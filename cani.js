@@ -68,8 +68,11 @@ var cani = (function(cc) {
 	    dbconf.push(function(){
 
 		AWS.config.credentials = new AWS.WebIdentityCredentials({
+		    //this I grabbed from AWS's IAM role console
+		    // I also had to add dynamoDB full control permission to this role
+		    // after having made the table of course
 		    RoleArn: 'arn:aws:iam::735148112467:role/canijstest',
-		    ProviderId: 'graph.facebook.com', // this is null for Google
+		    ProviderId: 'graph.facebook.com',
 		    WebIdentityToken: user.fb.accessToken
 		});
 		
