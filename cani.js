@@ -29,18 +29,22 @@ var Cani = (function(cc) {
 		    xfbml      : true  // parse XFBML
 		});
 
+		// facebook has a way to request extra permissions that should be a config option
 		FB.Event.subscribe('auth.authResponseChange', function(response) {
 		    if(response.status === 'connected'){
-			//FB.api('/me', function(pon) {
-			    // put the facebook user into the user pack
-			    user.fb = response.authResponse;
 
-			    dbconfig();
-			//});
-		    } else if (response.status === 'not_authorized') {
-			//user hasnt authed the app, requests them to do so
+			// record the facebook auth data, run dbconfig with it
+			user.fb = response.authResponse;
+			dbconfig();
 			
-			// facebook has a way to request extra permissions that should be a config option
+			// grab the facebook profile
+			FB.api('/me', function(pon) {
+			    user.fb.profile = pon;
+			});
+
+		    } else if (response.status === 'not_authorized') {
+
+			//user hasnt authed the app, requests them to do so
 			FB.login();
 		    } else {
 			//FB.login();
@@ -77,12 +81,19 @@ var Cani = (function(cc) {
 		    // Hide the sign-in button now that the user is authorized, for example:
 		    document.getElementById('gSigninWrapper').setAttribute('style', 'display: none');
 
-		    console.log(authResult);
+		    // record the google auth data, run dbconfig with it.
+		    user.google = authResult;
+		    dbconfig();
 
-		    //authResult.access_token .expires_in 
-		    // these are the interesting fields
-
-		    //   set auth token in user
+		    // grab the google profile
+		    gapi.client.load('plus','v1', function(){
+			var request = gapi.client.plus.people.get({
+			    'userId': 'me'
+			});
+			request.execute(function(resp) {
+			    user.google.profile = resp;
+			});
+		    });
 
 		} else {
 		    console.log('Sign-in state: ' + authResult['error']);
@@ -122,7 +133,9 @@ var Cani = (function(cc) {
 		    // after having made the table of course
 		    RoleArn: 'arn:aws:iam::735148112467:role/canijstest',
 		    ProviderId: 'graph.facebook.com',
-		    WebIdentityToken: user.fb.accessToken
+		    WebIdentityToken: user.fb.accessToken||user.google.access_token
+		    // this currently assumes that dbconfig will be run after the first auth takes place.
+		    // obviously this would have to be different for an app which uses double auth (why though?)
 		});
 		
 		db.dy = new AWS.DynamoDB({region: 'us-west-2'});
