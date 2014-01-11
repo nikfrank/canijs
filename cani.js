@@ -1,4 +1,6 @@
-var cani = (function(cc) {
+var googleSigninCallback;
+
+var Cani = (function(cc) {
 
     var user = {};
 
@@ -16,7 +18,8 @@ var cani = (function(cc) {
 
     cc.config = function(conf){
 
-	// conf = {fbApp:'#_APPID_#'} (FACEBOOK CONFIG)
+	//------------------------------FACEBOOK AUTH---------------------------------
+	// conf = {fbApp:'#_APPID_#'}
 	if(typeof conf.fbApp !== 'undefined'){
 	    window.fbAsyncInit = function() {
 		FB.init({
@@ -57,8 +60,54 @@ var cani = (function(cc) {
 	    }(document));
 	}
 
+	//-------------------------------GOOGLE AUTH--------------------------------
 
-	// dynamoDB config
+	if(typeof conf.googleId !== 'undefined'){
+
+	    var po = document.createElement('script');
+	    po.type = 'text/javascript'; po.async = true;
+	    po.src = 'https://apis.google.com/js/client:plusone.js?onload=render';
+	    var s = document.getElementsByTagName('script')[0];
+	    s.parentNode.insertBefore(po, s);
+
+
+	    googleSigninCallback = function(authResult) {
+		if (authResult['status']['signed_in']) {
+		    // Update the app to reflect a signed in user
+		    // Hide the sign-in button now that the user is authorized, for example:
+		    document.getElementById('gSigninWrapper').setAttribute('style', 'display: none');
+
+		    console.log(authResult);
+
+		    //authResult.access_token .expires_in 
+		    // these are the interesting fields
+
+		    //   set auth token in user
+
+		} else {
+		    console.log('Sign-in state: ' + authResult['error']);
+		}
+	    }
+
+
+	    setTimeout(function(){
+		var additionalParams = {
+		    'callback': googleSigninCallback
+		};
+
+		// Attach a click listener to a button to trigger the flow.
+		var signinButton = document.getElementById('signinButton');
+
+		document.getElementById('gSigninWrapper').setAttribute('style', 'display: block');
+
+		signinButton.addEventListener('click', function() {
+		    gapi.auth.signIn(additionalParams); // Will use page level configuration
+		});
+	    },300);
+	}
+
+
+	//-------------------------dynamoDB config----------------------------------
 
 	// federated auth will require that this be a callback on some other auth
 
@@ -94,7 +143,8 @@ var cani = (function(cc) {
 
 
     cc.save = function(index,data){
-	// return promise
+	// make save item request to db.dy
+	// for saves there should just be callbacks?
     };
 
     cc.save.doc = function(index,data){
@@ -106,7 +156,7 @@ var cani = (function(cc) {
     };
 
     cc.load = function(index,data){
-	//
+	// return a promised array of documents that match the query
     };
 
     cc.load.doc = function(index,data){
