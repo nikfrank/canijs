@@ -7,11 +7,34 @@
 <meta name="google-signin-cookiepolicy" content="single_host_origin" />
 
 </head>
+
+<style>
+
+.gSigninButton {
+  
+  background:red;
+  border:solid red;
+  border-radius:4px;
+
+  font-weight:900;
+  color:white;
+
+  display:inline-block;
+}
+
+.gSigninButton:hover {
+
+  background-color:#a00;
+  border-color:#a00;
+}
+
+</style>
+
 <body>
 <div></div>
 
 <div id="gSigninWrapper" style="display:none;">
-  <div id="signinButton">
+  <div id="signinButton" class="gSigninButton">
     Sign in with Google
   </div>
 </div>

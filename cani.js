@@ -8,9 +8,9 @@ var Cani = (function(cc) {
 
     var dbconf = [];
 
-    var dbconfig = function(){
+    var dbconfig = function(provider){
 	for(var i=0; i<dbconf.length; ++i){
-	    dbconf[i]();
+	    dbconf[i](provider);
 	}
     };
 
@@ -20,10 +20,10 @@ var Cani = (function(cc) {
 
 	//------------------------------FACEBOOK AUTH---------------------------------
 	// conf = {fbApp:'#_APPID_#'}
-	if(typeof conf.fbApp !== 'undefined'){
+	if(typeof conf.fb !== 'undefined') if(typeof conf.fb.App !== 'undefined'){
 	    window.fbAsyncInit = function() {
 		FB.init({
-		    appId      : conf.fbApp,
+		    appId      : conf.fb.App,
 		    status     : true, // check login status
 		    cookie     : true, // enable cookies to allow the server to access the session
 		    xfbml      : true  // parse XFBML
@@ -35,7 +35,7 @@ var Cani = (function(cc) {
 
 			// record the facebook auth data, run dbconfig with it
 			user.fb = response.authResponse;
-			dbconfig();
+			dbconfig('fb');
 			
 			// grab the facebook profile
 			FB.api('/me', function(pon) {
@@ -66,7 +66,7 @@ var Cani = (function(cc) {
 
 	//-------------------------------GOOGLE AUTH--------------------------------
 
-	if(typeof conf.googleId !== 'undefined'){
+	if(typeof conf.google !== 'undefined') if(typeof conf.google.App !== 'undefined'){
 
 	    var po = document.createElement('script');
 	    po.type = 'text/javascript'; po.async = true;
@@ -83,7 +83,9 @@ var Cani = (function(cc) {
 
 		    // record the google auth data, run dbconfig with it.
 		    user.google = authResult;
-		    dbconfig();
+
+		    user.google.accessToken = authResult.id_token;// naming consistency... don't be fooled by the "access_token" field. he does nothing
+		    dbconfig('google');
 
 		    // grab the google profile
 		    gapi.client.load('plus','v1', function(){
@@ -98,7 +100,7 @@ var Cani = (function(cc) {
 		} else {
 		    console.log('Sign-in state: ' + authResult['error']);
 		}
-	    }
+	    };
 
 
 	    setTimeout(function(){
@@ -125,24 +127,28 @@ var Cani = (function(cc) {
 	if(typeof conf.aws !== 'undefined'){
 	    //config amazon, whose singleton must already exist
 
-	    dbconf.push(function(){
+	    dbconf.push(function(provider){ //provider =<= ['fb', 'google', ('aws')]
 
-		AWS.config.credentials = new AWS.WebIdentityCredentials({
+		var webCredPack = {
 		    //this I grabbed from AWS's IAM role console
 		    // I also had to add dynamoDB full control permission to this role
 		    // after having made the table of course
-		    RoleArn: 'arn:aws:iam::735148112467:role/canijstest',
-		    ProviderId: 'graph.facebook.com',
-		    WebIdentityToken: user.fb.accessToken||user.google.access_token
+		    RoleArn: conf[provider].IAMRole,
+		    WebIdentityToken: user[provider].accessToken
 		    // this currently assumes that dbconfig will be run after the first auth takes place.
 		    // obviously this would have to be different for an app which uses double auth (why though?)
-		});
+		}
+
+
+		if(provider === 'fb') webCredPack.ProviderId = 'graph.facebook.com';
+
+		AWS.config.credentials = new AWS.WebIdentityCredentials(webCredPack);
 		
 		db.dy = new AWS.DynamoDB({region: 'us-west-2'});
 
 		db.dy.listTables(function(err, data) {
 		    if(err) console.log(err);
-		    console.log(data.TableNames);
+		    console.log(data.TableNames + ' ' + provider);
 		});
 	    });
 
@@ -157,7 +163,8 @@ var Cani = (function(cc) {
 
     cc.save = function(index,data){
 	// make save item request to db.dy
-	// for saves there should just be callbacks?
+	
+	
     };
 
     cc.save.doc = function(index,data){
