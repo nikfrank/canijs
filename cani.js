@@ -1,5 +1,7 @@
 var googleSigninCallback;
 
+var copy = function(r){return JSON.parse(JSON.stringify(r));};
+
 var Cani = (function(cc) {
 
     var user = {};
@@ -17,6 +19,8 @@ var Cani = (function(cc) {
 //------------------config
 
     cc.config = function(conf){
+
+	if(typeof conf.authOrder !== 'undefined') cc.authOrder = conf.authOrder;
 
 	//------------------------------FACEBOOK AUTH---------------------------------
 	// conf = {fbApp:'#_APPID_#'}
@@ -148,7 +152,9 @@ var Cani = (function(cc) {
 
 		db.dy.listTables(function(err, data) {
 		    if(err) console.log(err);
-		    console.log(data.TableNames + ' ' + provider);
+		    if(typeof user[provider].tables === 'undefined') user[provider].tables = {};
+		    user[provider].tables.dy = data.TableNames;
+
 		});
 	    });
 
@@ -163,8 +169,37 @@ var Cani = (function(cc) {
 
     cc.save = function(index,data){
 	// make save item request to db.dy
+
+	var pack = copy(data);
+	var tableName = '';
+
+	pack.docType = {'S':index};
+
+	pack.userId = {'S':''};
+	for(var authTypeNum in cc.authOrder){
+	    var authType = cc.authOrder[authTypeNum];
+	    if(typeof user[authType] !== 'undefined'){
+		pack.userId = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
+
+		if(typeof user[authType].tables !== 'undefined') 
+		    if(typeof user[authType].tables.dy !== 'undefined') 
+			if(user[authType].tables.dy.length === 1)
+			    tableName = user[authType].tables.dy[0];
+		break;
+	    }
+	}
+
+	pack.docId = {'S':pack.userId.S + '##' + (new Date()).getTime()};
 	
-	
+	if(tableName.length<3){
+	    console.log('write failed, tables not yet loaded');
+	    return;
+	}
+
+	db.dy.putItem({TableName:tableName, Item:pack}, function(err, res){
+	    if(err) console.log(err);
+	    console.log(res);
+	});
     };
 
     cc.save.doc = function(index,data){
@@ -207,3 +242,7 @@ var Cani = (function(cc) {
 
 })({});
 // <script src="/vendor/cani.js"></script>
+
+var testsave = function(){
+    Cani.save('cat',{says:{'S':'meow'}});
+};
