@@ -1,0 +1,13 @@
+<label for="docType">Document Type:</label>
+<input data-ng-model="docType"/>
+<div style="display:block; background-color:rgba(200,255,255,0.25)">
+  <button data-ng-click="push(doc)">Push</button>
+  <button data-ng-click="pop(doc)">Pop</button>
+  <div data-ng-repeat="ff in doc">
+    <input data-ng-model="ff.key"/>
+    <input data-ng-model="ff.val"/>
+  </div>
+</div>
+<button data-ng-click="savedoc()">Save to cloud</button>
+<button data-ng-click="loaddoc()">Load from cloud</button>
+{{doc}}

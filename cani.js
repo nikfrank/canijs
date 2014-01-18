@@ -169,8 +169,36 @@ var Cani = (function(cc) {
 
     cc.save = function(index,data){
 	// make save item request to db.dy
+	// this to be moved to db.save.dy or something of the sort when are many databases maybe
+	// then this function would only call the correct database save function
+	
+	//here check the format of the data, can be:
 
-	var pack = copy(data);
+	// [{key:'', value:..(,type:'')}...] implemented
+	// {key1:value1, ...}
+
+	var pack = {};
+
+	if(data.constructor == Array){
+	    for(var it in data){
+		if(data[it].val === '') continue;
+		// dynamodb doesn't allow empty strings
+
+		pack[data[it].key] = {};
+		if(typeof data[it].type === 'undefined') {
+		    data[it].type = (typeof data[it].val)[0].toUpperCase();
+		    //if it's an object, we have to stringify it. ugh.
+		    if(data[it].type === 'U') data[it].type = 'S';
+		    if(data[it].type === 'O'){
+			// determine the subtype if is qualify, append S to that letter
+		    }
+		}
+		pack[data[it].key][data[it].type] = data[it].val;
+	    }
+	}else if(data.constructor == Object){
+	    pack = data;
+	}
+
 	var tableName = '';
 
 	pack.docType = {'S':index};
@@ -210,15 +238,44 @@ var Cani = (function(cc) {
 	//
     };
 
-    cc.load = function(index,data){
+    cc.load = function(index,query){
 	// return a promised array of documents that match the query
+
+	var pack = {RequestItems:{}};
+
+	var tableName = '';
+	var userId = '';
+
+	for(var authTypeNum in cc.authOrder){
+	    var authType = cc.authOrder[authTypeNum];
+	    if(typeof user[authType] !== 'undefined'){
+		userId = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
+
+		if(typeof user[authType].tables !== 'undefined') 
+		    if(typeof user[authType].tables.dy !== 'undefined') 
+			if(user[authType].tables.dy.length === 1)
+			    tableName = user[authType].tables.dy[0];
+		break;
+	    }
+	}
+
+	pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"fb||100000198595053##1389538315152"},
+					       "userId":userId
+					      }]
+				       };
+
+	console.log(JSON.stringify(pack));
+	db.dy.batchGetItem(pack, function(err, res){
+	    //defer promise
+	    console.log(res);
+	});
     };
 
-    cc.load.doc = function(index,data){
+    cc.load.doc = function(index,query){
 	//
     };
 
-    cc.load.file = function(index,data){
+    cc.load.file = function(index,query){
 	//
     };
 
