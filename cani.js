@@ -239,6 +239,46 @@ var Cani = (function(cc) {
     };
 
     cc.load = function(index,query){
+	//pack up and make a query call
+
+	var pack = {indexName:"docType-author-index"};
+
+	var tableName = '';
+	var userId = '';
+
+	for(var authTypeNum in cc.authOrder){
+	    var authType = cc.authOrder[authTypeNum];
+	    if(typeof user[authType] !== 'undefined'){
+		userId = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
+
+		if(typeof user[authType].tables !== 'undefined') 
+		    if(typeof user[authType].tables.dy !== 'undefined') 
+			if(user[authType].tables.dy.length === 1)
+			    tableName = user[authType].tables.dy[0];
+		break;
+	    }
+	}
+
+	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"fb||100000198595053##1389538315152"},
+	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"google||100153867629924152510##1389537976366"},
+	pack = {TableName:tableName,
+		KeyConditions:{"docType": {"ComparisonOperator": "EQ", 
+					    "AttributeValueList": [{"S":"lesson"}]},
+				"userId": {"ComparisonOperator": "EQ", 
+					   "AttributeValueList": [userId]}
+			       }
+	       };
+
+
+	console.log(JSON.stringify(pack));
+	db.dy.query(pack, function(err, res){
+	    //defer promise
+	    if(err) console.log(err);
+	    console.log(res);
+	});
+    };
+
+    cc.load.batch = function(index,query){
 	// return a promised array of documents that match the query
 
 	var pack = {RequestItems:{}};
@@ -259,10 +299,14 @@ var Cani = (function(cc) {
 	    }
 	}
 
-	pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"fb||100000198595053##1389538315152"},
-					       "userId":userId
+	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"fb||100000198595053##1389538315152"},
+	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"google||100153867629924152510##1389537976366"},
+	pack.RequestItems[tableName] = {Keys:[{"userId":userId, 
+					       "docType": {"S":"lesson"},
+					       //"author":{"S":"nik"}
 					      }]
 				       };
+
 
 	console.log(JSON.stringify(pack));
 	db.dy.batchGetItem(pack, function(err, res){
