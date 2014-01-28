@@ -16,10 +16,16 @@ Progress:
 
 -notifications for database availability
 
+-stringify, make note of all objects on save
+
 -----------------------------
 Need to do soon:
 
 -save over/new
+
+-destringify all objects noted on load
+
+- pack arrays reasonably (remember dy db doesn't order arrays)
 
 -document aws user-filtering policy setup
 

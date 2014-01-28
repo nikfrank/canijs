@@ -169,15 +169,13 @@ var Cani = (function(cc) {
 		AWS.config.credentials = new AWS.WebIdentityCredentials(webCredPack);
 		
 		db.dy = new AWS.DynamoDB({region: 'us-west-2'});
-console.log(webCredPack);
-console.log(db.dy);
 
 		db.dy.listTables(function(err, data) {
 		    if(err) console.log(err);
 		    if(typeof user[provider].tables === 'undefined') user[provider].tables = {};
 		    user[provider].tables.dy = data.TableNames;
 		    //if(typeof notns.dydb !== undefined) notns.dydb();
-console.log(data);
+
 		    //callback on dynamo table ready
 		    callAndFlushNotes('db.dy');
 
@@ -204,6 +202,7 @@ console.log(data);
 	// {key1:value1, ...}
 
 	var pack = {};
+	var destrings = [];
 
 	if(data.constructor == Array){
 	    for(var it in data){
@@ -212,15 +211,27 @@ console.log(data);
 
 		pack[data[it].key] = {};
 		if(typeof data[it].type === 'undefined') {
+
+
 		    data[it].type = (typeof data[it].val)[0].toUpperCase();
 		    //if it's an object, we have to stringify it. ugh.
 		    if(data[it].type === 'U') data[it].type = 'S';
 		    if(data[it].type === 'O'){
 			// determine the subtype if is qualify, append S to that letter
+
+			// if array, determin if is all same (S, N), if not stringify
+
+			// if object or mixed array, stringify
+			data[it].val = JSON.stringify(data[it].val);
+			// add to list of things to destringify later
+			destrings.push(it);
 		    }
 		}
 		pack[data[it].key][data[it].type] = data[it].val;
 	    }
+
+	    if(JSON.stringify(destrings).length > 4) pack['destrings'] = {'SS':destrings};
+
 	}else if(data.constructor == Object){
 	    pack = data;
 	}
@@ -299,7 +310,6 @@ console.log(data);
 	console.log(JSON.stringify(pack));
 
 	var deferred = Q.defer();
-console.log(deferred);
 
 	db.dy.query(pack, function(err, res){
 	    //defer promise
@@ -315,8 +325,13 @@ console.log(deferred);
 		for(var ff in res.Items[i]){
 		    itm[ff] = res.Items[i][ff][Object.keys(res.Items[i][ff])[0]];
 		}
+		if(typeof itm.destrings !== 'undefined'){
+		    // parse the listed items in place
+		}
+
 		pon.push(itm);
 	    }
+
 	    console.log(deferred);
 	    deferred.resolve(pon);
 	});
@@ -375,8 +390,9 @@ console.log(deferred);
 
 	var deferred = Q.defer();
 
+//this needs to be generalized with a window[assetSplit[n]]
 	if(typeof db.dy !== 'undefined'){
-	    deferred.resolve();
+	    deferred.resolve(db.dy);
 	}else{
 
 	    // register with notification singleton
