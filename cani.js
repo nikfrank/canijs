@@ -177,7 +177,7 @@ console.log(db.dy);
 		    if(typeof user[provider].tables === 'undefined') user[provider].tables = {};
 		    user[provider].tables.dy = data.TableNames;
 		    //if(typeof notns.dydb !== undefined) notns.dydb();
-
+console.log(data);
 		    //callback on dynamo table ready
 		    callAndFlushNotes('db.dy');
 
