@@ -169,6 +169,8 @@ var Cani = (function(cc) {
 		AWS.config.credentials = new AWS.WebIdentityCredentials(webCredPack);
 		
 		db.dy = new AWS.DynamoDB({region: 'us-west-2'});
+console.log(webCredPack);
+console.log(db.dy);
 
 		db.dy.listTables(function(err, data) {
 		    if(err) console.log(err);
