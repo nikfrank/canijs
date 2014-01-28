@@ -10,7 +10,7 @@ Progress:
 
 -run angular
 
-- save, load from angular
+-save, load from angular
 
 -Q load
 
@@ -28,6 +28,8 @@ Need to do soon:
 -notifications for sign-in
 
 -endtoend unit testing through angular
+
+-use $q for Q dependency... works up until callback
 
 --------------------------------------------------------------
 -generalized indexing policy, for ranged searches on any data

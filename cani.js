@@ -2,6 +2,11 @@ var googleSigninCallback;
 
 var copy = function(r){return JSON.parse(JSON.stringify(r));};
 
+if(typeof window['Q'] === 'undefined'){
+    window['Q'] = window['angular'].injector(['ng']).get('$q');
+    console.log(Q);
+}
+
 var Cani = (function(cc) {
 
     var user = {};
@@ -51,6 +56,7 @@ var Cani = (function(cc) {
 			// record the facebook auth data, run dbconfig with it
 			user.fb = response.authResponse;
 			dbconfig('fb');
+			console.log('fb db config');
 			
 			// grab the facebook profile
 			FB.api('/me', function(pon) {
@@ -290,10 +296,12 @@ var Cani = (function(cc) {
 	console.log(JSON.stringify(pack));
 
 	var deferred = Q.defer();
+console.log(deferred);
 
 	db.dy.query(pack, function(err, res){
 	    //defer promise
 	    if(err) console.log(err);
+	    else console.log('good query');
 
 	    //unpack the response
 	    var pon = [];
@@ -306,6 +314,7 @@ var Cani = (function(cc) {
 		}
 		pon.push(itm);
 	    }
+	    console.log(deferred);
 	    deferred.resolve(pon);
 	});
 
@@ -395,8 +404,3 @@ var Cani = (function(cc) {
     return cc;
 
 })({});
-// <script src="/vendor/cani.js"></script>
-
-var testsave = function(){
-    Cani.save('cat',{says:{'S':'meow'}});
-};
