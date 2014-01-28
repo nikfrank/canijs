@@ -278,8 +278,6 @@ var Cani = (function(cc) {
     cc.load = function(index,query){
 	//pack up and make a query call
 
-	var pack = {indexName:"docType-author-index"};
-
 	var tableName = '';
 	var owner = '';
 
@@ -298,10 +296,9 @@ var Cani = (function(cc) {
 
 	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"fb||100000198595053##1389538315152"},
 	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"google||100153867629924152510##1389537976366"},
-	pack = {TableName:tableName,
-		KeyConditions:{"owner": {"ComparisonOperator": "EQ", 
-					   "AttributeValueList": [owner]},
-			       "docType": {"ComparisonOperator": "EQ", 
+	pack = {IndexName:"docType-author-index",
+		TableName:tableName,
+		KeyConditions:{"docType": {"ComparisonOperator": "EQ", 
 					   "AttributeValueList": [{"S":"lesson"}]}
 			       }
 	       };
