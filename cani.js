@@ -16,6 +16,7 @@ var Cani = (function(cc) {
     var dbconf = [];
 
     var dbconfig = function(provider){
+	console.log(dbconf);
 	for(var i=0; i<dbconf.length; ++i){
 	    dbconf[i](provider);
 	}
