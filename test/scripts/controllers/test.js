@@ -3,9 +3,6 @@
 angular.module('canijstest')
     .controller('TestCtrl', function ($scope) {
 
-	$scope.doc = [];
-	$scope.docType = '';
-
 	$scope.push = function(d){
 	    d.push({key:'',val:''});
 	};
@@ -14,12 +11,28 @@ angular.module('canijstest')
 	    d.pop();
 	};
 
-	$scope.savedoc = function(){
-	    Cani.save($scope.docType, $scope.doc);
-	};
-	
+	$scope.doc = [];
+	$scope.docType = '';
+
+	$scope.dyAvail = false;
+
+	Cani.confirm('db.dy').then(function(){
+
+	    $scope.dyAvail = true;
+
+	    $scope.savedoc = function(){
+		Cani.save($scope.docType, $scope.doc);
+	    };
+	});
+
+	$scope.ldoc = [];
+
 	$scope.loaddoc = function(query){
-	    Cani.load(query);
+	    Cani.load(query).then(function(docs){
+		$scope.ldoc = docs;
+		console.log($scope.ldoc);
+		$scope.$apply();
+	    });
 	};
 
 });

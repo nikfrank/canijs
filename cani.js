@@ -16,6 +16,17 @@ var Cani = (function(cc) {
 	}
     };
 
+    var note = {};//notifications
+
+    var callAndFlushNotes = function(asset){
+	if(typeof note[asset] === 'undefined') return;
+
+	for(var i=0; i<note[asset].length; ++i){
+	    note[asset][i]();
+	    console.log(asset);
+	}
+    };
+
 //------------------config
 
     cc.config = function(conf){
@@ -44,6 +55,7 @@ var Cani = (function(cc) {
 			// grab the facebook profile
 			FB.api('/me', function(pon) {
 			    user.fb.profile = pon;
+			    //if(typeof notns.fbme !== undefined) notns.fbme(pon);
 			});
 
 		    } else if (response.status === 'not_authorized') {
@@ -98,6 +110,7 @@ var Cani = (function(cc) {
 			});
 			request.execute(function(resp) {
 			    user.google.profile = resp;
+			    //if(typeof notns.ggme !== undefined) notns.ggme(resp);
 			});
 		    });
 
@@ -154,6 +167,10 @@ var Cani = (function(cc) {
 		    if(err) console.log(err);
 		    if(typeof user[provider].tables === 'undefined') user[provider].tables = {};
 		    user[provider].tables.dy = data.TableNames;
+		    //if(typeof notns.dydb !== undefined) notns.dydb();
+
+		    //callback on dynamo table ready
+		    callAndFlushNotes('db.dy');
 
 		});
 	    });
@@ -203,11 +220,11 @@ var Cani = (function(cc) {
 
 	pack.docType = {'S':index};
 
-	pack.userId = {'S':''};
+	pack.owner = {'S':''};
 	for(var authTypeNum in cc.authOrder){
 	    var authType = cc.authOrder[authTypeNum];
 	    if(typeof user[authType] !== 'undefined'){
-		pack.userId = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
+		pack.owner = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
 
 		if(typeof user[authType].tables !== 'undefined') 
 		    if(typeof user[authType].tables.dy !== 'undefined') 
@@ -217,7 +234,7 @@ var Cani = (function(cc) {
 	    }
 	}
 
-	pack.docId = {'S':pack.userId.S + '##' + (new Date()).getTime()};
+	pack.docId = {'S':pack.owner.S + '##' + (new Date()).getTime()};
 	
 	if(tableName.length<3){
 	    console.log('write failed, tables not yet loaded');
@@ -244,12 +261,12 @@ var Cani = (function(cc) {
 	var pack = {indexName:"docType-author-index"};
 
 	var tableName = '';
-	var userId = '';
+	var owner = '';
 
 	for(var authTypeNum in cc.authOrder){
 	    var authType = cc.authOrder[authTypeNum];
 	    if(typeof user[authType] !== 'undefined'){
-		userId = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
+		owner = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
 
 		if(typeof user[authType].tables !== 'undefined') 
 		    if(typeof user[authType].tables.dy !== 'undefined') 
@@ -262,20 +279,37 @@ var Cani = (function(cc) {
 	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"fb||100000198595053##1389538315152"},
 	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"google||100153867629924152510##1389537976366"},
 	pack = {TableName:tableName,
-		KeyConditions:{"docType": {"ComparisonOperator": "EQ", 
-					    "AttributeValueList": [{"S":"lesson"}]},
-				"userId": {"ComparisonOperator": "EQ", 
-					   "AttributeValueList": [userId]}
+		KeyConditions:{"owner": {"ComparisonOperator": "EQ", 
+					   "AttributeValueList": [owner]},
+			       "docType": {"ComparisonOperator": "EQ", 
+					   "AttributeValueList": [{"S":"lesson"}]}
 			       }
 	       };
 
 
 	console.log(JSON.stringify(pack));
+
+	var deferred = Q.defer();
+
 	db.dy.query(pack, function(err, res){
 	    //defer promise
 	    if(err) console.log(err);
-	    console.log(res);
+
+	    //unpack the response
+	    var pon = [];
+
+	    for(var i=0; i<res.Items.length; ++i){
+
+		var itm = {};
+		for(var ff in res.Items[i]){
+		    itm[ff] = res.Items[i][ff][Object.keys(res.Items[i][ff])[0]];
+		}
+		pon.push(itm);
+	    }
+	    deferred.resolve(pon);
 	});
+
+  	return deferred.promise;
     };
 
     cc.load.batch = function(index,query){
@@ -284,12 +318,12 @@ var Cani = (function(cc) {
 	var pack = {RequestItems:{}};
 
 	var tableName = '';
-	var userId = '';
+	var owner = '';
 
 	for(var authTypeNum in cc.authOrder){
 	    var authType = cc.authOrder[authTypeNum];
 	    if(typeof user[authType] !== 'undefined'){
-		userId = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
+		owner = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
 
 		if(typeof user[authType].tables !== 'undefined') 
 		    if(typeof user[authType].tables.dy !== 'undefined') 
@@ -301,7 +335,7 @@ var Cani = (function(cc) {
 
 	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"fb||100000198595053##1389538315152"},
 	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"google||100153867629924152510##1389537976366"},
-	pack.RequestItems[tableName] = {Keys:[{"userId":userId, 
+	pack.RequestItems[tableName] = {Keys:[{"owner":owner, 
 					       "docType": {"S":"lesson"},
 					       //"author":{"S":"nik"}
 					      }]
@@ -322,6 +356,25 @@ var Cani = (function(cc) {
     cc.load.file = function(index,query){
 	//
     };
+
+//-------------------notifications module
+
+    cc.confirm = function(asset){
+
+	var deferred = Q.defer();
+
+	if(typeof db.dy !== 'undefined'){
+	    deferred.resolve();
+	}else{
+
+	    // register with notification singleton
+	    if(typeof note[asset] === 'undefined') note[asset] = [];
+	    note[asset].push(function(){ deferred.resolve(); });
+	}
+
+  	return deferred.promise;
+    };
+
 
 
 //-------------------account module

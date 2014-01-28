@@ -33,29 +33,28 @@
 
 <body data-ng-app="canijstest">
 
-<div id="gSigninWrapper" style="display:none;">
-  <div id="signinButton" class="gSigninButton">
-    Sign in with Google
+  <div id="gSigninWrapper" style="display:none;">
+    <div id="signinButton" class="gSigninButton">
+      Sign in with Google
+    </div>
   </div>
-</div>
 
 
-<fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+  <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
 
-<button onclick="FB.logout()">log out</button>
+  <button onclick="FB.logout()">Log out of facebook</button>
 
-<button onclick="testsave()">Test Save doc</button>
+  <div data-ng-view></div>
 
-<div data-ng-view></div>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.0.0-rc5.min.js"></script>
+  <script src="../bower_components/q/q.js"></script>
+  <script src="../cani.js"></script>
+  <script src="../config.js"></script>
 
-<script src="https://sdk.amazonaws.com/js/aws-sdk-2.0.0-rc5.min.js"></script>
-<script src="../cani.js"></script>
-<script src="../config.js"></script>
+  <script src="vendor/angular/angular.js"></script>
 
-<script src="vendor/angular/angular.js"></script>
-
-<script src="scripts/app.js"></script>
-<script src="scripts/controllers/test.js"></script>
+  <script src="scripts/app.js"></script>
+  <script src="scripts/controllers/test.js"></script>
 
 </body>
 </html>
