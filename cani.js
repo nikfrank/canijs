@@ -175,7 +175,6 @@ var Cani = (function(cc) {
 		    if(typeof user[provider].tables === 'undefined') user[provider].tables = {};
 		    user[provider].tables.dy = data.TableNames;
 		    //if(typeof notns.dydb !== undefined) notns.dydb();
-
 		    //callback on dynamo table ready
 		    callAndFlushNotes('db.dy');
 
@@ -191,7 +190,7 @@ var Cani = (function(cc) {
 //------------------data module
 
 
-    cc.save = function(index,data){
+    cc.save = function(index,data, privacy){
 	// make save item request to db.dy
 	// this to be moved to db.save.dy or something of the sort when are many databases maybe
 	// then this function would only call the correct database save function
@@ -261,6 +260,9 @@ var Cani = (function(cc) {
 	    return;
 	}
 
+
+	if(privacy) pack.privacy = {'S':'private'};
+
 	db.dy.putItem({TableName:tableName, Item:pack}, function(err, res){
 	    if(err) console.log(err);
 	    console.log(res);
@@ -288,7 +290,7 @@ var Cani = (function(cc) {
 
 		if(typeof user[authType].tables !== 'undefined') 
 		    if(typeof user[authType].tables.dy !== 'undefined') 
-			if(user[authType].tables.dy.length === 1)
+			if(user[authType].tables.dy.length !== 0)
 			    tableName = user[authType].tables.dy[0];
 		break;
 	    }
@@ -296,14 +298,14 @@ var Cani = (function(cc) {
 
 	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"fb||100000198595053##1389538315152"},
 	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"google||100153867629924152510##1389537976366"},
-	pack = {IndexName:"docType-author-index",
+	pack = {IndexName:"docType-owner-index",
 		TableName:tableName,
 		KeyConditions:{"docType": {"ComparisonOperator": "EQ", 
 					   "AttributeValueList": [{"S":"lesson"}]}
 			       }
 	       };
 
-
+	console.log(owner);
 	console.log(JSON.stringify(pack));
 
 	var deferred = Q.defer();

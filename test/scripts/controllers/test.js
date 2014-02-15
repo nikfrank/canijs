@@ -20,8 +20,8 @@ angular.module('canijstest')
 
 	    $scope.dyAvail = true;
 
-	    $scope.savedoc = function(){
-		Cani.save($scope.docType, $scope.doc);
+	    $scope.savedoc = function(privacy){
+		Cani.save($scope.docType, $scope.doc, privacy);
 	    };
 	});
 
