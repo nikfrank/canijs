@@ -190,15 +190,16 @@ var Cani = (function(cc) {
 //------------------data module
 
 
-    cc.save = function(index,data, privacy){
-	// make save item request to db.dy
-	// this to be moved to db.save.dy or something of the sort when are many databases maybe
-	// then this function would only call the correct database save function
-	
+    cc.save = function(query,data){
+
+	//query = {overwrite:bool, docType:string}
+
 	//here check the format of the data, can be:
 
 	// [{key:'', value:..(,type:'')}...] implemented
 	// {key1:value1, ...}
+
+	// query.overwrite if true: use old docId, if false: make new docId
 
 	var pack = {};
 	var destrings = [];
@@ -210,7 +211,6 @@ var Cani = (function(cc) {
 
 		pack[data[it].key] = {};
 		if(typeof data[it].type === 'undefined') {
-
 
 		    data[it].type = (typeof data[it].val)[0].toUpperCase();
 		    //if it's an object, we have to stringify it. ugh.
@@ -232,31 +232,37 @@ var Cani = (function(cc) {
 	    if(JSON.stringify(destrings).length > 4) pack['destrings'] = {'SS':destrings};
 
 	}else if(data.constructor == Object){
+	    // this doesn't work. MAKE THIS WORK!
 	    pack = data;
 	}
 
 	var tableName = '';
 
-	pack.docType = {'S':index};
+	pack.docType = {'S':query.docType};
 
+	// set the ownership based on the auth order, choose the table to write to
 	pack.owner = {'S':''};
 	for(var authTypeNum in cc.authOrder){
 	    var authType = cc.authOrder[authTypeNum];
 	    if(typeof user[authType] !== 'undefined'){
 		pack.owner = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
 
-		if(typeof user[authType].tables !== 'undefined') 
-		    if(typeof user[authType].tables.dy !== 'undefined') 
+		if(typeof user[authType].tables !== 'undefined'){
+		    if(typeof user[authType].tables.dy !== 'undefined'){
 			if(user[authType].tables.dy.length === 1){
 			    tableName = user[authType].tables.dy[0];
 			}else{
 			    tableName = user[authType].tables.dy[0];
 			}
+		    }
+		}
 		break;
 	    }
 	}
 
-	pack.docId = {'S':pack.owner.S + '##' + (new Date()).getTime()};
+	if(!query.overwrite || (typeof pack.docId === 'undefined')){
+	    pack.docId = {'S':pack.owner.S + '##' + (new Date()).getTime()};
+	}
 	
 	if(tableName.length<3){
 	    console.log(user)
@@ -264,13 +270,16 @@ var Cani = (function(cc) {
 	    return;
 	}
 
-
-	if(privacy) pack.privacy = {'S':'private'};
+	var deferred = Q.defer();
 
 	db.dy.putItem({TableName:tableName, Item:pack}, function(err, res){
 	    if(err) console.log(err);
 	    console.log(res);
+
+	    deferred.resolve(res);
 	});
+
+	return deferred;
     };
 
     cc.save.doc = function(index,data){
@@ -281,7 +290,7 @@ var Cani = (function(cc) {
 	//
     };
 
-    cc.load = function(index,query){
+    cc.load = function(query){
 	//pack up and make a query call
 
 	var tableName = '';
@@ -302,10 +311,13 @@ var Cani = (function(cc) {
 
 	pack = {IndexName:"docType-owner-index",
 		TableName:tableName,
-		KeyConditions:{"docType": {"ComparisonOperator": "EQ", 
-					   "AttributeValueList": [{"S":"lesson"}]}
+		KeyConditions:{"docType": {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":"lesson"}]}
 			       }
 	       };
+
+	if(query.mine){
+	    pack.KeyConditions.owner = {"ComparisonOperator": "EQ", "AttributeValueList":[owner]};
+	}
 
 	var deferred = Q.defer();
 
@@ -330,7 +342,7 @@ var Cani = (function(cc) {
 		pon.push(itm);
 	    }
 
-	    console.log(deferred);
+	    console.log(res);
 	    deferred.resolve(pon);
 	});
 

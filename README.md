@@ -20,16 +20,20 @@ Progress:
 
 -document aws user-filtering policy setup
 
------------------------------
-Need to do soon:
+-load mine/see all
+
+-promises on save
 
 -save over/new
 
--destringify all objects noted on load
+-----------------------------
+Need to do soon:
+
+- edit resave
+
+- destringify all objects noted on load
 
 - pack arrays reasonably (remember dy db doesn't order arrays)
-
--promises on save
 
 -notifications for sign-in
 

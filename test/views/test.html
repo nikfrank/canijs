@@ -3,14 +3,21 @@
 <div style="display:block; background-color:rgba(200,255,255,0.25)">
   <button data-ng-click="push(doc)">Push</button>
   <button data-ng-click="pop(doc)">Pop</button>
-  <div data-ng-repeat="ff in doc">
+  <div data-ng-repeat="ff in doc" data-ng-show="!doc.docId">
     <input data-ng-model="ff.key"/>
     <input data-ng-model="ff.val"/>
   </div>
+  <div data-ng-repeat="(key,val) in doc" data-ng-show="!!doc.docId">
+    <input data-ng-model="key"/>
+    <input data-ng-model="val"/>
+  </div>
 </div>
-Private? <input type="checkbox" data-ng-model="privacy"/>
-<button data-ng-click="savedoc(privacy)">Save to cloud</button>
-<button data-ng-click="loaddoc()">Load from cloud</button>
+Load mine only? <input type="checkbox" data-ng-model="mine"/>
+Overwrite on save? <input type="checkbox" data-ng-model="overwrite"/>
+<button data-ng-click="savedoc({overwrite:overwrite})">Save to cloud</button>
+<button data-ng-click="loaddoc({mine:mine})">Load from cloud</button>
 {{doc}}
 <hr style="height:5px;width:40%; background-color:orange;"/>
-{{ldoc}}
+<div data-ng-repeat="ldoc in ldocs" data-ng-click="edit(ldoc)">
+  {{ldoc}}
+</div>

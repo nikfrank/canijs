@@ -21,18 +21,25 @@ angular.module('canijstest')
 	    $scope.dyAvail = true;
 
 	    $scope.savedoc = function(privacy){
-		Cani.save($scope.docType, $scope.doc, privacy);
+		Cani.save({docType:$scope.docType, overwrite:false}, $scope.doc, privacy).then(function(res){
+		    console.log(res);
+		});
 	    };
 	});
 
-	$scope.ldoc = [];
+	$scope.ldocs = [];
 
 	$scope.loaddoc = function(query){
 	    Cani.load(query).then(function(docs){
-		$scope.ldoc = docs;
-		console.log($scope.ldoc);
+		$scope.ldocs = docs;
+		console.log($scope.ldocs);
 		$scope.$apply();
 	    });
+	};
+
+	$scope.edit = function(doc){
+	    $scope.doc = doc;
+	    $scope.docType = doc.docType;
 	};
 
 });
