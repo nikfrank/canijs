@@ -247,8 +247,11 @@ var Cani = (function(cc) {
 
 		if(typeof user[authType].tables !== 'undefined') 
 		    if(typeof user[authType].tables.dy !== 'undefined') 
-			if(user[authType].tables.dy.length === 1)
+			if(user[authType].tables.dy.length === 1){
 			    tableName = user[authType].tables.dy[0];
+			}else{
+			    tableName = user[authType].tables.dy[0];
+			}
 		break;
 	    }
 	}
@@ -256,6 +259,7 @@ var Cani = (function(cc) {
 	pack.docId = {'S':pack.owner.S + '##' + (new Date()).getTime()};
 	
 	if(tableName.length<3){
+	    console.log(user)
 	    console.log('write failed, tables not yet loaded');
 	    return;
 	}
@@ -296,17 +300,12 @@ var Cani = (function(cc) {
 	    }
 	}
 
-	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"fb||100000198595053##1389538315152"},
-	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"google||100153867629924152510##1389537976366"},
 	pack = {IndexName:"docType-owner-index",
 		TableName:tableName,
 		KeyConditions:{"docType": {"ComparisonOperator": "EQ", 
 					   "AttributeValueList": [{"S":"lesson"}]}
 			       }
 	       };
-
-	console.log(owner);
-	console.log(JSON.stringify(pack));
 
 	var deferred = Q.defer();
 

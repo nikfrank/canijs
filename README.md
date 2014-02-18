@@ -18,6 +18,8 @@ Progress:
 
 -stringify, make note of all objects on save
 
+-document aws user-filtering policy setup
+
 -----------------------------
 Need to do soon:
 
@@ -26,8 +28,6 @@ Need to do soon:
 -destringify all objects noted on load
 
 - pack arrays reasonably (remember dy db doesn't order arrays)
-
--document aws user-filtering policy setup
 
 -promises on save
 
