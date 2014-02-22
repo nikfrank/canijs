@@ -197,16 +197,44 @@ var Cani = (function(cc) {
 	//here check the format of the data, can be:
 
 	// [{key:'', value:..(,type:'')}...] implemented
-	// {key1:value1, ...}
+	// {key1:value1, ...} implemented
 
 	// query.overwrite if true: use old docId, if false: make new docId
 
 	var pack = {};
 	var destrings = [];
 
+	if(data.constructor == Object){
+	    for(var it in data){
+		if(data[it] === '') continue;
+		// dynamodb doesn't allow empty strings
+
+		pack[it] = {};
+
+		var type = (typeof data[it])[0].toUpperCase();
+		//if it's an object, we have to stringify it. ugh.
+		if(type === 'U') type = 'S';
+		if(type === 'O'){
+		    // determine the subtype if is qualify, append S to that letter
+
+		    // if array, determin if is all same (S, N), if not stringify
+
+		    // if object or mixed array, stringify
+		    data[it] = JSON.stringify(data[it]);
+		    // add to list of things to destringify later
+		    destrings.push(it);
+		}
+
+		pack[it][type] = data[it];
+	    }
+
+	    if(JSON.stringify(destrings).length > 4) pack['__DESTRINGS'] = {'SS':destrings};
+	}
+
 	if(data.constructor == Array){
 	    for(var it in data){
 		if(data[it].val === '') continue;
+		if(typeof data[it].val === 'undefined') continue;
 		// dynamodb doesn't allow empty strings
 
 		pack[data[it].key] = {};
@@ -229,11 +257,7 @@ var Cani = (function(cc) {
 		pack[data[it].key][data[it].type] = data[it].val;
 	    }
 
-	    if(JSON.stringify(destrings).length > 4) pack['destrings'] = {'SS':destrings};
-
-	}else if(data.constructor == Object){
-	    // this doesn't work. MAKE THIS WORK!
-	    pack = data;
+	    if(JSON.stringify(destrings).length > 4) pack['__DESTRINGS'] = {'SS':destrings};
 	}
 
 	var tableName = '';
@@ -270,6 +294,8 @@ var Cani = (function(cc) {
 	    return;
 	}
 
+console.log(pack);
+
 	var deferred = Q.defer();
 
 	db.dy.putItem({TableName:tableName, Item:pack}, function(err, res){
@@ -279,7 +305,7 @@ var Cani = (function(cc) {
 	    deferred.resolve(res);
 	});
 
-	return deferred;
+	return deferred.promise;
     };
 
     cc.save.doc = function(index,data){
@@ -335,7 +361,7 @@ var Cani = (function(cc) {
 		for(var ff in res.Items[i]){
 		    itm[ff] = res.Items[i][ff][Object.keys(res.Items[i][ff])[0]];
 		}
-		if(typeof itm.destrings !== 'undefined'){
+		if(typeof itm.__DESTRINGS !== 'undefined'){
 		    // parse the listed items in place
 		}
 
