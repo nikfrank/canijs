@@ -17,3 +17,6 @@ Overwrite on save? <input type="checkbox" data-ng-model="overwrite"/>
 <div data-ng-repeat="ldoc in ldocs" data-ng-click="edit(ldoc)">
   {{ldoc}}
 </div>
+<hr style="height:5px;width:40%; background-color:orange;"/>
+<input type="file" id="file-chooser" />
+<button data-ng-click="savefile('file-chooser')">Upload to S3</button>

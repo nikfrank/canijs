@@ -27,9 +27,8 @@ angular.module('canijstest')
 		for(var i=0; i<$scope.doc.length; ++i){
 		    if($scope.doc[i].key === 'docType') $scope.docType = $scope.doc[i].val;
 		}
-console.log($scope.doc);
 
-		Cani.save({docType:$scope.docType, overwrite:false}, $scope.doc, privacy).then(function(res){
+		Cani.save.doc({docType:$scope.docType, overwrite:false}, $scope.doc, privacy).then(function(res){
 		    console.log(res);
 		});
 	    };
@@ -38,7 +37,7 @@ console.log($scope.doc);
 	$scope.ldocs = [];
 
 	$scope.loaddoc = function(query){
-	    Cani.load(query).then(function(docs){
+	    Cani.load.doc(query).then(function(docs){
 
 		var ldocs = [];
 		//make docs into an array
@@ -59,5 +58,23 @@ console.log($scope.doc);
 	    $scope.doc = doc;
 	    $scope.docType = doc.docType;
 	};
+
+// s3 testing -----------------------------------------------
+
+	Cani.confirm('db.s3').then(function(){
+	    console.log('db.s3 confirm');
+
+	    $scope.savefile = function(inputselector){
+		// grab the file from the html input at inputselector
+		var file = document.getElementById(inputselector).files[0];
+
+		console.log(file);
+
+		if(file){
+		    Cani.save.file('',file);
+		}
+	    };
+	});
+
 
 });

@@ -144,32 +144,30 @@ var Cani = (function(cc) {
 	}
 
 
-	//-------------------------dynamoDB config----------------------------------
+	//-------------------------DB config----------------------------------
 
 	// federated auth will require that this be a callback on some other auth
 
 	if(typeof conf.aws !== 'undefined'){
 	    //config amazon, whose singleton must already exist
 
-	    dbconf.push(function(provider){ //provider =<= ['fb', 'google', ('aws')]
+	    //-------------------------db.dy config----------------------------------
+	    var DYCONF = function(provider){ //provider =<= ['fb', 'google', ('aws')]
 
 		var webCredPack = {
 		    //this I grabbed from AWS's IAM role console
 		    // I also had to add dynamoDB full control permission to this role
 		    // after having made the table of course
-		    RoleArn: conf[provider].IAMRole,
+		    RoleArn: conf[provider].IAMRoles['db.dy'],
 		    WebIdentityToken: user[provider].accessToken
 		    // this currently assumes that dbconfig will be run after the first auth takes place.
 		    // obviously this would have to be different for an app which uses double auth (why though?)
-		}
-
+		};
 
 		if(provider === 'fb') webCredPack.ProviderId = 'graph.facebook.com';
-
 		AWS.config.credentials = new AWS.WebIdentityCredentials(webCredPack);
 		
 		db.dy = new AWS.DynamoDB({region: 'us-west-2'});
-
 		db.dy.listTables(function(err, data) {
 		    if(err) console.log(err);
 		    if(typeof user[provider].tables === 'undefined') user[provider].tables = {};
@@ -179,18 +177,38 @@ var Cani = (function(cc) {
 		    callAndFlushNotes('db.dy');
 
 		});
-	    });
+	    };
+
+	    var S3CONF = function(provider){
+
+		db.s3 = new AWS.S3({params: {Bucket: conf[provider].s3public}});
+		
+		var bucketCredPack = {
+                    RoleArn: conf[provider].IAMRoles['db.s3'],
+                    WebIdentityToken: user[provider].accessToken
+                };
+		if(provider === 'fb') bucketCredPack.ProviderId = 'graph.facebook.com';
+		db.s3.config.credentials = new AWS.WebIdentityCredentials(bucketCredPack);
+
+		callAndFlushNotes('db.s3');
+	    };
+
+	    dbconf.push(DYCONF);
+	    dbconf.push(S3CONF);
 
 	}
 
 
     };
 
-
 //------------------data module
 
-
     cc.save = function(query,data){
+	// this is for saving db.s3 with a db.dy index
+    };
+
+    cc.save.doc = function(query,data){
+	// this is for db.dy only
 
 	//query = {overwrite:bool, docType:string}
 
@@ -294,8 +312,6 @@ var Cani = (function(cc) {
 	    return;
 	}
 
-console.log(pack);
-
 	var deferred = Q.defer();
 
 	db.dy.putItem({TableName:tableName, Item:pack}, function(err, res){
@@ -306,17 +322,32 @@ console.log(pack);
 	});
 
 	return deferred.promise;
+
     };
 
-    cc.save.doc = function(index,data){
-	//
-    };
+    cc.save.file = function(query,file){
+	// this is for db.s3 only
 
-    cc.save.file = function(index,data){
-	//
+	var objKey = 'fb||' + user.fb.profile.id + '/' + file.name;
+        var params = {Key: objKey, ContentType: file.type, Body: file, ACL: 'public-read'};
+
+        db.s3.putObject(params, function (err, data) {
+            if (err) {
+                console.log(err);
+            } else {
+		console.log(data);
+            }
+
+        });
+
     };
 
     cc.load = function(query){
+	// this is for loading files with db.dy indices
+    };
+
+    cc.load.doc = function(query, index){
+	// this is for loading db.dy docs
 	//pack up and make a query call
 
 	var tableName = '';
@@ -338,7 +369,7 @@ console.log(pack);
 	pack = {IndexName:"docType-owner-index",
 		TableName:tableName,
 		KeyConditions:{"docType": {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":"lesson"}]}
-			       }
+			      }
 	       };
 
 	if(query.mine){
@@ -368,12 +399,19 @@ console.log(pack);
 		pon.push(itm);
 	    }
 
-	    console.log(res);
 	    deferred.resolve(pon);
 	});
 
   	return deferred.promise;
+
     };
+
+    cc.load.file = function(query, index){
+	// this is for loading s3 files without db.dy indices
+    };
+
+// -- dep batch code. this to be worked into a load.file(s) load.doc(s) grammar
+
 
     cc.load.batch = function(index,query){
 	// return a promised array of documents that match the query
@@ -411,14 +449,7 @@ console.log(pack);
 	    console.log(res);
 	});
     };
-
-    cc.load.doc = function(index,query){
-	//
-    };
-
-    cc.load.file = function(index,query){
-	//
-    };
+// -- end dep code
 
 //-------------------notifications module
 

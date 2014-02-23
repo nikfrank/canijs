@@ -30,10 +30,21 @@ Progress:
 
 - put IAM policies and GSI descriptions into the git
 
+- sort save.file/doc and load.file/doc
+
+-----------------------------
+Doing:
+
+- S3 config, sorting the credentials and keeping them seperate
+
+- saving a file
+
 -----------------------------
 Need to do soon:
 
 - handle errors in promises reasonably (deferred.reject) (doing?)
+
+- register watches (notification callbacks) functions, instead of the hacknik shit it is now
 
 - save to private
 
