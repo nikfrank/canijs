@@ -1,43 +1,35 @@
 Progress:
 
 -facebook auth
-
 -aws federated auth
-
 -google auth
 
 -test save doc w google & fb
-
 -run angular
-
 -save, load from angular
 
 -Q load
-
 -notifications for database availability
-
 -stringify, make note of all objects on save
 
 -document aws user-filtering policy setup
-
 -load mine/see all
-
 -promises on save
 
 -save over/new (test req)
-
 - edit resave
-
 - put IAM policies and GSI descriptions into the git
 
+- saving a file
 - sort save.file/doc and load.file/doc
+
 
 -----------------------------
 Doing:
 
-- S3 config, sorting the credentials and keeping them seperate
+- S3 config, sorting the dbs into modules to keep seperate
 
-- saving a file
+- listObjects in bucket
 
 -----------------------------
 Need to do soon:

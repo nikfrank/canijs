@@ -182,6 +182,8 @@ var Cani = (function(cc) {
 	    var S3CONF = function(provider){
 
 		db.s3 = new AWS.S3({params: {Bucket: conf[provider].s3public}});
+
+		db.s3.Bucket = conf[provider].s3public;
 		
 		var bucketCredPack = {
                     RoleArn: conf[provider].IAMRoles['db.s3'],
@@ -225,8 +227,8 @@ var Cani = (function(cc) {
 	if(data.constructor == Object){
 	    for(var it in data){
 		if(data[it] === '') continue;
-		// dynamodb doesn't allow empty strings
 
+		// dynamodb doesn't allow empty strings
 		pack[it] = {};
 
 		var type = (typeof data[it])[0].toUpperCase();
@@ -234,7 +236,6 @@ var Cani = (function(cc) {
 		if(type === 'U') type = 'S';
 		if(type === 'O'){
 		    // determine the subtype if is qualify, append S to that letter
-
 		    // if array, determin if is all same (S, N), if not stringify
 
 		    // if object or mixed array, stringify
@@ -242,10 +243,8 @@ var Cani = (function(cc) {
 		    // add to list of things to destringify later
 		    destrings.push(it);
 		}
-
 		pack[it][type] = data[it];
 	    }
-
 	    if(JSON.stringify(destrings).length > 4) pack['__DESTRINGS'] = {'SS':destrings};
 	}
 
@@ -274,7 +273,6 @@ var Cani = (function(cc) {
 		}
 		pack[data[it].key][data[it].type] = data[it].val;
 	    }
-
 	    if(JSON.stringify(destrings).length > 4) pack['__DESTRINGS'] = {'SS':destrings};
 	}
 
@@ -395,15 +393,18 @@ var Cani = (function(cc) {
 		if(typeof itm.__DESTRINGS !== 'undefined'){
 		    // parse the listed items in place
 		}
-
 		pon.push(itm);
 	    }
-
 	    deferred.resolve(pon);
 	});
-
   	return deferred.promise;
+    };
 
+    cc.load.fileList = function(query, index){
+	// load the file list from the bucket
+	db.s3.listObjects({Bucket:db.s3.Bucket}, function(err, res){
+	    console.log(res);
+	});
     };
 
     cc.load.file = function(query, index){

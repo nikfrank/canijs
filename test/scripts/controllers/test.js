@@ -74,6 +74,11 @@ angular.module('canijstest')
 		    Cani.save.file('',file);
 		}
 	    };
+
+	    $scope.loadfilelist = function(){
+		// grab the file list from the s3
+		Cani.load.fileList();
+	    };
 	});
 
 
