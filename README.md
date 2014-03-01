@@ -31,10 +31,14 @@ Doing:
 
 - listObjects in bucket
 
-- test and fix bug with private GSIs
+- test and fix bug with private GSIs maybe
+
+- ACLs on s3
 
 -----------------------------
 Need to do soon:
+
+- mime types for text file uploads to s3
 
 - handle errors in promises reasonably (deferred.reject) (doing?)
 

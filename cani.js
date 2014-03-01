@@ -416,10 +416,15 @@ var Cani = (function(cc) {
 	// this is for db.s3 only
 
 	var objKey = 'fb||' + user.fb.profile.id + '/' + file.name;
-        var params = {Key: objKey, ContentType: file.type, Body: file, ACL: 'public-read'};
+	if(query === 'F'){
+            var params = {Key: objKey, ContentType: file.type, Body: file, ACL: 'public-read'};
+	}else if(query === 'S'){
+	    var params = {Key: objKey, ContentType: 'text/plain', Body: file, ACL: 'public-read'};
+	}
 
         db.s3.putObject(params, function (err, data) {
             if (err) {
+		console.log('err');
                 console.log(err);
             } else {
 		console.log(data);

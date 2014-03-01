@@ -65,13 +65,37 @@ angular.module('canijstest')
 	    console.log('db.s3 confirm');
 
 	    $scope.savefile = function(inputselector){
-		// grab the file from the html input at inputselector
-		var file = document.getElementById(inputselector).files[0];
 
-		console.log(file);
+		if(!inputselector){
+		    // grab the text from the textarea and make a file out of it
+		    var textFile = null;
+		    var makeTextFile = function (text) {
+			var data = new Blob([text], {type: 'text/plain'});
 
-		if(file){
-		    Cani.save.file('',file);
+			// If we are replacing a previously generated file we need to
+			// manually revoke the object URL to avoid memory leaks.
+			if (textFile !== null) {
+			    window.URL.revokeObjectURL(textFile);
+			}
+
+			textFile = window.URL.createObjectURL(data);
+
+			return textFile;
+		    };
+
+		    //textFile = makeTextFile();
+
+		    Cani.save.file('S', document.getElementById('filearea').value);
+		}else{
+
+		    // grab the file from the html input at inputselector
+		    var file = document.getElementById(inputselector).files[0];
+
+		    console.log(file);
+
+		    if(file){
+			Cani.save.file('F',file);
+		    }
 		}
 	    };
 
