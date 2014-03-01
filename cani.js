@@ -102,6 +102,7 @@ var Cani = (function(cc) {
 		if (authResult['status']['signed_in']) {
 		    // Update the app to reflect a signed in user
 		    // Hide the sign-in button now that the user is authorized, for example:
+
 		    document.getElementById('gSigninWrapper').setAttribute('style', 'display: none');
 
 		    // record the google auth data, run dbconfig with it.
@@ -135,9 +136,10 @@ var Cani = (function(cc) {
 		// Attach a click listener to a button to trigger the flow.
 		var signinButton = document.getElementById('signinButton');
 
-		document.getElementById('gSigninWrapper').setAttribute('style', 'display: block');
+		if(document.getElementById('gSigninWrapper'))
+		    document.getElementById('gSigninWrapper').setAttribute('style', 'display: block');
 
-		signinButton.addEventListener('click', function() {
+		if(signinButton) signinButton.addEventListener('click', function() {
 		    gapi.auth.signIn(additionalParams); // Will use page level configuration
 		});
 	    },300);
@@ -145,7 +147,7 @@ var Cani = (function(cc) {
 
 
 	//-------------------------DB config----------------------------------
-
+	// move these into the data modules
 	// federated auth will require that this be a callback on some other auth
 
 	if(typeof conf.aws !== 'undefined'){
@@ -178,7 +180,10 @@ var Cani = (function(cc) {
 
 		});
 	    };
+	    dbconf.push(DYCONF);
 
+
+	    //-------------------------s3 config----------------------------------
 	    var S3CONF = function(provider){
 
 		db.s3 = new AWS.S3({params: {Bucket: conf[provider].s3public}});
@@ -194,21 +199,30 @@ var Cani = (function(cc) {
 
 		callAndFlushNotes('db.s3');
 	    };
-
-	    dbconf.push(DYCONF);
 	    dbconf.push(S3CONF);
 
 	}
-
-
     };
+//---------------end config
 
 //------------------data module
 
     cc.save = function(query,data){
 	// this is for saving db.s3 with a db.dy index
+
+	// check which databases have been configured
+	// if both, dy->versioned index ==>> file in s3
+	// else, just save it to the database present if that makes sense
     };
 
+    cc.load = function(query){
+	// this is for loading files with db.dy indices
+
+	// see which databases are configd
+	// search the index, grab the file
+    };
+
+//-----data-dy module
     cc.save.doc = function(query,data){
 	// this is for db.dy only
 
@@ -292,7 +306,9 @@ var Cani = (function(cc) {
 			if(user[authType].tables.dy.length === 1){
 			    tableName = user[authType].tables.dy[0];
 			}else{
-			    tableName = user[authType].tables.dy[0];
+			    if(query.privacy === true) tableName = 'private';
+			    else tableName = 'docs';
+			    // obviously this makes some assumptions which should be documented
 			}
 		    }
 		}
@@ -320,30 +336,9 @@ var Cani = (function(cc) {
 	});
 
 	return deferred.promise;
-
     };
 
-    cc.save.file = function(query,file){
-	// this is for db.s3 only
-
-	var objKey = 'fb||' + user.fb.profile.id + '/' + file.name;
-        var params = {Key: objKey, ContentType: file.type, Body: file, ACL: 'public-read'};
-
-        db.s3.putObject(params, function (err, data) {
-            if (err) {
-                console.log(err);
-            } else {
-		console.log(data);
-            }
-
-        });
-
-    };
-
-    cc.load = function(query){
-	// this is for loading files with db.dy indices
-    };
-
+//-----------------load
     cc.load.doc = function(query, index){
 	// this is for loading db.dy docs
 	//pack up and make a query call
@@ -356,21 +351,36 @@ var Cani = (function(cc) {
 	    if(typeof user[authType] !== 'undefined'){
 		owner = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
 
-		if(typeof user[authType].tables !== 'undefined') 
-		    if(typeof user[authType].tables.dy !== 'undefined') 
-			if(user[authType].tables.dy.length !== 0)
-			    tableName = user[authType].tables.dy[0];
+		if(typeof user[authType].tables !== 'undefined') {
+		    if(typeof user[authType].tables.dy !== 'undefined') {
+			if(user[authType].tables.dy.length !== 0){
+			    if(query.privacy === true){
+				tableName = 'private';
+			    }else{
+				tableName = 'docs';//user[authType].tables.dy[0];
+			    }
+			}
+		    }
+		}
 		break;
 	    }
 	}
 
-	pack = {IndexName:"docType-owner-index",
-		TableName:tableName,
-		KeyConditions:{"docType": {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":"lesson"}]}
-			      }
-	       };
+	if(query.privacy === true){
+	    pack = {IndexName:"owner-docType-index",
+		    TableName:tableName,
+		    KeyConditions:{"docType": {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":"lesson"}]}
+				  }
+		   };
+	}else{
+	    pack = {IndexName:"docType-owner-index",
+		    TableName:tableName,
+		    KeyConditions:{"docType": {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":"lesson"}]}
+				  }
+		   };
+	}
 
-	if(query.mine){
+	if(query.mine || query.privacy){
 	    pack.KeyConditions.owner = {"ComparisonOperator": "EQ", "AttributeValueList":[owner]};
 	}
 
@@ -399,6 +409,25 @@ var Cani = (function(cc) {
 	});
   	return deferred.promise;
     };
+//-------------end data-dy module
+
+//------------data-s3 module
+    cc.save.file = function(query,file){
+	// this is for db.s3 only
+
+	var objKey = 'fb||' + user.fb.profile.id + '/' + file.name;
+        var params = {Key: objKey, ContentType: file.type, Body: file, ACL: 'public-read'};
+
+        db.s3.putObject(params, function (err, data) {
+            if (err) {
+                console.log(err);
+            } else {
+		console.log(data);
+            }
+
+        });
+
+    };
 
     cc.load.fileList = function(query, index){
 	// load the file list from the bucket
@@ -410,6 +439,8 @@ var Cani = (function(cc) {
     cc.load.file = function(query, index){
 	// this is for loading s3 files without db.dy indices
     };
+//-------------end data-s3 module
+
 
 // -- dep batch code. this to be worked into a load.file(s) load.doc(s) grammar
 

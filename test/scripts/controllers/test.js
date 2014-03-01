@@ -22,13 +22,13 @@ angular.module('canijstest')
 
 	    $scope.dyAvail = true;
 
-	    $scope.savedoc = function(privacy){
+	    $scope.savedoc = function(options){
 
 		for(var i=0; i<$scope.doc.length; ++i){
 		    if($scope.doc[i].key === 'docType') $scope.docType = $scope.doc[i].val;
 		}
 
-		Cani.save.doc({docType:$scope.docType, overwrite:false}, $scope.doc, privacy).then(function(res){
+		Cani.save.doc({docType:$scope.docType, overwrite:options.overwrite, privacy:options.privacy}, $scope.doc).then(function(res){
 		    console.log(res);
 		});
 	    };
@@ -36,8 +36,8 @@ angular.module('canijstest')
 
 	$scope.ldocs = [];
 
-	$scope.loaddoc = function(query){
-	    Cani.load.doc(query).then(function(docs){
+	$scope.loaddoc = function(options){
+	    Cani.load.doc(options).then(function(docs){
 
 		var ldocs = [];
 		//make docs into an array

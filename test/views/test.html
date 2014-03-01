@@ -10,8 +10,9 @@
 </div>
 Load mine only? <input type="checkbox" data-ng-model="mine"/>
 Overwrite on save? <input type="checkbox" data-ng-model="overwrite"/>
-<button data-ng-click="savedoc({overwrite:overwrite})">Save to cloud</button>
-<button data-ng-click="loaddoc({mine:mine})">Load from cloud</button>
+Private? <input type="checkbox" data-ng-model="privacy"/>
+<button data-ng-click="savedoc({overwrite:overwrite, privacy:privacy})">Save to cloud</button>
+<button data-ng-click="loaddoc({mine:mine, privacy:privacy})">Load from cloud</button>
 {{doc}}
 <hr style="height:5px;width:40%; background-color:orange;"/>
 <div data-ng-repeat="ldoc in ldocs" data-ng-click="edit(ldoc)">

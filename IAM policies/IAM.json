@@ -50,7 +50,7 @@ module.exports = {
 		"Resource": "arn:aws:dynamodb:us-west-2:735148112467:table/*",
 		"Condition": {
                     "ForAllValues:StringEquals": {
-			"dynamodb:LeadingKeys":  ["fb||${graph.facebook.com:id}"]
+			"dynamodb:LeadingKeys":  ["fb||${graph.facebook.com:id}"] // this won't work for indices where the owner isn't the key
                     }
 		}
 	    }

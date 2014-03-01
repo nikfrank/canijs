@@ -31,6 +31,8 @@ Doing:
 
 - listObjects in bucket
 
+- test and fix bug with private GSIs
+
 -----------------------------
 Need to do soon:
 
@@ -52,7 +54,7 @@ Need to do soon:
 
 - save files to S3, set up IAM to work public/private
 
-- incorporate a "versionaing" dynamo table for all S3 files
+- incorporate a "versioning" dynamo table for all S3 files
 
 --------------------------------------------------------------
 -generalized indexing policy, for ranged searches on any data
