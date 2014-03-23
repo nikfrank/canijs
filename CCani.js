@@ -12,47 +12,89 @@ if(typeof window['Q'] === 'undefined'){
     }
 }
 
-var Cani = (function(cc) {
+var Cani = Cani || {};
 
-    if(window.crashbecauseQ){
-	console.log('crashed because of missing q dep');
-	return {};
-    }
+Cani.core = (function(core){
+    // core is just notifications and confirmations
 
-    var user = {};
-    var db = {};
-    var dbconf = [];
-
-    var dbconfig = function(provider){
-	console.log(dbconf);
-	for(var i=0; i<dbconf.length; ++i){
-	    dbconf[i](provider);
-	}
-    };
+    var config = {};
+    core.config = config;
 
     var note = {};//notifications
 
-    var callAndFlushNotes = function(asset){
-	if(typeof note[asset] === 'undefined') return;
-
-	for(var i=0; i<note[asset].length; ++i){
-	    note[asset][i]();
-	    console.log(asset);
+    core.cast = function(asset, flush, params){
+	if(typeof asset === 'string'){
+	    if(typeof note[asset] === 'undefined') return;
+	    for(var i=0; i<note[asset].length; ++i) note[asset][i](params);
+	    if(flush) note[asset] = [];
+	}else if(asset instanceof RegExp){
+	    for(var ff in note){
+		if(asset.test(ff)) for(var i=0; i<note[ff].length; ++i) note[ff][i](params);
+		if(flush) note[ff] = [];
+	    }
 	}
     };
 
-//------------------config
+    core.on = function(asset, tino){
+	if(typeof note[asset] === 'undefined') note[asset] = [];
+	note[asset].push(tino);
+    };
 
-    cc.config = function(conf){
+    var assets = [];
+    core.assets = assets;
 
-	if(typeof conf.authOrder !== 'undefined') cc.authOrder = conf.authOrder;
+    core.confirm = function(asset){
+	var deferred = Q.defer();
 
+	if(assets.indexOf(asset)>-1){
+	    deferred.resolve();
+	}else{
+	    // register note for confirmation
+	    if(typeof note['confirm: '+asset] === 'undefined') note['confirm: '+asset] = [];
+	    note['confirm: '+asset].push(function(){ deferred.resolve();});
+	}
+
+  	return deferred.promise;
+    };
+
+    core.affirm = function(asset){
+	if(assets.indexOf(asset)===-1) assets.push(asset);
+	core.cast('confirm: '+asset, true);
+    };
+
+    core.defirm = function(asset){
+	if(assets.indexOf(asset)>-1) assets.splice(assets.indexOf(asset), 1);
+    };
+
+
+
+    core.boot = function(conf){
+	// any config requiring something else to register on that thing's cast
+
+	// also, if the config file were to determine boot, this would be the place to read that
+
+	config = conf;
+	return core.cast(/config/, true, conf);
+    };
+
+})(Cani.core||{});
+
+Cani.user = (function(user){
+    // store user information
+    // auth on request
+
+    Cani.core.on('config: user.noauth', function(conf){
+
+	user.noauth = conf.user.noauth;
+    });
+
+    Cani.core.on('config: user.fb', function(conf){
 	//------------------------------FACEBOOK AUTH---------------------------------
-	// conf = {fbApp:'#_APPID_#'}
-	if(typeof conf.fb !== 'undefined') if(typeof conf.fb.App !== 'undefined'){
+	// this requires a fb:login button in the markup
+	if(typeof conf.user.fb !== 'undefined') if(typeof conf.user.fb.App !== 'undefined'){
 	    window.fbAsyncInit = function() {
 		FB.init({
-		    appId      : conf.fb.App,
+		    appId      : conf.user.fb.App,
 		    status     : true, // check login status
 		    cookie     : true, // enable cookies to allow the server to access the session
 		    xfbml      : true  // parse XFBML
@@ -61,20 +103,16 @@ var Cani = (function(cc) {
 		// facebook has a way to request extra permissions that should be a config option
 		FB.Event.subscribe('auth.authResponseChange', function(response) {
 		    if(response.status === 'connected'){
-
 			// record the facebook auth data, run dbconfig with it
 			user.fb = response.authResponse;
-			dbconfig('fb');
-			console.log('fb db config');
 			
 			// grab the facebook profile
 			FB.api('/me', function(pon) {
 			    user.fb.profile = pon;
-			    //if(typeof notns.fbme !== undefined) notns.fbme(pon);
+			    Cani.core.cast('fb', true, conf);
 			});
 
 		    } else if (response.status === 'not_authorized') {
-
 			//user hasnt authed the app, requests them to do so
 			FB.login();
 		    } else {
@@ -94,17 +132,18 @@ var Cani = (function(cc) {
 		ref.parentNode.insertBefore(js, ref);
 	    }(document));
 	}
+    });
 
+    Cani.core.on('config: user.google', function(conf){
 	//-------------------------------GOOGLE AUTH--------------------------------
-
-	if(typeof conf.google !== 'undefined') if(typeof conf.google.App !== 'undefined'){
+	// this requires some meta tags in the markup, also a #gSigninWrapper for the button
+	if(typeof conf.user.google !== 'undefined') if(typeof conf.user.google.App !== 'undefined'){
 
 	    var po = document.createElement('script');
 	    po.type = 'text/javascript'; po.async = true;
 	    po.src = 'https://apis.google.com/js/client:plusone.js?onload=render';
 	    var s = document.getElementsByTagName('script')[0];
 	    s.parentNode.insertBefore(po, s);
-
 
 	    googleSigninCallback = function(authResult) {
 		if (authResult['status']['signed_in']) {
@@ -117,7 +156,7 @@ var Cani = (function(cc) {
 		    user.google = authResult;
 
 		    user.google.accessToken = authResult.id_token;// naming consistency... don't be fooled by the "access_token" field. he does nothing
-		    dbconfig('google');
+		    //dbconfig('google');
 
 		    // grab the google profile
 		    gapi.client.load('plus','v1', function(){
@@ -126,7 +165,7 @@ var Cani = (function(cc) {
 			});
 			request.execute(function(resp) {
 			    user.google.profile = resp;
-			    //if(typeof notns.ggme !== undefined) notns.ggme(resp);
+			    Cani.core.cast('google', true, conf);
 			});
 		    });
 
@@ -152,83 +191,121 @@ var Cani = (function(cc) {
 		});
 	    },300);
 	}
+    });
 
 
-	//-------------------------DB config----------------------------------
-	// move these into the data modules
-	// federated auth will require that this be a callback on some other auth
+    // expose schema writers and parsers
 
-	if(typeof conf.aws !== 'undefined'){
-	    //config amazon, whose singleton must already exist
-
-	    //-------------------------db.dy config----------------------------------
-	    var DYCONF = function(provider){ //provider =<= ['fb', 'google', ('aws')]
-
-		var webCredPack = {
-		    //this I grabbed from AWS's IAM role console
-		    // I also had to add dynamoDB full control permission to this role
-		    // after having made the table of course
-		    RoleArn: conf[provider].IAMRoles['db.dy'],
-		    WebIdentityToken: user[provider].accessToken
-		    // this currently assumes that dbconfig will be run after the first auth takes place.
-		    // obviously this would have to be different for an app which uses double auth (why though?)
-		};
-
-		if(provider === 'fb') webCredPack.ProviderId = 'graph.facebook.com';
-		AWS.config.credentials = new AWS.WebIdentityCredentials(webCredPack);
-		
-		db.dy = new AWS.DynamoDB({region: 'us-west-2'});
-		db.dy.listTables(function(err, data) {
-		    if(err) console.log(err);
-		    if(typeof user[provider].tables === 'undefined') user[provider].tables = {};
-		    user[provider].tables.dy = data.TableNames;
-		    //if(typeof notns.dydb !== undefined) notns.dydb();
-		    //callback on dynamo table ready
-		    callAndFlushNotes('db.dy');
-
-		});
-	    };
-	    dbconf.push(DYCONF);
-
-
-	    //-------------------------s3 config----------------------------------
-	    var S3CONF = function(provider){
-
-		db.s3 = new AWS.S3({params: {Bucket: conf[provider].s3public}});
-
-		db.s3.Bucket = conf[provider].s3public;
-		
-		var bucketCredPack = {
-                    RoleArn: conf[provider].IAMRoles['db.s3'],
-                    WebIdentityToken: user[provider].accessToken
-                };
-		if(provider === 'fb') bucketCredPack.ProviderId = 'graph.facebook.com';
-		db.s3.config.credentials = new AWS.WebIdentityCredentials(bucketCredPack);
-
-		callAndFlushNotes('db.s3');
-	    };
-	    dbconf.push(S3CONF);
-
-	}
-    };
-//---------------end config
-
-//------------------data module
-
-    cc.save = function(query,data){
-	// this is for saving db.s3 with a db.dy index
-
-	// check which databases have been configured
-	// if both, dy->versioned index ==>> file in s3
-	// else, just save it to the database present if that makes sense
+    user.write = function(type){
+	// return {'S':'fb||192865412235'} or whatever
     };
 
-    cc.load = function(query){
-	// this is for loading files with db.dy indices
-
-	// see which databases are configd
-	// search the index, grab the file
+    user.parse = function(type, val){
+	// using the type, split the val data into reasonable parts
     };
+
+})(Cani.user||{});
+
+Cani.doc = (function(doc){
+    // expect schemas in conf.doc to map saves/loads, set indices, confirm permissions properly
+
+    var tables = [];
+    doc.tables = tables;
+
+    var dy; // aws dyanmo singleton
+
+    // run this right away with noauth
+    // then on the provider casts run 
+
+    var DYCONF = function(conf, provider){ //provider =<= ['fb', 'google', ('aws')]
+
+	var webCredPack = {
+	    RoleArn: conf.doc.IAMRoles[provider]    //conf[provider].IAMRoles['db.dy'],
+	    WebIdentityToken: Cani.user[provider].accessToken //check this for no auth setup
+	};
+
+	if(provider === 'fb') webCredPack.ProviderId = 'graph.facebook.com';
+	AWS.config.credentials = new AWS.WebIdentityCredentials(webCredPack);
+	
+	dy = new AWS.DynamoDB(conf.doc.awsConfigPack);
+	dy.listTables(function(err, data) {
+	    if(err){
+		// maybe parse the meaningless aws error messages?
+		console.log(err);
+	    }
+
+	    tables = data.TableNames;
+	    Cani.core.cast('dy', true, tables);
+
+	});
+    };
+
+    Cani.core.on('config: doc noauth', function(conf){ DYCONF(conf, 'noauth');} );
+    Cani.core.on('fb', function(conf){ DYCONF(conf, 'fb');} );
+    Cani.core.on('google', function(conf){ DYCONF(conf, 'google');} );
+
+
+    // expose save and load functions
+
+    doc.save = function(schema, data, options){
+
+	// loop through schema, fill pack
+	var pack = {};
+
+
+	// make request and return promise
+	var deferred = Q.defer();
+	dy.putItem({TableName:tableName, Item:pack}, function(err, res){
+	    if(err){
+		console.log(err);
+		// parse aws error msg
+	    }
+	    deferred.resolve(res);
+	});
+	return deferred.promise;
+    };
+
+    doc.load = function(schema, query, options){
+
+    };
+
+
+})(Cani.doc||{});
+
+Cani.file = (function(file){
+    // expect schemas in conf.file to map saves/loads, confirm permissions properly
+
+    var s3; // aws s3 singleton
+
+    // run this right away with noauth
+    // then on the provider casts run 
+
+    var S3CONF = function(conf, provider){
+
+	s3 = new AWS.S3({params: {Bucket: conf.file.schemas['default'] } });
+	s3.Bucket = conf.file.schemas['default'];
+	
+	var bucketCredPack = {
+            RoleArn: conf.file.IAMRoles[provider],
+            WebIdentityToken: Cani.user[provider].accessToken
+        };
+	if(provider === 'fb') bucketCredPack.ProviderId = 'graph.facebook.com';
+	s3.config.credentials = new AWS.WebIdentityCredentials(bucketCredPack);
+
+	// is there a list available buckets function? idk
+	Cani.core.cast('s3', true);
+    };
+
+    Cani.core.on('config: file noauth', function(conf){ S3CONF(conf, 'noauth');} );
+    Cani.core.on('fb', function(conf){ S3CONF(conf, 'fb');} );
+    Cani.core.on('google', function(conf){ S3CONF(conf, 'google');} );
+
+
+    // expose save and load functions
+
+
+})(Cani.file||{});
+
 
 //-----data-dy module
     cc.save.doc = function(query,data){
@@ -458,83 +535,3 @@ var Cani = (function(cc) {
 //-------------end data-s3 module
 
 
-// -- dep batch code. this to be worked into a load.file(s) load.doc(s) grammar
-
-
-    cc.load.batch = function(index,query){
-	// return a promised array of documents that match the query
-
-	var pack = {RequestItems:{}};
-
-	var tableName = '';
-	var owner = '';
-
-	for(var authTypeNum in cc.authOrder){
-	    var authType = cc.authOrder[authTypeNum];
-	    if(typeof user[authType] !== 'undefined'){
-		owner = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
-
-		if(typeof user[authType].tables !== 'undefined') 
-		    if(typeof user[authType].tables.dy !== 'undefined') 
-			if(user[authType].tables.dy.length === 1)
-			    tableName = user[authType].tables.dy[0];
-		break;
-	    }
-	}
-
-	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"fb||100000198595053##1389538315152"},
-	//pack.RequestItems[tableName] = {Keys:[{"docId": {"S":"google||100153867629924152510##1389537976366"},
-	pack.RequestItems[tableName] = {Keys:[{"owner":owner, 
-					       "docType": {"S":"lesson"},
-					       //"author":{"S":"nik"}
-					      }]
-				       };
-
-
-	console.log(JSON.stringify(pack));
-	db.dy.batchGetItem(pack, function(err, res){
-	    //defer promise
-	    console.log(res);
-	});
-    };
-// -- end dep code
-
-//-------------------notifications module
-
-    cc.confirm = function(asset){
-
-	var deferred = Q.defer();
-
-//this needs to be generalized with a window[assetSplit[n]]
-	if(typeof db.dy !== 'undefined'){
-	    deferred.resolve(db.dy);
-	}else{
-
-	    // register with notification singleton
-	    if(typeof note[asset] === 'undefined') note[asset] = [];
-	    note[asset].push(function(){ deferred.resolve(); });
-	}
-
-  	return deferred.promise;
-    };
-
-
-
-//-------------------account module
-
-    cc.signin = function(){
-	//
-    };
-
-    cc.signin.withfb = function(){
-	//
-    };
-
-    cc.requireSignedIn = function(provider){
-	// check user signed in with provider on all requests
-    };
-
-
-    return cc;
-
-})({});

@@ -1,3 +1,20 @@
+Overall:
+
+split into modules: auth, doc (dynamo), file (s3)
+
+reorg the conf pack by module
+
+-----
+
+merge the save/load actions into modules. split modules into various files
+merge in edits from jkb copy
+
+register config actions... test configing... test configing from split files
+
+doc to register schemas to tables... can autofill ownership, uiding, datestamps in schema... also default overwrite option
+
+write basic schema options, examples
+
 Progress:
 
 -facebook auth
@@ -23,17 +40,24 @@ Progress:
 - saving a file
 - sort save.file/doc and load.file/doc
 
+- listObjects in bucket
+
+- save files to S3, set up IAM to work public/private
+
+- investigate ACL vs IAM -> leave ACL to max allow, use IAM to limit access (re: least-privilege policy)
 
 -----------------------------
 Doing:
 
 - S3 config, sorting the dbs into modules to keep seperate
 
-- listObjects in bucket
-
 - test and fix bug with private GSIs maybe
 
-- ACLs on s3
+- loading file into DOM
+
+- incorporate a "versioning" dynamo table for all S3 files
+
+-- once save&load/doc&file all work, make save/load convenience functions for versioned docs
 
 -----------------------------
 Need to do soon:
@@ -44,26 +68,20 @@ Need to do soon:
 
 - register watches (notification callbacks) functions, instead of the hacknik shit it is now
 
-- save to private
-
 - destringify all objects noted on load
 
 - pack arrays reasonably (remember dy db doesn't order arrays)
 
--notifications for sign-in
+- notifications for sign-in
 
--endtoend unit testing through angular
+- endtoend unit testing through angular -> just use angular. no bs. comment well.
 
--use $q for Q dependency... works up until callback
-
-- save files to S3, set up IAM to work public/private
-
-- incorporate a "versioning" dynamo table for all S3 files
+- use $q for Q dependency... works up until callback
 
 --------------------------------------------------------------
--generalized indexing policy, for ranged searches on any data
+- generalized indexing policy, for ranged searches on any data
 
--split up modules into different files
+- split up modules into different files
 
 --------------------------------------------------------------
 --------------------------------------------------------------
@@ -71,3 +89,15 @@ Need to do soon:
 catchies:
 
 make sure to $scope.$apply() in a .then from a promise
+
+
+------------------------------------
+boot sequence:
+
+module files are loaded into the dom
+Cani.core is loaded
+modules are added to the Cani singleton
+modules register their config functions with the core
+config file initiates boot
+
+this may require a bit of wrangling to make sure core comes first.

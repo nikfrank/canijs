@@ -1,14 +1,52 @@
-Cani.config({
+Cani.core.boot({
+
+    user:{
+	fb:{
+	    App:'651024351606699'
+	},
+	google:{
+	    App:'234767639427-pfs0j8gj55lf28hl0193p69eg4dkhcva.apps.googleusercontent.com'
+	},
+	aws:{},
+	noauth:{}
+    },
+    doc:{
+	schemas:{
+	    lesson:{
+		fields:{
+		    userId:'userId',
+		    docId:'userId+Date',
+		    topic:'S'
+		},
+		table:'',
+		authOrder:['fb','google']
+	    }
+	},
+	awsConfigPack:{region: 'us-west-2'},
+	IAMRoles:{
+	    noauth:'arn:aws:iam::735148112467:role/canijstest',
+	    fb:'arn:aws:iam::735148112467:role/canijstest',
+	    google:'arn:aws:iam::735148112467:role/canijstestgoogle'
+	}
+    },
+    file:{
+	schemas:{'default':'canijs-test'},
+	IAMRoles:{
+	    noauth:'arn:aws:iam::735148112467:role/canijstest',
+	    fb:'arn:aws:iam::735148112467:role/caijs-test-s3'
+	}
+    },
+
     fb:{
 	App:'651024351606699',
-	IAMRoles:{'db.dy':'arn:aws:iam::735148112467:role/canijstest',
-		  'db.s3':'arn:aws:iam::735148112467:role/caijs-test-s3'},
+	IAMRoles:{'dy':'arn:aws:iam::735148112467:role/canijstest',
+		  's3':'arn:aws:iam::735148112467:role/caijs-test-s3'},
 	s3public:'canijs-test'
     },
     google:{
 	App:'234767639427-pfs0j8gj55lf28hl0193p69eg4dkhcva.apps.googleusercontent.com',
-	IAMRoles:{'db.dy':'arn:aws:iam::735148112467:role/canijstestgoogle',
-		  'db.s3':''}
+	IAMRoles:{'dy':'arn:aws:iam::735148112467:role/canijstestgoogle',
+		  's3':''}
     },
     aws:'',
     authOrder:['google','fb']
