@@ -18,7 +18,11 @@ angular.module('canijstest')
 
 	$scope.dyAvail = false;
 
-	Cani.core.confirm('dy').then(function(tables){
+	Cani.core.confirm(['fb','dy']).then(function(pack){
+	    console.log(pack, 'blah');
+	});
+
+	Cani.core.confirm('dyy').then(function(tables){
 
 	    $scope.dyAvail = true;
 
@@ -61,8 +65,7 @@ angular.module('canijstest')
 
 // s3 testing -----------------------------------------------
 
-	Cani.core.confirm('s3').then(function(){
-	    console.log('s3 confirm');
+	Cani.core.confirm('s33').then(function(){
 
 	    $scope.savefile = function(inputselector){
 

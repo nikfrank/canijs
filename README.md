@@ -10,6 +10,13 @@ merge the save/load actions into modules. split modules into various files -> us
 merge in edits from jkb copy
 
 register config actions... test configing... test configing from split files
+-> affirm all modules on completion of boot, pass the module through as a param
++> use cast for boot and auth
+
+=======
+build in the nofirmations behind the scenes of all Cani.js calls
+=======
+
 
 doc to register schemas to tables... can autofill ownership, uiding, datestamps in schema... also default overwrite option
   default values per schema. NO DEFAULT VALUES PER TABLE. this makes sense, don't worry about it any more.

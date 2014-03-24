@@ -29,8 +29,10 @@ Cani.core = (function(core){
 	    if(flush) note[asset] = [];
 	}else if(asset instanceof RegExp){
 	    for(var ff in note){
-		if(asset.test(ff)) for(var i=0; i<note[ff].length; ++i) note[ff][i](params);
-		if(flush) note[ff] = [];
+		if(asset.test(ff)){
+		    for(var i=0; i<note[ff].length; ++i) note[ff][i](params);
+		    if(flush) note[ff] = [];
+		}
 	    }
 	}
     };
@@ -38,32 +40,70 @@ Cani.core = (function(core){
     core.on = function(asset, tino){
 	if(typeof note[asset] === 'undefined') note[asset] = [];
 	note[asset].push(tino);
+	// in order to achieve multi-asset casting, use the affirmation system
+	// ie, when something loads, affirm. to wait on something, confirm
     };
 
-    var assets = [];
+    var assets = {};
     core.assets = assets;
 
     core.confirm = function(asset){
 	var deferred = Q.defer();
 
-	if(assets.indexOf(asset)>-1){
-	    deferred.resolve();
-	}else{
-	    // register note for confirmation
-	    if(typeof note['confirm: '+asset] === 'undefined') note['confirm: '+asset] = [];
-	    note['confirm: '+asset].push(function(){ deferred.resolve();});
+	if(typeof asset === 'string'){
+	    if(asset in assets){
+		deferred.resolve(assets[asset]);
+	    }else{
+		// register note for confirmation
+		if(typeof note['confirm: '+asset] === 'undefined'){
+		    note['confirm: '+asset] = [];
+		}
+		core.on('confirm: '+asset, function(){
+		    deferred.resolve(assets[asset]);
+		});
+	    }
+  	    return deferred.promise;
+
+	}else if(typeof asset === 'object'){
+	    // check that all of the assets are present, return as collection
+
+	    // cheeky way to do this is to find the first missing asset
+	    //    then on it's load register the same confirm
+	    // if everything is here send it all back
+	    // technically this would work for arrays of arrays of assets. WoAh.
+	    var everything = true;
+	    for(var se in asset){
+		var s = (asset.constructor == Array)? asset[se] : se;
+		if(!(s in assets)){
+		    everything = false;
+		    core.confirm(s).then(function(singleAsset){
+			core.confirm(asset).then(function(allAssets){
+			    deferred.resolve(allAssets);
+			});
+		    });
+		    break;
+		}
+	    }
+	    if(everything){
+		var ret = {};
+		for(var se in asset){
+		    var s = (asset.constructor == Array)? asset[se] : se;
+		    ret[s] = assets[s];
+		}
+		deferred.resolve(ret);
+	    }
+	    return deferred.promise;
 	}
-
-  	return deferred.promise;
     };
 
-    core.affirm = function(asset){
-	if(assets.indexOf(asset)===-1) assets.push(asset);
-	core.cast('confirm: '+asset, true);
+    core.affirm = function(asset, params, module){
+	if(!(asset in assets)) assets[asset] = module;
+	core.cast('confirm: '+asset, true, params);
     };
 
-    core.defirm = function(asset){
-	if(assets.indexOf(asset)>-1) assets.splice(assets.indexOf(asset), 1);
+    core.defirm = function(asset, params){
+	if(assets.indexOf(asset)>-1) delete assets[asset];
+	core.cast('defirm: '+asset, true, params);
     };
 
 
@@ -111,7 +151,8 @@ Cani.user = (function(user){
 			// grab the facebook profile
 			FB.api('/me', function(pon) {
 			    user.fb.profile = pon;
-			    Cani.core.cast('fb', true, conf);
+			    //Cani.core.cast('fb', true, conf);
+			    Cani.core.affirm('fb', conf, user);
 			});
 
 		    } else if (response.status === 'not_authorized') {
@@ -157,7 +198,8 @@ Cani.user = (function(user){
 		    // record the google auth data, run dbconfig with it.
 		    user.google = authResult;
 
-		    user.google.accessToken = authResult.id_token;// naming consistency... don't be fooled by the "access_token" field. he does nothing
+		    user.google.accessToken = authResult.id_token;
+		    // naming consistency... don't be fooled by the "access_token" field. he does nothing
 		    //dbconfig('google');
 
 		    // grab the google profile
@@ -167,7 +209,8 @@ Cani.user = (function(user){
 			});
 			request.execute(function(resp) {
 			    user.google.profile = resp;
-			    Cani.core.cast('google', true, conf);
+			    //Cani.core.cast('google', true, conf);
+			    Cani.affirm('google', conf, user);
 			});
 		    });
 
@@ -225,10 +268,15 @@ Cani.doc = (function(doc){
 
 	schemas = conf.doc.schemas;
 
+console.log('dyconf running ', schemas, provider);
+	if(provider === 'noauth') return;
+
 	var webCredPack = {
 	    RoleArn: conf.doc.IAMRoles[provider],    //conf[provider].IAMRoles['db.dy'],
 	    WebIdentityToken: Cani.user[provider].accessToken //check this for no auth setup
 	};
+
+console.log('webcredpack ', webCredPack);
 
 	if(provider === 'fb') webCredPack.ProviderId = 'graph.facebook.com';
 	AWS.config.credentials = new AWS.WebIdentityCredentials(webCredPack);
@@ -243,13 +291,17 @@ Cani.doc = (function(doc){
 
 	    tables = data.TableNames;
 	    Cani.core.cast('dy', true, tables);
-
+console.log('affirm dy');
+	    Cani.core.affirm('dy', tables, doc);
 	});
     };
 
-    //Cani.core.on('config: doc noauth', function(conf){ DYCONF(conf, 'noauth');} );
-    Cani.core.on('fb', function(conf){ DYCONF(conf, 'fb');} );
-    Cani.core.on('google', function(conf){ DYCONF(conf, 'google');} );
+    Cani.core.on('config: doc noauth', function(conf){
+console.log('config doc noauth ',conf);
+	DYCONF(conf, 'noauth');
+	Cani.core.confirm('fb').then(function(user){ DYCONF(conf, 'fb');} );
+	Cani.core.confirm('google').then(function(user){ DYCONF(conf, 'google');} );
+    } );
 
 
     // expose save and load functions
@@ -383,8 +435,9 @@ Cani.doc = (function(doc){
 	}
 
 	if((typeof ctable === 'undefined')||(typeof cindex === 'undefined')){
-	    // if we don't have a table or index here, throw a reasonably worded error message (tell them to check the config file or the doc.load call)
-	    console.log('could not determine reasonable table-index pair to load docs with. check the doc.load call and the config file');
+	    // if we don't have a table or index here, throw a reasonably worded error
+	    // message (tell them to check the config file or the doc.load call)
+	    console.log('couldnt determine table-index pair to load docs. check the doc.load call and the config file');
 	}
 	// that shit is ugly like a penguin's anus at feeding time!
 
