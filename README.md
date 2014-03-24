@@ -6,12 +6,13 @@ reorg the conf pack by module
 
 -----
 
-merge the save/load actions into modules. split modules into various files
+merge the save/load actions into modules. split modules into various files -> use the coreScriptElement.onload to order configs
 merge in edits from jkb copy
 
 register config actions... test configing... test configing from split files
 
 doc to register schemas to tables... can autofill ownership, uiding, datestamps in schema... also default overwrite option
+  default values per schema. NO DEFAULT VALUES PER TABLE. this makes sense, don't worry about it any more.
 
 write basic schema options, examples
 

@@ -77,6 +77,8 @@ Cani.core = (function(core){
 	return core.cast(/config/, true, conf);
     };
 
+    return core;
+
 })(Cani.core||{});
 
 Cani.user = (function(user){
@@ -204,13 +206,15 @@ Cani.user = (function(user){
 	// using the type, split the val data into reasonable parts
     };
 
+    return user;
+
 })(Cani.user||{});
 
 Cani.doc = (function(doc){
     // expect schemas in conf.doc to map saves/loads, set indices, confirm permissions properly
 
-    var tables = [];
-    doc.tables = tables;
+    var schemas = [];
+    doc.schemas = schemas;
 
     var dy; // aws dyanmo singleton
 
@@ -219,8 +223,10 @@ Cani.doc = (function(doc){
 
     var DYCONF = function(conf, provider){ //provider =<= ['fb', 'google', ('aws')]
 
+	schemas = conf.doc.schemas;
+
 	var webCredPack = {
-	    RoleArn: conf.doc.IAMRoles[provider]    //conf[provider].IAMRoles['db.dy'],
+	    RoleArn: conf.doc.IAMRoles[provider],    //conf[provider].IAMRoles['db.dy'],
 	    WebIdentityToken: Cani.user[provider].accessToken //check this for no auth setup
 	};
 
@@ -232,6 +238,7 @@ Cani.doc = (function(doc){
 	    if(err){
 		// maybe parse the meaningless aws error messages?
 		console.log(err);
+		console.log(Cani.user[provider]);
 	    }
 
 	    tables = data.TableNames;
@@ -240,18 +247,43 @@ Cani.doc = (function(doc){
 	});
     };
 
-    Cani.core.on('config: doc noauth', function(conf){ DYCONF(conf, 'noauth');} );
+    //Cani.core.on('config: doc noauth', function(conf){ DYCONF(conf, 'noauth');} );
     Cani.core.on('fb', function(conf){ DYCONF(conf, 'fb');} );
     Cani.core.on('google', function(conf){ DYCONF(conf, 'google');} );
 
 
     // expose save and load functions
 
-    doc.save = function(schema, data, options){
+    doc.save = function(schemaName, data, options){
 
 	// loop through schema, fill pack
 	var pack = {};
 
+	var schema = schemas[schemaName];
+
+	for(var ff in schema.fields){
+	    // ff is name, [ff] is type.
+	    var type = schema.fields[ff];
+
+	    if(type.length < 3) pack[ff] = {type : data[ff]};
+	    else{
+		//use Cani[module].write(type) for non-dynamo types
+		var spll = type.split(':');
+		pack[ff] = Cani[spll[0]].write(spll[1]); // write returns a fully formatted dynamo var
+	    }
+	}
+	for(var ff in data){
+	    // if wasn't in schema, guess the type and write it.
+	    if(ff in pack) continue;
+
+	    // do the old style type guessing.
+	}
+
+	//use the options (or defaults) to select the table
+	var tableName = '';
+
+	if(!options.table) tableName = schema.tables['public'].split('/')[1];
+	else tableName = schema.tables[options.table].split('/')[1];
 
 	// make request and return promise
 	var deferred = Q.defer();
@@ -265,10 +297,139 @@ Cani.doc = (function(doc){
 	return deferred.promise;
     };
 
-    doc.load = function(schema, query, options){
+    doc.load = function(schemaName, query, options){
+	console.log(schemaName, query, options);
 
+	var indexName;
+	var tableName;
+
+	var schema = schemas[schemaName];
+
+// right away supplement the query with the schema defaults if proper
+
+	var pack = {};
+
+	if(options.index) indexName = options.index;
+	if(options.table) tableName = options.table;
+
+	var tablesTC = schema.tables;
+	if(tableName) tablesTC = {tableName:schema[tableName]};
+
+	// filter the tables to check based on the options. still run loop to check indices
+
+	// here we may have many tables and no indication which to use.
+	// pick the first one who has an index we can use
+	// quit if we find one with range and hash
+	
+	var ctable;
+	var cindex;
+
+	for(var table in tablesTC){
+	    if(indexName){
+		//check that this table has that index. if it does break
+		if(indexName === 'default'){
+		    // check that we have the hash key... if we don't we can still check other tables
+		    if((typeof query[tablesTC[table].hashKey] !== 'undefined')&&(typeof query[tablesTC[table].rangeKey] !== 'undefined')){
+			ctable = table;
+			cindex = 'default';
+			break;
+		    }else if(typeof query[tablesTC[table].hashKey] !== 'undefined'){
+			ctable = table;
+			cindex = 'default';
+		    }
+		}else if(tablesTC[table].indices.indexOf(indexName) > -1){
+		    // check that we have the hash key... if we don't, throw an error right away
+		    var hashKey = indexName.split('-')[0];
+		    var rangeKey = indexName.split('-')[1];
+		    if((typeof query[hashKey] !== 'undefined')&&(typeof query[rangeKey] !== 'undefined')){
+			ctable = table;
+			cindex = indexName;
+			break;
+		    }else if(typeof query[tablesTC[table]].hashKey !== 'undefined'){
+			ctable = table;
+			cindex = indexName;
+		    }
+		}
+		// the index is in another table. if this is the last one it'll throw an error after the loop
+		continue;
+	    }else{
+		// check this table's default index
+		if((typeof query[tablesTC[table].hashKey] !== 'undefined')&&(typeof query[tablesTC[table].rangeKey] !== 'undefined')){
+		    ctable = table;
+		    cindex = 'default';
+		    break;
+		}else if(typeof query[tablesTC[table].hashKey] !== 'undefined'){
+		    ctable = table;
+		    cindex = 'default';
+		}
+
+		// check the other indices
+		var pind = tablesTC[table].indices;
+
+		for(var i=0; i<pind.length; ++i){
+		    var hashKey = pind[i].split('-')[0];
+		    var rangeKey = pind[i].split('-')[1];
+
+		    if((typeof query[hashKey] !== 'undefined')&&(typeof query[rangeKey] !== 'undefined')){
+			ctable = table;
+			cindex = pind[i];
+			break;
+		    }else if(typeof query[hashKey] !== 'undefined'){
+			ctable = table;
+			cindex = pind[i];
+		    }
+		}
+	    }
+	}
+
+	if((typeof ctable === 'undefined')||(typeof cindex === 'undefined')){
+	    // if we don't have a table or index here, throw a reasonably worded error message (tell them to check the config file or the doc.load call)
+	    console.log('could not determine reasonable table-index pair to load docs with. check the doc.load call and the config file');
+	}
+	// that shit is ugly like a penguin's anus at feeding time!
+
+	pack.TableName = tableName = ctable;
+	pack.IndexName = indexName = cindex;
+
+	// here we know that there is a table and index which we can use properly.
+	// fill the KeyConditions with values from query index (which has been supplemented by the schema defaults)
+
+	// keyconditions has to include at least the hash key (which we know we have)
+	// if present it will also include the range key
+
+	// fill the pack from query, guided by schema.fields
+
+	pack.KeyConditions = {"docType": {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":query.docType}]}
+			     };
+
+
+	var deferred = Q.defer();
+
+	dy.query(pack, function(err, res){
+	    //defer promise
+	    if(err) console.log(err);
+	    else console.log('good query');
+
+	    //unpack the response
+	    var pon = [];
+
+	    for(var i=0; i<res.Items.length; ++i){
+
+		var itm = {};
+		for(var ff in res.Items[i]){
+		    itm[ff] = res.Items[i][ff][Object.keys(res.Items[i][ff])[0]];
+		}
+		if(typeof itm.__DESTRINGS !== 'undefined'){
+		    // parse the listed items in place
+		}
+		pon.push(itm);
+	    }
+	    deferred.resolve(pon);
+	});
+  	return deferred.promise;
     };
 
+    return doc;
 
 })(Cani.doc||{});
 
@@ -303,10 +464,11 @@ Cani.file = (function(file){
 
     // expose save and load functions
 
+    return file;
 
 })(Cani.file||{});
 
-
+try{
 //-----data-dy module
     cc.save.doc = function(query,data){
 	// this is for db.dy only
@@ -535,3 +697,8 @@ Cani.file = (function(file){
 //-------------end data-s3 module
 
 
+}catch(e){
+
+console.log(e);
+
+}

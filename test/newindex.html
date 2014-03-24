@@ -1,0 +1,61 @@
+<html>
+<head>
+
+<!-- these need to be added to tha page on the fly in config -->
+<meta name="google-signin-clientid" content="234767639427-pfs0j8gj55lf28hl0193p69eg4dkhcva.apps.googleusercontent.com" />
+<meta name="google-signin-scope" content="https://www.googleapis.com/auth/plus.login">
+<meta name="google-signin-requestvisibleactions" content="http://schemas.google.com/AddActivity" />
+<meta name="google-signin-cookiepolicy" content="single_host_origin" />
+
+</head>
+
+<style>
+
+.gSigninButton {
+  
+  background:red;
+  border:solid red;
+  border-radius:4px;
+
+  font-weight:900;
+  color:white;
+
+  display:inline-block;
+}
+
+.gSigninButton:hover {
+
+  background-color:#a00;
+  border-color:#a00;
+}
+
+</style>
+
+<body data-ng-app="canijstest">
+
+  <div id="gSigninWrapper" style="display:none;">
+    <div id="signinButton" class="gSigninButton">
+      Sign in with Google
+    </div>
+  </div>
+
+
+  <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+
+  <button onclick="FB.logout()">Log out of facebook</button>
+
+  <div data-ng-view></div>
+
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.0.0-rc5.min.js"></script>
+  <script src="../bower_components/q/q.js"></script>
+  <script src="vendor/angular/angular.js"></script>
+
+  <script src="scripts/app.js"></script>
+  <script src="scripts/controllers/test.js"></script>
+
+  <script src="../CCani.js"></script>
+  <script src="../config.js"></script>
+
+
+</body>
+</html>

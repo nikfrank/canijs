@@ -18,7 +18,7 @@ angular.module('canijstest')
 
 	$scope.dyAvail = false;
 
-	Cani.confirm('db.dy').then(function(){
+	Cani.core.confirm('dy').then(function(tables){
 
 	    $scope.dyAvail = true;
 
@@ -28,7 +28,7 @@ angular.module('canijstest')
 		    if($scope.doc[i].key === 'docType') $scope.docType = $scope.doc[i].val;
 		}
 
-		Cani.save.doc({docType:$scope.docType, overwrite:options.overwrite, privacy:options.privacy}, $scope.doc).then(function(res){
+		Cani.doc.save({docType:$scope.docType, overwrite:options.overwrite, privacy:options.privacy}, $scope.doc).then(function(res){
 		    console.log(res);
 		});
 	    };
@@ -37,7 +37,7 @@ angular.module('canijstest')
 	$scope.ldocs = [];
 
 	$scope.loaddoc = function(options){
-	    Cani.load.doc(options).then(function(docs){
+	    Cani.doc.load('lesson', {}, options).then(function(docs){
 
 		var ldocs = [];
 		//make docs into an array
@@ -61,8 +61,8 @@ angular.module('canijstest')
 
 // s3 testing -----------------------------------------------
 
-	Cani.confirm('db.s3').then(function(){
-	    console.log('db.s3 confirm');
+	Cani.core.confirm('s3').then(function(){
+	    console.log('s3 confirm');
 
 	    $scope.savefile = function(inputselector){
 
