@@ -44,7 +44,8 @@ angular.module('canijstest')
 
 	$scope.loaddoc = function(options){
 	    
-	    options.table = 'docs';
+	    //options.table = 'docs';
+	    if(!options) options = {};
 
 	    Cani.doc.load('lesson', {}, options).then(function(docs){
 

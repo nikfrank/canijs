@@ -11,22 +11,23 @@ Cani.core.boot({
 	noauth:{}
     },
     doc:{
-	schemas:{
+	schemas:{ // use this to make tables from AWS CLI?
 	    lesson:{
-		fields:{
+		fields:{// ie types
 		    docType:'S',
 		    owner:'S',
 		    docId:'S'
 		},
 		defaults:{
-		    docType:'lesson',
-		    owner:{user:'id'}
+		    docType:'lesson'
 		},
 		saveDefaults:{
-		    docId:{user:'id+date'}
+		    docId:{user:'id+date'},
+		    owner:{user:'id'},
+		    docType:'lesson'
 		},
 		tables:{
-		    'docs':{ // this is the default which will be used
+		    'docs':{
 			arn:'arn:aws:dynamodb:us-west-2:735148112467:table/docs',
 			hashKey:'owner',
 			rangeKey:'docId',
@@ -41,6 +42,7 @@ Cani.core.boot({
 			requiredFields:[]
 		    }
 		},
+		stringifyAllArrays: false,
 		authOrder:['fb','google']
 	    }
 	},
@@ -57,19 +59,5 @@ Cani.core.boot({
 	    noauth:'arn:aws:iam::735148112467:role/canijstest',
 	    fb:'arn:aws:iam::735148112467:role/caijs-test-s3'
 	}
-    },
-
-    fb:{
-	App:'651024351606699',
-	IAMRoles:{'dy':'arn:aws:iam::735148112467:role/canijstest',
-		  's3':'arn:aws:iam::735148112467:role/caijs-test-s3'},
-	s3public:'canijs-test'
-    },
-    google:{
-	App:'234767639427-pfs0j8gj55lf28hl0193p69eg4dkhcva.apps.googleusercontent.com',
-	IAMRoles:{'dy':'arn:aws:iam::735148112467:role/canijstestgoogle',
-		  's3':''}
-    },
-    aws:'',
-    authOrder:['google','fb']
+    }
 });

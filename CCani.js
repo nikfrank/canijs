@@ -242,11 +242,11 @@ Cani.user = (function(user){
     // expose schema writers and parsers
 
     user.write = function(type){
-	// return {'S':'fb||192865412235'} or whatever
+	// return just the value. the database handler will package it
 	if(type === 'id'){
 	    return ('fb||'+user.fb.profile.id);
 	}else if(type === 'id+date'){
-	    return ('fb||'+user.fb.profile.id+'||'+(new Date()).getTime());
+	    return ('fb||'+user.fb.profile.id+'##'+(new Date()).getTime());
 	}
     };
 
@@ -312,40 +312,79 @@ Cani.doc = (function(doc){
     } );
 
     // expose save and load functions
-    doc.save = function(schemaName, data, options){
-	// confirm the 
 
-	// loop through schema, fill pack
-	var pack = {};
+//------------------------------------------------------------------------------------------
+    doc.save = function(schemaName, query, options){
 
 	var schema = schemas[schemaName];
 
-	for(var ff in schema.fields){
-	    // ff is name, [ff] is type.
-	    var type = schema.fields[ff];
-
-	    if(type.length < 3) pack[ff] = {type : data[ff]};
-	    else{
-		//use Cani[module].write(type) for non-dynamo types
-		var spll = type.split(':');
-		pack[ff] = Cani[spll[0]].write(spll[1]); // write returns a fully formatted dynamo var
+	// xor defaults into the query
+	for(var ff in schema.saveDefaults){
+	    if(typeof schema.saveDefaults[ff] === 'string'){
+		if(typeof query[ff] === 'undefined') query[ff] = schema.defaults[ff];
+	    }else if(typeof schema.saveDefaults[ff] === 'object'){
+		for(var mod in schema.saveDefaults[ff]){
+		    if(typeof query[ff] === 'undefined') query[ff] = Cani[mod].write(schema.saveDefaults[ff][mod]);
+		}
 	    }
 	}
-	for(var ff in data){
-	    // if wasn't in schema, guess the type and write it.
-	    if(ff in pack) continue;
+	
+	// load the query into an AWS Item pack
+	var pack = {};
+	var destrings = []; // array to hold params which will be stringified in storage
 
-	    // do the old style type guessing.
+	for(var ff in query){
+	    if(query[ff] === '') continue; //  no blank strings allowed
+	    if(query[ff] === null) continue; // typeof null == 'object'
+
+	    if(ff[0] === '$') continue; // don't write angular fields. also fuck php?
+
+	    if(ff in schema.fields){
+		// if in schema write to pack with type
+		pack[ff] = {};
+		pack[ff][schema.fields[ff]] = query[ff];
+	    }else{
+		// do the old style type guessing
+		var type = (typeof query[ff])[0].toUpperCase();
+		if(type === 'U') continue; // shouldn't happen though
+		    
+		pack[ff] = {};
+
+		//if it's an object, we may have to stringify it.
+		if(type === 'O'){
+		    //determine if is all same (S, N), if not stringify. (option for BS?)
+		    var stringit = options.stringifyAllArrays || schema.stringifyAllArrays || (type === 'B'); // always stringify booleans
+		    if(query[ff].constructor == Array){
+			var atype = (typeof query[ff][0])[0].toUpperCase();
+
+			// this is a biscuit. LEARN FROM THIS CODE MOOCHES!
+			for(var i=1; (i<query[ff].length)&&(!stringit); ++i)
+			    if(stringit |= (atype !== (typeof query[ff][i])[0].toUpperCase()))	break;
+
+			if(!stringit) type = atype + 'S'; // can save as a dynamo array.
+		    }
+
+		    if((query[ff].constructor == Object)||(stringit)){
+			// if object or mixed array, stringify
+			type = 'S';
+			query[ff] = JSON.stringify(query[ff]);
+			// add to list of things to destringify later
+			destrings.push(ff);
+		    }
+		}
+
+		pack[ff][type] = query[ff];
+	    }
 	}
+	if(JSON.stringify(destrings).length > 4) pack['__DESTRINGS'] = {'SS':destrings};
 
-	//use the options (or defaults) to select the table
+	//find a table we have the hash and range key for to save to (check options.table first)
 	var tableName = '';
 
-	// here if !options.table, find a table that we have at least the hash and range for
-	// then confirm that the required auth is present
-	// then make the request
 	if(!options.table) tableName = schema.tables['public'].split('/')[1];
 	else tableName = schema.tables[options.table].split('/')[1];
+
+	// then confirm that the required table is present?
 
 	// make request and return promise
 	var deferred = Q.defer();
@@ -359,10 +398,10 @@ Cani.doc = (function(doc){
 	return deferred.promise;
     };
 
-    //----------------------------------------------------
-
+//------------------------------------------------------------------------------------------
     doc.load = function(schemaName, query, options){
 	console.log(schemaName, query, options);
+// put option for "all possible queries? to load from all tables possible
 
 	var indexName;
 	var tableName;
@@ -384,15 +423,17 @@ Cani.doc = (function(doc){
 
 	// filter the tables to check based on the options. still run loop to check indices
 	// filter the tables based on what is available
+	for(vat tt in tablesTC) if(doc.tables.indexOf(tt) === -1) delete tablesTC[tt];
+
 	// if options.table isn't permitted throw a nicely worded message about permissions by IAMRoles, confirmations
 
-// fill in default fields from schema
+	// fill in default fields from schema
 	for(var ff in schema.defaults){
 	    if(typeof schema.defaults[ff] === 'string'){
-		query[ff] = schema.defaults[ff];
+		if(typeof query[ff] === 'undefined') query[ff] = schema.defaults[ff];
 	    }else if(typeof schema.defaults[ff] === 'object'){
 		for(var mod in schema.defaults[ff]){
-		    query[ff] = Cani[mod].write(schema.defaults[ff][mod]);
+		    if(typeof query[ff] === 'undefined') query[ff] = Cani[mod].write(schema.defaults[ff][mod]);
 		}
 	    }
 	}
@@ -404,6 +445,7 @@ Cani.doc = (function(doc){
 	var ctable;
 	var cindex;
 
+// if(options.allTables) keep track of all possible queries, then make all of them
 	// this finds a table-index pair we can use.
 	for(var table in tablesTC){
 	    if(indexName){
@@ -476,19 +518,21 @@ Cani.doc = (function(doc){
 	var table = schema.tables[ctable];
 
 	// here we know that there is a table and index which we can use properly.
-
 	// fill the KeyConditions with values from query index (which has been supplemented by the schema defaults)
-
 	pack.KeyConditions = {};
 
 	for(var ff in query){
-	    console.log(ff,query[ff]);
-	    pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":(query[ff]) }] }
+	    // this will let you override default with empty
+// put in type selection here
+// look in the schema, then guess
+
+// also, look in options for different operators?
+
+	    if(query[ff] !== '') pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":(query[ff]) }] }
 	}
 
 	// keyconditions has to include at least the hash key (which we know we have)
 	// if present it will also include the range key
-
 
 	var deferred = Q.defer();
 
