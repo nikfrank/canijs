@@ -96,9 +96,9 @@ Cani.core = (function(core){
 	}
     };
 
-    core.affirm = function(asset, params, module){
+    core.affirm = function(asset, module){
 	if(!(asset in assets)) assets[asset] = module;
-	core.cast('confirm: '+asset, true, params);
+	core.cast('confirm: '+asset, true);
     };
 
     core.defirm = function(asset, params){
@@ -152,7 +152,7 @@ Cani.user = (function(user){
 			FB.api('/me', function(pon) {
 			    user.fb.profile = pon;
 			    //Cani.core.cast('fb', true, conf);
-			    Cani.core.affirm('fb', conf, user);
+			    Cani.core.affirm('fb', user);
 			});
 
 		    } else if (response.status === 'not_authorized') {
@@ -210,7 +210,7 @@ Cani.user = (function(user){
 			request.execute(function(resp) {
 			    user.google.profile = resp;
 			    //Cani.core.cast('google', true, conf);
-			    Cani.affirm('google', conf, user);
+			    Cani.affirm('google', user);
 			});
 		    });
 
@@ -243,6 +243,11 @@ Cani.user = (function(user){
 
     user.write = function(type){
 	// return {'S':'fb||192865412235'} or whatever
+	if(type === 'id'){
+	    return ('fb||'+user.fb.profile.id);
+	}else if(type === 'id+date'){
+	    return ('fb||'+user.fb.profile.id+'||'+(new Date()).getTime());
+	}
     };
 
     user.parse = function(type, val){
@@ -259,24 +264,22 @@ Cani.doc = (function(doc){
     var schemas = [];
     doc.schemas = schemas;
 
+    var tables = [];
+    doc.tables = tables;
+
     var dy; // aws dyanmo singleton
 
-    // run this right away with noauth
-    // then on the provider casts run 
-
+    // ------------------------------- config -------------------------------------
     var DYCONF = function(conf, provider){ //provider =<= ['fb', 'google', ('aws')]
 
 	schemas = conf.doc.schemas;
 
-console.log('dyconf running ', schemas, provider);
 	if(provider === 'noauth') return;
 
 	var webCredPack = {
 	    RoleArn: conf.doc.IAMRoles[provider],    //conf[provider].IAMRoles['db.dy'],
 	    WebIdentityToken: Cani.user[provider].accessToken //check this for no auth setup
 	};
-
-console.log('webcredpack ', webCredPack);
 
 	if(provider === 'fb') webCredPack.ProviderId = 'graph.facebook.com';
 	AWS.config.credentials = new AWS.WebIdentityCredentials(webCredPack);
@@ -289,24 +292,28 @@ console.log('webcredpack ', webCredPack);
 		console.log(Cani.user[provider]);
 	    }
 
-	    tables = data.TableNames;
-	    Cani.core.cast('dy', true, tables);
-console.log('affirm dy');
-	    Cani.core.affirm('dy', tables, doc);
+	    doc.tables = data.TableNames;
+
+	    
+	    // finally done booting dynamo
+	    Cani.core.affirm('dy', doc);
+
+	    // affirm dy.table foreach table
+	    for(var i=0; i<doc.tables.length; ++i) Cani.core.affirm('dy.'+doc.tables[i], doc);
+
 	});
     };
 
+    // dynamo boot hook
     Cani.core.on('config: doc noauth', function(conf){
-console.log('config doc noauth ',conf);
 	DYCONF(conf, 'noauth');
 	Cani.core.confirm('fb').then(function(user){ DYCONF(conf, 'fb');} );
 	Cani.core.confirm('google').then(function(user){ DYCONF(conf, 'google');} );
     } );
 
-
     // expose save and load functions
-
     doc.save = function(schemaName, data, options){
+	// confirm the 
 
 	// loop through schema, fill pack
 	var pack = {};
@@ -334,6 +341,9 @@ console.log('config doc noauth ',conf);
 	//use the options (or defaults) to select the table
 	var tableName = '';
 
+	// here if !options.table, find a table that we have at least the hash and range for
+	// then confirm that the required auth is present
+	// then make the request
 	if(!options.table) tableName = schema.tables['public'].split('/')[1];
 	else tableName = schema.tables[options.table].split('/')[1];
 
@@ -349,6 +359,8 @@ console.log('config doc noauth ',conf);
 	return deferred.promise;
     };
 
+    //----------------------------------------------------
+
     doc.load = function(schemaName, query, options){
 	console.log(schemaName, query, options);
 
@@ -357,7 +369,7 @@ console.log('config doc noauth ',conf);
 
 	var schema = schemas[schemaName];
 
-// right away supplement the query with the schema defaults if proper
+	// right away supplement the query with the schema defaults if proper
 
 	var pack = {};
 
@@ -365,9 +377,25 @@ console.log('config doc noauth ',conf);
 	if(options.table) tableName = options.table;
 
 	var tablesTC = schema.tables;
-	if(tableName) tablesTC = {tableName:schema[tableName]};
+	if(tableName){
+	    tablesTC = {};
+	    tablesTC[tableName] = schema.tables[tableName];
+	}
 
 	// filter the tables to check based on the options. still run loop to check indices
+	// filter the tables based on what is available
+	// if options.table isn't permitted throw a nicely worded message about permissions by IAMRoles, confirmations
+
+// fill in default fields from schema
+	for(var ff in schema.defaults){
+	    if(typeof schema.defaults[ff] === 'string'){
+		query[ff] = schema.defaults[ff];
+	    }else if(typeof schema.defaults[ff] === 'object'){
+		for(var mod in schema.defaults[ff]){
+		    query[ff] = Cani[mod].write(schema.defaults[ff][mod]);
+		}
+	    }
+	}
 
 	// here we may have many tables and no indication which to use.
 	// pick the first one who has an index we can use
@@ -376,6 +404,7 @@ console.log('config doc noauth ',conf);
 	var ctable;
 	var cindex;
 
+	// this finds a table-index pair we can use.
 	for(var table in tablesTC){
 	    if(indexName){
 		//check that this table has that index. if it does break
@@ -433,27 +462,32 @@ console.log('config doc noauth ',conf);
 		}
 	    }
 	}
-
+	
 	if((typeof ctable === 'undefined')||(typeof cindex === 'undefined')){
 	    // if we don't have a table or index here, throw a reasonably worded error
 	    // message (tell them to check the config file or the doc.load call)
-	    console.log('couldnt determine table-index pair to load docs. check the doc.load call and the config file');
+	    console.log('couldnt determine table to load docs from. check the doc.load call and the config file');
 	}
 	// that shit is ugly like a penguin's anus at feeding time!
 
 	pack.TableName = tableName = ctable;
-	pack.IndexName = indexName = cindex;
+	if(cindex !== 'default') pack.IndexName = indexName = cindex;
+
+	var table = schema.tables[ctable];
 
 	// here we know that there is a table and index which we can use properly.
+
 	// fill the KeyConditions with values from query index (which has been supplemented by the schema defaults)
+
+	pack.KeyConditions = {};
+
+	for(var ff in query){
+	    console.log(ff,query[ff]);
+	    pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":(query[ff]) }] }
+	}
 
 	// keyconditions has to include at least the hash key (which we know we have)
 	// if present it will also include the range key
-
-	// fill the pack from query, guided by schema.fields
-
-	pack.KeyConditions = {"docType": {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":query.docType}]}
-			     };
 
 
 	var deferred = Q.defer();

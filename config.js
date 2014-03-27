@@ -14,22 +14,31 @@ Cani.core.boot({
 	schemas:{
 	    lesson:{
 		fields:{
-		    owner:'user:Id',
-		    docId:'user:Id+Date',
-		    docType:'S'
+		    docType:'S',
+		    owner:'S',
+		    docId:'S'
+		},
+		defaults:{
+		    docType:'lesson',
+		    owner:{user:'id'}
+		},
+		saveDefaults:{
+		    docId:{user:'id+date'}
 		},
 		tables:{
-		    'public':{ // this is the default which will be used
+		    'docs':{ // this is the default which will be used
 			arn:'arn:aws:dynamodb:us-west-2:735148112467:table/docs',
 			hashKey:'owner',
 			rangeKey:'docId',
-			indices:['docType-owner-index','owner-docType-index']
+			indices:['docType-owner-index','owner-docType-index'],
+			requiredFields:[]
 		    },
 		    'private':{
 			arn:'arn:aws:dynamodb:us-west-2:735148112467:table/private',
 			hashKey:'owner',
 			rangeKey:'docId',
-			indices:['owner-docType-index']
+			indices:['owner-docType-index'],
+			requiredFields:[]
 		    }
 		},
 		authOrder:['fb','google']

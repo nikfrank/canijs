@@ -20,9 +20,11 @@ angular.module('canijstest')
 
 	Cani.core.confirm(['fb','dy']).then(function(pack){
 	    console.log(pack, 'blah');
+	    console.log(pack.dy.tables);
+	    // by now we can load shit.
 	});
 
-	Cani.core.confirm('dyy').then(function(tables){
+	Cani.core.confirm('dy').then(function(tables){
 
 	    $scope.dyAvail = true;
 
@@ -41,6 +43,9 @@ angular.module('canijstest')
 	$scope.ldocs = [];
 
 	$scope.loaddoc = function(options){
+	    
+	    options.table = 'docs';
+
 	    Cani.doc.load('lesson', {}, options).then(function(docs){
 
 		var ldocs = [];

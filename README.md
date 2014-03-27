@@ -1,22 +1,19 @@
 Overall:
 
-split into modules: auth, doc (dynamo), file (s3)
-
-reorg the conf pack by module
-
 -----
 
 merge the save/load actions into modules. split modules into various files -> use the coreScriptElement.onload to order configs
-merge in edits from jkb copy
 
 register config actions... test configing... test configing from split files
 -> affirm all modules on completion of boot, pass the module through as a param
-+> use cast for boot and auth
++> use cast for boot and interally on confirms
 
 =======
-build in the nofirmations behind the scenes of all Cani.js calls
+build in the confirmations behind the scenes of all Cani.js calls
 =======
-
+write documentation on how to use it
+ie learn how to format README files properly
+=======
 
 doc to register schemas to tables... can autofill ownership, uiding, datestamps in schema... also default overwrite option
   default values per schema. NO DEFAULT VALUES PER TABLE. this makes sense, don't worry about it any more.
@@ -54,10 +51,14 @@ Progress:
 
 - investigate ACL vs IAM -> leave ACL to max allow, use IAM to limit access (re: least-privilege policy)
 
+
+- split into modules: auth, doc (dynamo), file (s3)
+
+- reorg the conf pack by module
+
+
 -----------------------------
 Doing:
-
-- S3 config, sorting the dbs into modules to keep seperate
 
 - test and fix bug with private GSIs maybe
 
@@ -74,13 +75,9 @@ Need to do soon:
 
 - handle errors in promises reasonably (deferred.reject) (doing?)
 
-- register watches (notification callbacks) functions, instead of the hacknik shit it is now
-
 - destringify all objects noted on load
 
 - pack arrays reasonably (remember dy db doesn't order arrays)
-
-- notifications for sign-in
 
 - endtoend unit testing through angular -> just use angular. no bs. comment well.
 
@@ -88,8 +85,6 @@ Need to do soon:
 
 --------------------------------------------------------------
 - generalized indexing policy, for ranged searches on any data
-
-- split up modules into different files
 
 --------------------------------------------------------------
 --------------------------------------------------------------
