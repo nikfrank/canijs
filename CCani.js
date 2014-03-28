@@ -16,7 +16,7 @@ var Cani = Cani || {};
 
 Cani.core = (function(core){
     // core is just notifications and confirmations
-
+    
     var config = {};
     core.config = config;
 
@@ -317,7 +317,7 @@ Cani.doc = (function(doc){
     doc.save = function(schemaName, query, options){
 
 	var schema = schemas[schemaName];
-
+console.log(schemaName, ' ', schemas);
 	// xor defaults into the query
 	for(var ff in schema.saveDefaults){
 	    if(typeof schema.saveDefaults[ff] === 'string'){
@@ -380,27 +380,54 @@ Cani.doc = (function(doc){
 
 	//find a table we have the hash and range key for to save to (check options.table first)
 	var tableName = '';
+	if(options.table) tableName = options.table;
 
-	if(!options.table) tableName = schema.tables['public'].split('/')[1];
-	else tableName = schema.tables[options.table].split('/')[1];
+	var tablesTC = schema.tables;
+	if(tableName){
+	    tablesTC = {};
+	    tablesTC[tableName] = schema.tables[tableName];
+	}
 
-	// then confirm that the required table is present?
+	// filter the tables to check based on the options. still run loop to check indices
+	// filter the tables based on what is available
+	for(var tt in tablesTC) if(doc.tables.indexOf(tt) === -1) delete tablesTC[tt];
+
+// loop through the tables, find one that we have the hash and range key for.
+	for(var table in tablesTC){
+	    var hash = schema.tables[table].hashKey;
+	    var range = schema.tables[table].rangeKey;
+
+	    if((typeof query[hash] === 'undefined')||(typeof query[range] === 'undefined')) delete tablesTC[tt];
+	}
 
 	// make request and return promise
 	var deferred = Q.defer();
-	dy.putItem({TableName:tableName, Item:pack}, function(err, res){
-	    if(err){
-		console.log(err);
-		// parse aws error msg
-	    }
-	    deferred.resolve(res);
-	});
+
+	if(!tableName){
+	    deferred.reject('must indicate table for save');
+	}else if(!(tableName in tablesTC)){
+	    //throw error?
+	    if(tableName in schema.tables) deferred.reject('missing hash/range for indicated table');
+	    else deferred.reject('asset dynamo table: '+tableName+' not available/permitted');
+	}else{
+	    // were done here
+	    dy.putItem({TableName:tableName, Item:pack}, function(err, res){
+		if(err){
+		    console.log(err);
+		    // parse aws error msg
+		}
+		deferred.resolve(res);
+	    });
+	}
 	return deferred.promise;
     };
 
 //------------------------------------------------------------------------------------------
     doc.load = function(schemaName, query, options){
 	console.log(schemaName, query, options);
+	if(!options) options = {};
+	if(!query) query = {};
+// maybe put something in here to kill requests before booting is done
 // put option for "all possible queries? to load from all tables possible
 
 	var indexName;
@@ -423,7 +450,7 @@ Cani.doc = (function(doc){
 
 	// filter the tables to check based on the options. still run loop to check indices
 	// filter the tables based on what is available
-	for(vat tt in tablesTC) if(doc.tables.indexOf(tt) === -1) delete tablesTC[tt];
+	for(var tt in tablesTC) if(doc.tables.indexOf(tt) === -1) delete tablesTC[tt];
 
 	// if options.table isn't permitted throw a nicely worded message about permissions by IAMRoles, confirmations
 
@@ -523,12 +550,20 @@ Cani.doc = (function(doc){
 
 	for(var ff in query){
 	    // this will let you override default with empty
-// put in type selection here
-// look in the schema, then guess
+
+	    var type = (typeof query[ff])[0].toUpperCase();
+
+// querying arrays
 
 // also, look in options for different operators?
 
-	    if(query[ff] !== '') pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":(query[ff]) }] }
+	    if(ff in schema.fields) type = schema.fields[ff];
+	    if(['S','N'].indexOf(type) === -1) continue;
+
+	    var subpack = {}
+	    subpack[type] = query[ff];
+
+	    if(query[ff] !== '') pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [subpack] }
 	}
 
 	// keyconditions has to include at least the hash key (which we know we have)
