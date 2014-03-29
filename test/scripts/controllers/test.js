@@ -5,8 +5,18 @@ angular.module('canijstest')
 
 	var copy = function(t){return JSON.parse(JSON.stringify(t));};
 
+	$scope.stypes = [{txt:'number',val:'S'},
+			{txt:'string',val:'S'},
+			{txt:'boolean',val:'B'}];
+
+	$scope.types = [{txt:'number',val:'S'},
+			{txt:'string',val:'S'},
+			{txt:'boolean',val:'B'},
+			{txt:'collection',val:'C'},
+			{txt:'array',val:'A'}];
+
 	$scope.push = function(d){
-	    d.push({key:'',val:''});
+	    d.push({key:'',val:'', type:'S'});
 	};
 
 	$scope.pop = function(d){
@@ -14,44 +24,75 @@ angular.module('canijstest')
 	};
 
 	$scope.doc = [];
-	$scope.docType = '';
 
 	$scope.ldocs = [];
 
 	$scope.dyAvail = false;
 
 	Cani.core.confirm(['fb','dy']).then(function(pack){
-	    console.log(pack, 'blah');
-	    console.log(pack.dy.tables);
-	    // by now we can load shit.
 
-	    $scope.dyAvail = true;
+	    $scope.schemas = pack.dy.schemas;
+	    // by now we can load shit.
 
 	    $scope.savedoc = function(){
 
-		for(var i=0; i<$scope.doc.length; ++i){
-		    if($scope.doc[i].key === 'docType') $scope.docType = $scope.doc[i].val;
-		}
+		var query = {};
 
-		console.log($scope.doc);
+		for(var i=0; i<$scope.doc.length; ++i){
+		    if(($scope.doc[i].type!=='C')&&($scope.doc[i].type!=='A')){
+			query[$scope.doc[i].key] = $scope.doc[i].val;
+		    }else if($scope.doc[i].type==='C'){
+			var pack = {};
+			for(var j=0; j<$scope.doc[i].val.length; ++j){
+			    pack[$scope.doc[i].val[j].key] = $scope.doc[i].val[j].val;
+			}
+			query[$scope.doc[i].key] = pack;
+		    }else if($scope.doc[i].type==='A'){
+			var pack = [];
+			for(var j=0; j<$scope.doc[i].val.length; ++j){
+			    pack[j] = $scope.doc[i].val[j].val;
+			}
+			query[$scope.doc[i].key] = pack;
+		    }
+		}
 
 		// pack the doc into a collection-query
 
-		//Cani.doc.save('lesson', $scope.doc, {table:'private'}).then(function(res){
-		//    console.log(res);
-		//});
+		Cani.doc.save('lesson', query, {table:$scope.table||'docs'}).then(function(res){
+		    console.log(res);
+		});
 	    };
 
 	    $scope.loaddoc = function(){
 		
-		Cani.doc.load('lesson', {}, {}).then(function(docs){
-
+		Cani.doc.load('lesson', {owner:''}, {table:$scope.table||'docs'}).then(function(docs){
 		    var ldocs = [];
 		    //make docs into an array
 		    for(var i=0; i<docs.length; ++i){
 			ldocs[i] = [];
 			for(var ff in docs[i]){
-			    ldocs[i][ldocs[i].length] = {key:ff, val:docs[i][ff]};
+			    // here guess the type
+			    var type = (typeof docs[i][ff])[0].toUpperCase();
+			    if(type === 'N') type = 'S';
+			    if(type === 'O'){
+				if(docs[i][ff].constructor == Array){
+				    type = 'A';
+				    for(var j=0; j<docs[i][ff].length; ++j){
+					docs[i][ff][j] = {val:docs[i][ff][j], type:(typeof docs[i][ff][j])[0].toUpperCase()};
+				    }
+				}else{
+				    type = 'C';
+				    var cpack = [];
+				    var ccc = 0;
+				    for(var gg in docs[i][ff]){
+					cpack[ccc++] = {val:docs[i][ff][gg], key:gg, type:(typeof docs[i][ff][gg])[0].toUpperCase()};
+				    }
+				    docs[i][ff] = cpack;
+				}
+			    }
+			    
+			    //if not an object or array...
+			    ldocs[i][ldocs[i].length] = {key:ff, val:docs[i][ff], type:type};
 			}
 		    }
 
@@ -61,12 +102,40 @@ angular.module('canijstest')
 		});
 	    };
 
+	    $scope.dyAvail = true;
+	    $scope.$apply();
 	});
 
-	$scope.edit = function(doc){
-	    $scope.doc = doc;
-	    $scope.docType = doc.docType;
+	$scope.erase = function(doc){
+	    
+	    Cani.doc.erase('lesson', {}, {table:''}).then(function(res){
+		console.log(res);
+	    });
 	};
+
+
+	$scope.edit = function(docIndex){
+	    $scope.docIndex = docIndex;
+	    $scope.doc = copy($scope.ldocs[docIndex]);
+	};
+
+	$scope.$watch('doc', function(n, o){
+
+	    if(!n) return;
+	    for(var i=0; i<n.length; ++i){
+		var tt = (typeof n[i].val)[0].toUpperCase();
+		var nt = n[i].type;
+
+		if(tt === 'N') tt = 'S';
+		if((nt === 'C')||(nt === 'A')) nt = 'O';
+
+		if(nt !== tt){
+		    if(n[i].type === 'S') n[i].val = '';
+		    else if(n[i].type === 'C') n[i].val = [];
+		    else if(n[i].type === 'A') n[i].val = [];
+		}
+	    }
+	}, true);
 
 // s3 testing -----------------------------------------------
 

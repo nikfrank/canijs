@@ -283,6 +283,9 @@ Cani.doc = (function(doc){
 
 	if(provider === 'fb') webCredPack.ProviderId = 'graph.facebook.com';
 	AWS.config.credentials = new AWS.WebIdentityCredentials(webCredPack);
+console.log('AWS.conf.cred',AWS.config.credentials);
+console.log('webcredpack',webCredPack);
+console.log(Cani.user);
 	
 	dy = new AWS.DynamoDB(conf.doc.awsConfigPack);
 	dy.listTables(function(err, data) {
@@ -316,8 +319,10 @@ Cani.doc = (function(doc){
 //------------------------------------------------------------------------------------------
     doc.save = function(schemaName, query, options){
 
+	var deferred = Q.defer(); // deferred.reject to do an error
+
 	var schema = schemas[schemaName];
-console.log(schemaName, ' ', schemas);
+
 	// xor defaults into the query
 	for(var ff in schema.saveDefaults){
 	    if(typeof schema.saveDefaults[ff] === 'string'){
@@ -400,9 +405,6 @@ console.log(schemaName, ' ', schemas);
 	    if((typeof query[hash] === 'undefined')||(typeof query[range] === 'undefined')) delete tablesTC[tt];
 	}
 
-	// make request and return promise
-	var deferred = Q.defer();
-
 	if(!tableName){
 	    deferred.reject('must indicate table for save');
 	}else if(!(tableName in tablesTC)){
@@ -424,7 +426,9 @@ console.log(schemaName, ' ', schemas);
 
 //------------------------------------------------------------------------------------------
     doc.load = function(schemaName, query, options){
-	console.log(schemaName, query, options);
+
+	var deferred = Q.defer(); // deferred.reject to do an error
+
 	if(!options) options = {};
 	if(!query) query = {};
 // maybe put something in here to kill requests before booting is done
@@ -569,12 +573,9 @@ console.log(schemaName, ' ', schemas);
 	// keyconditions has to include at least the hash key (which we know we have)
 	// if present it will also include the range key
 
-	var deferred = Q.defer();
-
 	dy.query(pack, function(err, res){
 	    //defer promise
 	    if(err) console.log(err);
-	    else console.log('good query');
 
 	    //unpack the response
 	    var pon = [];
@@ -586,11 +587,54 @@ console.log(schemaName, ' ', schemas);
 		    itm[ff] = res.Items[i][ff][Object.keys(res.Items[i][ff])[0]];
 		}
 		if(typeof itm.__DESTRINGS !== 'undefined'){
-		    // parse the listed items in place
+		    for(var j=0; j<itm.__DESTRINGS.length; ++j){
+			itm[itm.__DESTRINGS[j]] = JSON.parse(itm[itm.__DESTRINGS[j]]);
+		    }
+		    delete itm.__DESTRINGS;
 		}
 		pon.push(itm);
 	    }
 	    deferred.resolve(pon);
+	});
+  	return deferred.promise;
+    };
+
+//------------------------------------------------------------------------------------------
+    doc.erase = function(schemaName, query, options){
+	// make a deleteItem request to the table determined by options &| schema
+
+	// basically I'm going to require that you have the tableName, hash and range.
+	// feel free to send me a collection of hash-range (maybe batch delete later)
+
+// autofill table for schemas with only one table
+	var tableName  = options.table;
+
+	var pack = {
+	    Key: {},
+	    ReturnValues: "ALL_OLD",
+	    TableName: tableName
+	};
+
+	var schema = schemas[schemaName];
+	var table = schema.tables[tableName];
+
+	var hash = table.hashKey;
+	var range = table.rangeKey;
+
+	pack.Key[hash] = {};
+	pack.Key[range] = {};
+
+	if((options.useDefault.indexOf(hash) === -1)||(typeof options.useDefault === 'string')){
+// fill marked defaults
+	}
+
+	pack.Key[hash][schema.fields[hash]] = pack.Key[hash][schema.fields[hash]] || query[hash];
+	pack.Key[range][schema.fields[range]] = pack.Key[range][schema.fields[range]] || query[range];
+
+	var deferred = Q.defer();
+
+	dy.deleteItem(pack, function(err, res){
+	    deferred.resolve(res);
 	});
   	return deferred.promise;
     };
@@ -635,195 +679,6 @@ Cani.file = (function(file){
 })(Cani.file||{});
 
 try{
-//-----data-dy module
-    cc.save.doc = function(query,data){
-	// this is for db.dy only
-
-	//query = {overwrite:bool, docType:string}
-
-	//here check the format of the data, can be:
-
-	// [{key:'', value:..(,type:'')}...] implemented
-	// {key1:value1, ...} implemented
-
-	// query.overwrite if true: use old docId, if false: make new docId
-
-	var pack = {};
-	var destrings = [];
-
-	if(data.constructor == Object){
-	    for(var it in data){
-		if(data[it] === '') continue;
-
-		// dynamodb doesn't allow empty strings
-		pack[it] = {};
-
-		var type = (typeof data[it])[0].toUpperCase();
-		//if it's an object, we have to stringify it. ugh.
-		if(type === 'U') type = 'S';
-		if(type === 'O'){
-		    // determine the subtype if is qualify, append S to that letter
-		    // if array, determin if is all same (S, N), if not stringify
-
-		    // if object or mixed array, stringify
-		    data[it] = JSON.stringify(data[it]);
-		    // add to list of things to destringify later
-		    destrings.push(it);
-		}
-		pack[it][type] = data[it];
-	    }
-	    if(JSON.stringify(destrings).length > 4) pack['__DESTRINGS'] = {'SS':destrings};
-	}
-
-	if(data.constructor == Array){
-	    for(var it in data){
-		if(data[it].val === '') continue;
-		if(typeof data[it].val === 'undefined') continue;
-		// dynamodb doesn't allow empty strings
-
-		pack[data[it].key] = {};
-		if(typeof data[it].type === 'undefined') {
-
-		    data[it].type = (typeof data[it].val)[0].toUpperCase();
-		    //if it's an object, we have to stringify it. ugh.
-		    if(data[it].type === 'U') data[it].type = 'S';
-		    if(data[it].type === 'O'){
-			// determine the subtype if is qualify, append S to that letter
-
-			// if array, determin if is all same (S, N), if not stringify
-
-			// if object or mixed array, stringify
-			data[it].val = JSON.stringify(data[it].val);
-			// add to list of things to destringify later
-			destrings.push(it);
-		    }
-		}
-		pack[data[it].key][data[it].type] = data[it].val;
-	    }
-	    if(JSON.stringify(destrings).length > 4) pack['__DESTRINGS'] = {'SS':destrings};
-	}
-
-	var tableName = '';
-
-	pack.docType = {'S':query.docType};
-
-	// set the ownership based on the auth order, choose the table to write to
-	pack.owner = {'S':''};
-	for(var authTypeNum in cc.authOrder){
-	    var authType = cc.authOrder[authTypeNum];
-	    if(typeof user[authType] !== 'undefined'){
-		pack.owner = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
-
-		if(typeof user[authType].tables !== 'undefined'){
-		    if(typeof user[authType].tables.dy !== 'undefined'){
-			if(user[authType].tables.dy.length === 1){
-			    tableName = user[authType].tables.dy[0];
-			}else{
-			    if(query.privacy === true) tableName = 'private';
-			    else tableName = 'docs';
-			    // obviously this makes some assumptions which should be documented
-			}
-		    }
-		}
-		break;
-	    }
-	}
-
-	if(!query.overwrite || (typeof pack.docId === 'undefined')){
-	    pack.docId = {'S':pack.owner.S + '##' + (new Date()).getTime()};
-	}
-	
-	if(tableName.length<3){
-	    console.log(user)
-	    console.log('write failed, tables not yet loaded');
-	    return;
-	}
-
-	var deferred = Q.defer();
-
-	db.dy.putItem({TableName:tableName, Item:pack}, function(err, res){
-	    if(err) console.log(err);
-	    console.log(res);
-
-	    deferred.resolve(res);
-	});
-
-	return deferred.promise;
-    };
-
-//-----------------load
-    cc.load.doc = function(query, index){
-	// this is for loading db.dy docs
-	//pack up and make a query call
-
-	var tableName = '';
-	var owner = '';
-
-	for(var authTypeNum in cc.authOrder){
-	    var authType = cc.authOrder[authTypeNum];
-	    if(typeof user[authType] !== 'undefined'){
-		owner = {'S':authType+'||'+user[authType].profile.id};//lucky thats the same already
-
-		if(typeof user[authType].tables !== 'undefined') {
-		    if(typeof user[authType].tables.dy !== 'undefined') {
-			if(user[authType].tables.dy.length !== 0){
-			    if(query.privacy === true){
-				tableName = 'private';
-			    }else{
-				tableName = 'docs';//user[authType].tables.dy[0];
-			    }
-			}
-		    }
-		}
-		break;
-	    }
-	}
-
-	if(query.privacy === true){
-	    pack = {IndexName:"owner-docType-index",
-		    TableName:tableName,
-		    KeyConditions:{"docType": {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":"lesson"}]}
-				  }
-		   };
-	}else{
-	    pack = {IndexName:"docType-owner-index",
-		    TableName:tableName,
-		    KeyConditions:{"docType": {"ComparisonOperator": "EQ", "AttributeValueList": [{"S":"lesson"}]}
-				  }
-		   };
-	}
-
-	if(query.mine || query.privacy){
-	    pack.KeyConditions.owner = {"ComparisonOperator": "EQ", "AttributeValueList":[owner]};
-	}
-
-	var deferred = Q.defer();
-
-	db.dy.query(pack, function(err, res){
-	    //defer promise
-	    if(err) console.log(err);
-	    else console.log('good query');
-
-	    //unpack the response
-	    var pon = [];
-
-	    for(var i=0; i<res.Items.length; ++i){
-
-		var itm = {};
-		for(var ff in res.Items[i]){
-		    itm[ff] = res.Items[i][ff][Object.keys(res.Items[i][ff])[0]];
-		}
-		if(typeof itm.__DESTRINGS !== 'undefined'){
-		    // parse the listed items in place
-		}
-		pon.push(itm);
-	    }
-	    deferred.resolve(pon);
-	});
-  	return deferred.promise;
-    };
-//-------------end data-dy module
-
 //------------data-s3 module
     cc.save.file = function(query,file){
 	// this is for db.s3 only

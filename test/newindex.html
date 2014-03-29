@@ -7,6 +7,8 @@
 <meta name="google-signin-requestvisibleactions" content="http://schemas.google.com/AddActivity" />
 <meta name="google-signin-cookiepolicy" content="single_host_origin" />
 
+<link rel="stylesheet" href="bootstrap.css"/>
+
 </head>
 
 <style>
@@ -29,22 +31,33 @@
   border-color:#a00;
 }
 
+.active {
+  background-color:#cfc;
+}
+
 </style>
 
 <body data-ng-app="canijstest">
 
-  <div id="gSigninWrapper" style="display:none;">
-    <div id="signinButton" class="gSigninButton">
-      Sign in with Google
+  <div class="row-fluid" style="overflow-x:hidden;">
+
+    <div class="span1"></div>
+    <div class="span9">
+      <div data-ng-view></div>
     </div>
+
+    <div class="span2">
+      <div id="gSigninWrapper" style="display:none;">
+	<div id="signinButton" class="gSigninButton">
+	  Sign in with Google
+	</div>
+      </div>
+
+
+      <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+    </div>
+
   </div>
-
-
-  <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
-
-  <button onclick="FB.logout()">Log out of facebook</button>
-
-  <div data-ng-view></div>
 
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.0.0-rc5.min.js"></script>
   <script src="../bower_components/q/q.js"></script>

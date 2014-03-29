@@ -19,6 +19,7 @@ Cani.core.boot({
 		    docId:'S'
 		},
 		defaults:{
+		    owner:{user:'id'},
 		    docType:'lesson'
 		},
 		saveDefaults:{

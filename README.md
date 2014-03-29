@@ -2,13 +2,17 @@ Overall:
 
 -----
 
-- destringify all objects noted on load
-
 finish saving docs, clean up and use in housepartie
 
-merge the save/load actions into modules. split modules into various files -> use requirejs to load modules, document
+split modules into various files -> use requirejs to load modules, document
 
-register config actions... test configing... test configing from split files
+test configing from split files
+
+- handle errors in promises reasonably (deferred.reject)
+
+more query options (alltables, other operators)
+
+-> scan when no index is present
 
 rewrite on s3, dy+s3 versioning
 
@@ -61,6 +65,9 @@ doc to register schemas to tables... can autofill ownership, uiding, datestamps 
 
 write basic schema options, examples
 
+- destringify all objects noted on load
+
+
 -----------------------------
 Doing:
 
@@ -74,8 +81,6 @@ Doing:
 Need to do soon:
 
 - mime types for text file uploads to s3
-
-- handle errors in promises reasonably (deferred.reject) (doing?)
 
 - endtoend unit testing through angular -> just use angular. no bs. comment well.
 

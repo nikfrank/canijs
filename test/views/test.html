@@ -1,21 +1,92 @@
-<label for="docType">Document Type:</label>
-<input data-ng-model="docType"/>
+<div class="row-fluid">
+  <div class="span4">
+    <label for="tableName">Table:</label>
+    <input id="tableName" data-ng-model="table"/>
+  </div>
+</div>
+
+<button data-ng-disabled="!dyAvail" data-ng-click="savedoc()">Save to cloud</button>
+<button data-ng-disabled="!dyAvail" data-ng-click="loaddoc()">Load from cloud</button>
+
 <div style="display:block; background-color:rgba(200,255,255,0.25)">
   <button data-ng-click="push(doc)">Push</button>
   <button data-ng-click="pop(doc)">Pop</button>
-  <div data-ng-repeat="ff in doc">
-    <input data-ng-model="ff.key"/>
-    <input data-ng-model="ff.val"/>
+  <button data-ng-click="erase(doc)">Delete</button>
+  <div data-ng-repeat="ff in doc" class="row-fluid">
+    <div class="span2">
+      <input data-ng-model="ff.key" style="width:100px;"/>
+    </div>
+    <div class="span2">
+      <select data-ng-model="ff.type" data-ng-options="type.val as type.txt for type in types"
+	      data-ng-init="ff.type = ff.type||'S'" style="width:100px;"></select>
+    </div>
+    <div data-ng-show="(ff.type=='N')||(ff.type=='S')">
+      <div class="span3">
+	<input data-ng-model="ff.val"/>
+      </div>
+    </div>
+    <div data-ng-show="ff.type=='B'">
+      <div class="span2">
+	<input type="checkbox" data-ng-model="ff.val"/>
+      </div>
+    </div>
+    <div data-ng-show="ff.type=='C'">
+      <div class="span6">
+
+	<button data-ng-click="push(ff.val)">Push</button>
+	<button data-ng-click="pop(ff.val, kk)">Pop</button>
+	<div data-ng-repeat="ii in ff.val" class="row-fluid">
+	  <div class="span4">
+	    <input data-ng-model="ii.key" style="width:100px"/>
+	  </div>
+	  <div class="span4">
+	    <select data-ng-model="ii.type" data-ng-options="type.val as type.txt for type in stypes"
+		    data-ng-init="ii.type = ii.type||'S'" style="width:100px;"></select>
+	  </div>
+	  <div data-ng-show="(ii.type=='N')||(ii.type=='S')">
+	    <div class="span4">
+	      <input data-ng-model="ii.val"/>
+	    </div>
+	  </div>
+	  <div data-ng-show="ii.type=='B'">
+	    <div class="span4">
+	      <input type="checkbox" data-ng-model="ii.val"/>
+	    </div>
+	  </div>
+
+	</div>
+      </div>
+    </div>
+    <div data-ng-show="ff.type=='A'">
+      <div class="span6">
+	<button data-ng-click="push(ff.val)">Push</button>
+	<button data-ng-click="pop(ff.val)">Pop</button>
+	<div data-ng-repeat="ii in ff.val" class="row-fluid">
+
+	  <div class="span4">
+	    <select data-ng-model="ii.type" data-ng-options="type.val as type.txt for type in stypes"
+		    data-ng-init="ii.type = ii.type||'S'" style="width:100px;"></select>
+	  </div>
+	  <div data-ng-show="(ii.type=='N')||(ii.type=='S')">
+	    <div class="span4">
+	      <input data-ng-model="ii.val"/>
+	    </div>
+	  </div>
+	  <div data-ng-show="ii.type=='B'">
+	    <div class="span4">
+	      <input type="checkbox" data-ng-model="ii.val"/>
+	    </div>
+	  </div>
+
+	</div>
+      </div>
+    </div>
   </div>
 </div>
-Load mine only? <input type="checkbox" data-ng-model="mine"/>
-Overwrite on save? <input type="checkbox" data-ng-model="overwrite"/>
-Private? <input type="checkbox" data-ng-model="privacy"/>
-<button data-ng-click="savedoc()">Save to cloud</button>
-<button data-ng-click="loaddoc()">Load from cloud</button>
-{{doc}}
+
 <hr style="height:5px;width:40%; background-color:orange;"/>
-<div data-ng-repeat="ldoc in ldocs" data-ng-click="edit(ldoc)">
+<div data-ng-repeat="ldoc in ldocs" data-ng-click="edit($index)"
+     data-ng-class="{true:'active'}[$index == docIndex]">
   {{ldoc}}
 </div>
 <hr style="height:5px;width:40%; background-color:orange;"/>
