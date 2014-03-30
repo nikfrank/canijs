@@ -107,8 +107,13 @@ angular.module('canijstest')
 	});
 
 	$scope.erase = function(doc){
-	    
-	    Cani.doc.erase('lesson', {}, {table:''}).then(function(res){
+	    console.log(doc);
+	    var did;
+	    for(var i=0; i<doc.length; ++i) if(doc[i].key === 'docId') did = doc[i].val;
+	    var own;
+	    for(var i=0; i<doc.length; ++i) if(doc[i].key === 'owner') own = doc[i].val;
+
+	    Cani.doc.erase('lesson', {docId:did, owner:own}, {table:$scope.table||'docs'}).then(function(res){
 		console.log(res);
 	    });
 	};
