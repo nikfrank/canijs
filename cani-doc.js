@@ -80,7 +80,7 @@ console.log(Cani.user);
 	// xor defaults into the query
 	for(var ff in schema.saveDefaults){
 	    if(typeof schema.saveDefaults[ff] === 'string'){
-		if(typeof query[ff] === 'undefined') query[ff] = schema.defaults[ff];
+		if(typeof query[ff] === 'undefined') query[ff] = schema.saveDefaults[ff];
 	    }else if(typeof schema.saveDefaults[ff] === 'object'){
 		for(var mod in schema.saveDefaults[ff]){
 		    if(typeof query[ff] === 'undefined') query[ff] = Cani[mod].write(schema.saveDefaults[ff][mod]);
@@ -167,6 +167,7 @@ console.log(Cani.user);
 	    else deferred.reject('asset dynamo table: '+tableName+' not available/permitted');
 	}else{
 	    // were done here
+
 	    dy.putItem({TableName:tableName, Item:pack}, function(err, res){
 		if(err){
 		    console.log(err);
