@@ -171,8 +171,9 @@ console.log(Cani.user);
 		if(err){
 		    console.log(err);
 		    // parse aws error msg
+		    deferred.reject(err);
 		}
-		deferred.resolve(res);
+		deferred.resolve(query);
 	    });
 	}
 	return deferred.promise;
@@ -234,6 +235,7 @@ console.log(Cani.user);
 
 // if(options.allTables) keep track of all possible queries, then make all of them
 	// this finds a table-index pair we can use.
+//make sure we have hash+range for index query
 	for(var table in tablesTC){
 	    if(indexName){
 		//check that this table has that index. if it does break
@@ -255,10 +257,7 @@ console.log(Cani.user);
 			ctable = table;
 			cindex = indexName;
 			break;
-		    }else if(typeof query[tablesTC[table]].hashKey !== 'undefined'){
-			ctable = table;
-			cindex = indexName;
-		    }
+		    }// need both for an index
 		}
 		// the index is in another table. if this is the last one it'll throw an error after the loop
 		continue;
@@ -284,10 +283,7 @@ console.log(Cani.user);
 			ctable = table;
 			cindex = pind[i];
 			break;
-		    }else if(typeof query[hashKey] !== 'undefined'){
-			ctable = table;
-			cindex = pind[i];
-		    }
+		    }// need both for non-default index
 		}
 	    }
 	}
@@ -316,20 +312,15 @@ console.log(Cani.user);
 
 // querying arrays
 
-// also, look in options for different operators?
-
 	    if(ff in schema.fields) type = schema.fields[ff];
 	    if(['S','N'].indexOf(type) === -1) continue;
 
 	    var subpack = {}
 	    subpack[type] = query[ff];
-// write hash or range here (both req for index other than default)
+// write ONLY hash or range here (both req for index other than default)
 // pull operators here?
 	    if(query[ff] !== '') pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [subpack] };
 	}
-
-	// keyconditions has to include at least the hash key (which we know we have)
-	// if present it will also include the range key
 
 	dy.query(pack, function(err, res){
 	    //defer promise
