@@ -29,6 +29,8 @@ Cani.doc = (function(doc){
 
 	if(provider === 'fb') webCredPack.ProviderId = 'graph.facebook.com';
 	AWS.config.credentials = new AWS.WebIdentityCredentials(webCredPack);
+
+// there's a bug sometimes which I think is caused by facebook token failure, but proof is elusive!
 console.log('AWS.conf.cred',AWS.config.credentials);
 console.log('webcredpack',webCredPack);
 console.log(Cani.user);
@@ -61,6 +63,12 @@ console.log(Cani.user);
     } );
 
     // expose save and load functions
+
+//------------------------------------------------------------------------------------------
+    doc.write = function(type){
+	// in cases where default options are non-EQ queries
+	return '';
+    };
 
 //------------------------------------------------------------------------------------------
     doc.save = function(schemaName, query, options){
@@ -178,7 +186,9 @@ console.log(Cani.user);
 	if(!options) options = {};
 	if(!query) query = {};
 // maybe put something in here to kill requests before booting is done
-// put option for "all possible queries? to load from all tables possible
+// put option for "all possible tables? to load from all tables possible
+
+// loop through query, if string or number, leave. if object -> unpack conditions and values
 
 	var indexName;
 	var tableName;
@@ -285,6 +295,7 @@ console.log(Cani.user);
 	if((typeof ctable === 'undefined')||(typeof cindex === 'undefined')){
 	    // if we don't have a table or index here, throw a reasonably worded error
 	    // message (tell them to check the config file or the doc.load call)
+// use a scan instead
 	    console.log('couldnt determine table to load docs from. check the doc.load call and the config file');
 	}
 	// that shit is ugly like a penguin's anus at feeding time!
@@ -312,8 +323,9 @@ console.log(Cani.user);
 
 	    var subpack = {}
 	    subpack[type] = query[ff];
-
-	    if(query[ff] !== '') pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [subpack] }
+// write hash or range here (both req for index other than default)
+// pull operators here?
+	    if(query[ff] !== '') pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [subpack] };
 	}
 
 	// keyconditions has to include at least the hash key (which we know we have)
@@ -321,7 +333,10 @@ console.log(Cani.user);
 
 	dy.query(pack, function(err, res){
 	    //defer promise
-	    if(err) console.log(err);
+	    if(err){
+		console.log(err);
+		deferred.reject(err);
+	    }
 
 	    //unpack the response
 	    var pon = [];

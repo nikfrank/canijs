@@ -37,13 +37,16 @@ Cani.core = (function(core){
 	if(typeof note[asset] === 'undefined') note[asset] = [];
 	note[asset].push(tino);
 	// in order to achieve multi-asset casting, use the affirmation system
-	// ie, when something loads, affirm. to wait on something, confirm
+	// ie, when something loads, affirm. to wait on something, confirm().then
     };
 
     var assets = {};
     core.assets = assets;
 
-    core.confirm = function(asset){
+    core.confirm = function(asset, prefix){
+
+	if(!prefix) prefix = 'confirm';
+
 	var deferred = Q.defer();
 
 	if(typeof asset === 'string'){
@@ -52,9 +55,9 @@ Cani.core = (function(core){
 	    }else{
 		// register note for confirmation
 		if(typeof note['confirm: '+asset] === 'undefined'){
-		    note['confirm: '+asset] = [];
+		    note[prefix+': '+asset] = [];
 		}
-		core.on('confirm: '+asset, function(){
+		core.on(prefix+': '+asset, function(){
 		    deferred.resolve(assets[asset]);
 		});
 	    }
@@ -92,21 +95,24 @@ Cani.core = (function(core){
 	}
     };
 
+    core.disconfirm = function(asset){
+	return core.confirm(asset, 'defirm');
+    };
+
     core.affirm = function(asset, module){
 	if(!(asset in assets)) assets[asset] = module;
 	core.cast('confirm: '+asset, true);
     };
 
     core.defirm = function(asset, params){
+// call the module's defirmation handler
 	if(assets.indexOf(asset)>-1) delete assets[asset];
+// check that this doesn't delete the entire module
 	core.cast('defirm: '+asset, true, params);
     };
 
-
-
     core.boot = function(conf){
 	// any config requiring something else to register on that thing's cast
-
 	// also, if the config file were to determine boot, this would be the place to read that
 
 	config = conf;

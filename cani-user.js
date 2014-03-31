@@ -45,8 +45,9 @@ Cani.user = (function(user){
 			FB.login();
 		    } else {
 			//FB.login();
+			Cani.core.defirm('fb');
 			alert('logged out');
-			location.reload();
+			//location.reload();
 		    }
 		});
 	    };

@@ -91,6 +91,8 @@ catchies:
 
 make sure to $scope.$apply() in a .then from a promise
 
+permission has to be set to arn::yada-yada/tableName* for indices
+make sure to prefix tables named the same (ie HP-party, HP-private-party) to avoid problems
 
 ------------------------------------
 boot sequence:
