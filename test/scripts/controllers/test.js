@@ -5,6 +5,17 @@ angular.module('canijstest')
 
 	var copy = function(t){return JSON.parse(JSON.stringify(t));};
 
+
+	Cani.core.confirm('youtube').then(function(yt){
+	    yt.search('lights techno').then(function(pon){
+		console.log(pon);
+console.log('http://img.youtube.com/vi/');
+	    });
+	});
+
+
+//-------------------dynamo testing-------------------
+
 	$scope.stypes = [{txt:'number',val:'S'},
 			{txt:'string',val:'S'},
 			{txt:'boolean',val:'B'}];

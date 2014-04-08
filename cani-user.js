@@ -68,12 +68,16 @@ Cani.user = (function(user){
 	// this requires some meta tags in the markup, also a #gSigninWrapper for the button
 	if(typeof conf.user.google !== 'undefined') if(typeof conf.user.google.App !== 'undefined'){
 
-	    var po = document.createElement('script');
-	    po.type = 'text/javascript'; po.async = true;
-	    po.src = 'https://apis.google.com/js/client:plusone.js?onload=render';
-	    var s = document.getElementsByTagName('script')[0];
-	    s.parentNode.insertBefore(po, s);
+	    if(typeof window.gapi === 'undefined'){
+		window.gapi = {};
+		var po = document.createElement('script');
+		po.type = 'text/javascript'; po.async = true;
+		po.src = 'https://apis.google.com/js/client:plusone.js?onload=Cani.core.confirm("gapi")';
+		var s = document.getElementsByTagName('script')[0];
+		s.parentNode.insertBefore(po, s);
+	    }
 
+	    var prevggcb = window.googleSigninCallback;
 	    window.googleSigninCallback = function(authResult) {
 		if (authResult['status']['signed_in']) {
 		    // Update the app to reflect a signed in user
@@ -86,8 +90,6 @@ Cani.user = (function(user){
 
 		    user.google.accessToken = authResult.id_token;
 		    // naming consistency... don't be fooled by the "access_token" field. he does nothing
-		    //dbconfig('google');
-
 		    // grab the google profile
 		    gapi.client.load('plus','v1', function(){
 			var request = gapi.client.plus.people.get({
@@ -95,7 +97,6 @@ Cani.user = (function(user){
 			});
 			request.execute(function(resp) {
 			    user.google.profile = resp;
-			    //Cani.core.cast('google', true, conf);
 			    Cani.core.affirm('google', user);
 			});
 		    });
@@ -103,6 +104,8 @@ Cani.user = (function(user){
 		} else {
 		    console.log('Sign-in state: ' + authResult['error']);
 		}
+
+		if(prevggcb) prevggcb(authResult);
 	    };
 
 
