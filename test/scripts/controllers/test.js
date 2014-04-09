@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('canijstest')
-    .controller('TestCtrl', function ($scope) {
+    .controller('TestCtrl', function ($scope, $firebase) {
 
 	var copy = function(t){return JSON.parse(JSON.stringify(t));};
 
