@@ -24,15 +24,12 @@ Cani.youtube = (function(youtube){
 	    if(request.readyState === 4){
 
 		var pon = JSON.parse(request.response);
-console.log(pon);
-
-
 		var ret = [];
 		for(var i = pon.feed.entry.length; i-->0;){
 		    ret.unshift(pon.feed.entry[i].content.src.split('?')[0].substr(26));
 		}
 
-		deferred.resolve(ret);
+		deferred.resolve({yids:ret, response:pon);
 	    }
         }
 	request.onreadystatechange = ensureReadiness;
