@@ -26,10 +26,20 @@ Cani.youtube = (function(youtube){
 		var pon = JSON.parse(request.response);
 		var ret = [];
 		for(var i = pon.feed.entry.length; i-->0;){
-		    ret.unshift(pon.feed.entry[i].content.src.split('?')[0].substr(26));
-		}
+		    var ent = pon.feed.entry[i];
+		    var retent = {hash: ent.content.src.split('?')[0].substr(26),
+				  author: ent.author[0].name.$t,
+				  title: ent.title.$t,
+				  duration: ent.media$group.media$content[0].duration,
+				  link:ent.content.src
+				 };
+		    retent.imgsrc = 'http://img.youtube.com/vi/'+retent.hash+'/1.jpg';
 
-		deferred.resolve({yids:ret, response:pon);
+		    retent.time = (new Date(null, null, null, null, null, retent.duration)).toTimeString().split(' ')[0];
+		    ret.unshift(retent);
+		    
+		}
+		deferred.resolve(ret);
 	    }
         }
 	request.onreadystatechange = ensureReadiness;
