@@ -101,6 +101,9 @@ console.log(Cani.user);
 	    if(ff in schema.fields){
 		// if in schema write to pack with type
 		pack[ff] = {};
+
+		if(pack[ff][schema.fields[ff]] === 'N') query[ff] = ''+query[ff];
+
 		pack[ff][schema.fields[ff]] = query[ff];
 	    }else{
 		// do the old style type guessing
@@ -108,6 +111,8 @@ console.log(Cani.user);
 		if(type === 'U') continue; // shouldn't happen though
 		    
 		pack[ff] = {};
+
+		if(type === 'N') query[ff] = ''+query[ff];
 
 		//if it's an object, we may have to stringify it.
 		if(type === 'O'){
