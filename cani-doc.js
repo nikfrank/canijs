@@ -73,6 +73,8 @@ console.log(Cani.user);
 //------------------------------------------------------------------------------------------
     doc.save = function(schemaName, query, options){
 
+	if(typeof query === 'undefined') query = {};
+
 	var deferred = Q.defer(); // deferred.reject to do an error
 
 	var schema = schemas[schemaName];
@@ -161,8 +163,13 @@ console.log(Cani.user);
 	    var hash = schema.tables[table].hashKey;
 	    var range = schema.tables[table].rangeKey;
 
-	    if((typeof query[hash] === 'undefined')||(typeof query[range] === 'undefined')) delete tablesTC[tt];
+	    if((typeof query[hash] === 'undefined')||(typeof query[range] === 'undefined')) delete tablesTC[table];
 	}
+
+	var nt = 0;
+	for(var tt in tablesTC) nt++;
+	
+	if(nt === 1) for(var tt in tablesTC) tableName = tt;
 
 	if(!tableName){
 	    deferred.reject('must indicate table for save');
