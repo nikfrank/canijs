@@ -45,7 +45,7 @@ console.log(Cani.user);
 
 	    doc.tables = data.TableNames;
 
-	    
+
 	    // finally done booting dynamo
 	    Cani.core.affirm('dy', doc);
 
