@@ -138,10 +138,21 @@ Cani.user = (function(user){
 
     user.write = function(type){
 	// return just the value. the database handler will package it
+	var cuser;
+	var pro;
+
+	if(user.fb){
+	    cuser = user.fb;
+	    pro = 'fb';
+	}else{
+	    cuser = user.google;
+	    pro = 'google';
+	}
+
 	if(type === 'id'){
-	    return ('fb||'+user.fb.profile.id);
+	    return (pro+'||'+cuser.profile.id);
 	}else if(type === 'id+date'){
-	    return ('fb||'+user.fb.profile.id+'##'+(new Date()).getTime());
+	    return (pro+'||'+cuser.profile.id+'##'+(new Date()).getTime());
 	}
     };
 

@@ -7,18 +7,35 @@ clean up offer/answer host/client
 
 
 finish saving docs, clean up and use in housepartie
-
-split modules into various files -> use requirejs to load modules, document
-
-test configing from split files
-
-- handle errors in promises reasonably (deferred.reject)
-
+=======
 more query options (alltables, other operators)
 
 -> scan when no index is present
 
-rewrite on s3, dy+s3 versioning
+- rewrite on s3, dy+s3 versioning
+- incorporate a "versioning" dynamo table for all S3 files
+
+- module for fb graph api
+
+-----------------------------
+Doing:
+
+- loading file into DOM
+
+- graph api module
+
+-----------------------------
+Need to do soon:
+
+- mime types for text file uploads to s3
+
+--------------------------------------------------------------
+
+coninuing work:
+
+
+- endtoend unit testing through angular -> just use angular. no bs. comment well.
+
 
 =======
 write documentation on how to use it
@@ -71,24 +88,10 @@ write basic schema options, examples
 
 - destringify all objects noted on load
 
+- finish saving docs, clean up and use in housepartie
 
------------------------------
-Doing:
+- split modules into various files
 
-- loading file into DOM
-
-- incorporate a "versioning" dynamo table for all S3 files
-
--- once save&load/doc&file all work, make save/load convenience functions for versioned docs
-
------------------------------
-Need to do soon:
-
-- mime types for text file uploads to s3
-
-- endtoend unit testing through angular -> just use angular. no bs. comment well.
-
---------------------------------------------------------------
 --------------------------------------------------------------
 
 catchies:
