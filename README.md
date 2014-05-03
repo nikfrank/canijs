@@ -2,6 +2,10 @@ Overall:
 
 -----
 
+rtc -> finish connect process, bind send/receive, fix host/client socket
+clean up offer/answer host/client
+
+
 finish saving docs, clean up and use in housepartie
 
 split modules into various files -> use requirejs to load modules, document

@@ -4,6 +4,8 @@ angular.module('canijstest', ['firebase'])
   .config(['$routeProvider', function ($routeProvider) {
     $routeProvider
       .when('/', {templateUrl: 'views/test.html', controller: 'TestCtrl'})
+      .when('/ggdrive', {templateUrl: 'views/ggdrive.html', controller: 'GgCtrl'})
+      .when('/rtc', {templateUrl: 'views/rtc.html', controller: 'RtcCtrl'})
       .otherwise({redirectTo: '/'});
   }])
 .directive('compile', function($compile) {
