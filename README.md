@@ -20,12 +20,30 @@ more query options (alltables, other operators)
 -----------------------------
 Doing:
 
+- indexeddb
+-----------
+
+write a simple schema
+write write and read actions
+
+the consideration of keys to use is as follows:
+
+if a key is provided, it will be used
+the key may be a uid used similarly on dynamo
+you can make it out of a hash+range also
+
+if not, the auto key will be used, as it is assumed
+that you are handling keys/compatibility.
+
+--------------------------
 - loading file into DOM
 
 - graph api module
 
 -----------------------------
 Need to do soon:
+
+- error messages
 
 - mime types for text file uploads to s3
 
@@ -36,6 +54,7 @@ coninuing work:
 
 - endtoend unit testing through angular -> just use angular. no bs. comment well.
 
+- mocha tests (might need phantomjs
 
 =======
 write documentation on how to use it

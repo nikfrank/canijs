@@ -10,6 +10,7 @@ Cani.core.boot({
 	aws:{},
 	noauth:{}
     },
+
     doc:{
 	schemas:{ // use this to make tables from AWS CLI?
 	    lesson:{
@@ -54,11 +55,38 @@ Cani.core.boot({
 	    google:'arn:aws:iam::735148112467:role/canijstestgoogle'
 	}
     },
+
     file:{
 	schemas:{'default':'canijs-test'},
 	IAMRoles:{
 	    noauth:'arn:aws:iam::735148112467:role/canijstest',
 	    fb:'arn:aws:iam::735148112467:role/caijs-test-s3'
+	}
+    },
+
+    indexeddb:{
+	schemas:{
+	    links:{
+		fields:{
+
+// all these schemae need are key path options and indices.
+// any data conversion on upgrade needed should be codified here.
+		    docType:'S',
+		    owner:'S',
+		    docId:'S'
+		},
+		defaults:{
+		    owner:{user:'id'},
+		    docType:'lesson'
+		},
+		saveDefaults:{
+		    docId:{user:'id+date'},
+		    owner:{user:'id'},
+		    docType:'lesson'
+		},
+		tables:{
+		}
+	    }
 	}
     }
 });
