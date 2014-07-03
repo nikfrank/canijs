@@ -35,6 +35,10 @@ you can make it out of a hash+range also
 if not, the auto key will be used, as it is assumed
 that you are handling keys/compatibility.
 
+---
+
+promises for idb
+
 --------------------------
 - loading file into DOM
 

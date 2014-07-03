@@ -21,16 +21,18 @@ Cani.indexeddb = (function(indexeddb){
 
     var readwrite = IDBTransaction.READ_WRITE || 'readwrite';
 
+    var schemas;
+
 
 // think of a way of handling the various schemae - should be simple
    // so long as the schemae are confd to the db
 // 
 
     var IDBCONF = function(conf, provider){
-console.log(conf);
-	var schemas = conf.indexeddb.schemas;
 
-	var opendbrequest = window.indexedDB.open("localstuff", 1);
+	schemas = conf.indexeddb.schemas;
+
+	var opendbrequest = window.indexedDB.open(conf.idbname, conf.idbversion);
 
 	opendbrequest.onerror = function(event) {
 	    // error creating db
@@ -102,14 +104,47 @@ console.log(db.objectStoreNames);
 	// use the schema description, create a readwrite transaction request
 	// resolve the promise onsuccess
 	// error the promise on error
-console.log('save');
+	console.log('save');
+
+	var schema = schemas[schemaName];
+
+	var transaction = db.transaction([schemaName], 'readwrite');
 	
+	// report on the success of opening the transaction
+	transaction.oncomplete = function(event) {
+            console.log('complete save', event);
+	};
+
+	transaction.onerror = function(event) {
+            console.log('err save', event);
+	};
+
+	var objectStore = transaction.objectStore(schemaName);
+
+	var request = objectStore.add(data);        
+
+        request.onsuccess = function(event) {
+	    console.log('saved', event);
+	};
+
     };
 
     indexeddb.load = function(schemaName, query){
 	// use the schema description, create a readonly transaction request
 
-console.log('load');
+	console.log('load');
+
+	var schema = schemas[schemaName];
+
+	var objectStore = db.transaction(schemaName).objectStore(schemaName);
+	objectStore.openCursor().onsuccess = function(event) {
+	    var cursor = event.target.result;
+
+            if(cursor) {
+		console.log('loaded item ', cursor);
+	    }
+	};
+
     };
 
     Cani.core.on('config: indexeddb noauth', function(conf){ IDBCONF(conf, 'noauth');} );

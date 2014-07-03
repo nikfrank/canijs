@@ -5,10 +5,13 @@ angular.module('canijstest')
 
       // run tests on the idb singleton?
 
-console.log('waiting...');
+      console.log('waiting...');
 
       Cani.core.confirm('idb').then(function(idb){
 	  console.log('confirmed', idb);
+
+	  $scope.load = idb.load;
+	  $scope.save = idb.save;
       });
 
 });

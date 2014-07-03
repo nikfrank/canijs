@@ -65,8 +65,12 @@ Cani.core.boot({
     },
 
     indexeddb:{
+	idbname:'idbtest',
+	idbversion:2,
 	schemas:{
 	    links:{
+		keyPath:'link_hash',
+		indices:[{tag:'person_hash', unique:false}, {tag:'place_hash',unique:false}],
 		fields:{
 
 // all these schemae need are key path options and indices.
@@ -83,8 +87,6 @@ Cani.core.boot({
 		    docId:{user:'id+date'},
 		    owner:{user:'id'},
 		    docType:'lesson'
-		},
-		tables:{
 		}
 	    }
 	}
