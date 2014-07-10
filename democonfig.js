@@ -66,29 +66,47 @@ Cani.core.boot({
 
     indexeddb:{
 	idbname:'idbtest',
-	idbversion:2,
+	idbversion:5,
+// all these schemae need are key path options and indices.
+
 	schemas:{
 	    links:{
 		keyPath:'link_hash',
-		indices:[{tag:'person_hash', unique:false}, {tag:'place_hash',unique:false}],
+		indices:{person_hash:{unique:false},
+			 places:{unique:false, multiEntry:true},
+			 last_seen:{unique:false}
+			},
 		fields:{
-
-// all these schemae need are key path options and indices.
-// any data conversion on upgrade needed should be codified here.
-		    docType:'S',
-		    owner:'S',
-		    docId:'S'
+		    // any data conversion on upgrade needed should be codified here.
+		    // ie last_seen:{2:'last', 1:{tag:'last', map:function}}
 		},
 		defaults:{
-		    owner:{user:'id'},
-		    docType:'lesson'
+		    // this is searching defaults
 		},
 		saveDefaults:{
-		    docId:{user:'id+date'},
-		    owner:{user:'id'},
-		    docType:'lesson'
+		    last_seen:'now()'
+		    // use this with cani-user to save self-data
+		}
+	    },
+
+	    msgs:{
+		keyPath:'msg_hash',
+		indices:{from:{unique:false},
+			 to:{unique:false, multiEntry:true},
+			 sent:{unique:false}
+			},
+		fields:{
+		    // any data conversion on upgrade needed should be codified here.
+		    // ie last_seen:{2:'last', 1:{tag:'last', map:function}}
+		},
+		defaults:{
+		    // this is searching defaults
+		},
+		saveDefaults:{
+		    // use this with cani-user to save self-data
 		}
 	    }
+
 	}
     }
 });

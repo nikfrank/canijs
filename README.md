@@ -39,6 +39,10 @@ that you are handling keys/compatibility.
 
 promises for idb
 
+indices from config
+
+various save and load methods
+
 --------------------------
 - loading file into DOM
 

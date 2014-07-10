@@ -12,6 +12,25 @@ angular.module('canijstest')
 
 	  $scope.load = idb.load;
 	  $scope.save = idb.save;
+
+
+	  // gen msg hash, insert msgs, then load them back
+
+	  $scope.numsg = function(text){
+	      var msg = {from:'',to:'',sent:(new Date()), text:text, msg_hash:(new Date())};
+
+	      idb.save('msgs', msg).then(function(res){
+		  console.log(res);
+	      });
+	  };
+
+	  $scope.loadmsg = function(){
+	      idb.load('msgs').then(function(res){
+		  console.log(res);
+	      });
+	  };
+
+
       });
 
 });
