@@ -33,4 +33,13 @@ angular.module('canijstest')
 
       });
 
+      Cani.core.confirm('fbgraph').then(function(fbgraph){
+
+	  $scope.fbtest = function(){
+	      fbgraph.searchPages().then(function(res){
+		  console.log(res);
+	      });
+	  };
+      });
+
 });
