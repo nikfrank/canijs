@@ -4,6 +4,7 @@ canijs docs
 quickstart
 ---
 
+import q.js
 import cani-core.js
 
     Cani.core.confirm(moduleOrModules).then(function(mOrMs){...});
