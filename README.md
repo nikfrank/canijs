@@ -36,6 +36,10 @@ coninuing work:
 
 - endtoend unit testing through angular -> just use angular. no bs. comment well.
 
+-> mocha tests
+
+-> load selected fields options
+
 
 =======
 write documentation on how to use it

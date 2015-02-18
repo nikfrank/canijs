@@ -31,23 +31,11 @@ Cani.rtc = (function(rtc){
 
     var dataChannel;
 
-
     // ondatachannel (datachannel) -> set handlers
-    console.log('create ondatachannel handler');
     pc.ondatachannel = function(datachannel){
-	console.log('datachan');
-	console.log(datachannel);
 	dataChannel = datachannel.channel;
 	createDataChannel(false);
     };
-
-    pc.onconnection = function(){
-	console.log('connection');
-    };
-
-    pc.oniceconnectionstatechange = function(){
-	console.log(pc);
-    }
 
     var remote = false;
     var pendingIce = false;
@@ -59,12 +47,7 @@ Cani.rtc = (function(rtc){
 	socket.emit('icecandidate', {candidate:e.candidate, room:'party'});
     };
 
-    pc.onnegotiationneeded = function(par){
-	console.log('neg need ',par);
-    }
-
     socket.on('icecandidate', function(cand){
-console.log('cand ', cand);
 	if(!cand) return;
 	if(!remote) pendingIce = cand;
 	else{
@@ -75,13 +58,15 @@ console.log('cand ', cand);
 
     var sender;
 
+// rtc.createNode = function(roomName){};
+var roomName;
     rtc.offer = function(){
 	createDataChannel(true);
 	pc.createOffer(function (offer) {
 
 	    pc.setLocalDescription(offer);
 
-	    socket.emit('offer', {offer:offer, room:'party'});
+	    socket.emit('offer', {offer:offer, room:roomName||'party'});
 
 	    socket.on('answer', function(answer){
 		if(!answer) return;
@@ -135,7 +120,6 @@ console.log('cand ', cand);
     function createDataChannel(make){
 	if(make) dataChannel = pc.createDataChannel("jsonchannel", {reliable: false});
 
-console.log('opening connection');
 	dataChannel.onerror = function (error) {
 	    console.log("Data Channel Error:", error);
 	};
@@ -159,17 +143,23 @@ console.log('opening connection');
 	};
 
     }
+    
+    // rtc.setSignalChannel({...})
+
+    // rtc.listHubs(){ return [...];}
+    // rtc.createHub().then()
+    // rtc.onOffer = function(offer){}
+    // rtc.onRemoteConnection = function(peer){}
 
 
+    // rtc.connectToHub(hubId).then(successFn, rejectFn)
+    // rtc.hub[id].onmessage = function(message){}
 
-    var CONF = function(conf, provider){
-	// use heroku websocket server as a signal channel
+    // rtc.disconnectFromHub(hubId).then()
 
-	// status
-	Cani.core.cast('rtc', true);
-    };
+    //... those for dataChannels
+    //... then for video/audio
 
-    Cani.core.on('dy', function(conf){ CONF(conf, 'dy');} );
 
     // expose save and load functions
     Cani.core.affirm('rtc', rtc);
