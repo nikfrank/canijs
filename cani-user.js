@@ -26,6 +26,7 @@ Cani.user = (function(user){
 		    cookie     : true, // enable cookies to allow the server to access the session
 		    xfbml      : true  // parse XFBML
 		});
+		Cani.core.cast('fbsingleton');
 
 		// facebook has a way to request extra permissions that should be a config option
 		FB.Event.subscribe('auth.authResponseChange', function(response) {

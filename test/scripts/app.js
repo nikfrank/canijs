@@ -1,11 +1,12 @@
 'use strict';
 
-angular.module('canijstest', ['firebase'])
+angular.module('canijstest', [])
   .config(['$routeProvider', function ($routeProvider) {
     $routeProvider
       .when('/', {templateUrl: 'views/test.html', controller: 'TestCtrl'})
       .when('/ggdrive', {templateUrl: 'views/ggdrive.html', controller: 'GgCtrl'})
       .when('/rtc', {templateUrl: 'views/rtc.html', controller: 'RtcCtrl'})
+      .when('/idbtest', {templateUrl: 'views/idbtest.html', controller: 'IdbtestCtrl'})
       .otherwise({redirectTo: '/'});
   }])
 .directive('compile', function($compile) {

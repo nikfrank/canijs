@@ -10,6 +10,7 @@ Cani.core.boot({
 	aws:{},
 	noauth:{}
     },
+
     doc:{
 	schemas:{ // use this to make tables from AWS CLI?
 	    lesson:{
@@ -54,11 +55,58 @@ Cani.core.boot({
 	    google:'arn:aws:iam::735148112467:role/canijstestgoogle'
 	}
     },
+
     file:{
 	schemas:{'default':'canijs-test'},
 	IAMRoles:{
 	    noauth:'arn:aws:iam::735148112467:role/canijstest',
 	    fb:'arn:aws:iam::735148112467:role/caijs-test-s3'
+	}
+    },
+
+    indexeddb:{
+	idbname:'idbtest',
+	idbversion:5,
+// all these schemae need are key path options and indices.
+
+	schemas:{
+	    links:{
+		keyPath:'link_hash',
+		indices:{person_hash:{unique:false},
+			 places:{unique:false, multiEntry:true},
+			 last_seen:{unique:false}
+			},
+		fields:{
+		    // any data conversion on upgrade needed should be codified here.
+		    // ie last_seen:{2:'last', 1:{tag:'last', map:function}}
+		},
+		defaults:{
+		    // this is searching defaults
+		},
+		saveDefaults:{
+		    last_seen:'now()'
+		    // use this with cani-user to save self-data
+		}
+	    },
+
+	    msgs:{
+		keyPath:'msg_hash',
+		indices:{from:{unique:false},
+			 to:{unique:false, multiEntry:true},
+			 sent:{unique:false}
+			},
+		fields:{
+		    // any data conversion on upgrade needed should be codified here.
+		    // ie last_seen:{2:'last', 1:{tag:'last', map:function}}
+		},
+		defaults:{
+		    // this is searching defaults
+		},
+		saveDefaults:{
+		    // use this with cani-user to save self-data
+		}
+	    }
+
 	}
     }
 });
