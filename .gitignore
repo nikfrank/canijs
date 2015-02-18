@@ -5,3 +5,4 @@ dist
 *~
 aws*
 q.js
+test/mocha/
