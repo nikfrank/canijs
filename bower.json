@@ -1,0 +1,27 @@
+{
+  "name": "canijs",
+  "version": "0.1.0",
+  "homepage": "https://github.com/nikfrank/canijs",
+  "authors": [
+    "nik frank <nikbfrank@gmail.com>"
+  ],
+  "description": "front end apis made easy",
+  "main": "cani.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "cani",
+    "js",
+    "client",
+    "api"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
