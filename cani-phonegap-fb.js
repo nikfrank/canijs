@@ -15,7 +15,7 @@ Cani.phonegapFb = (function(phonegapFb){
 
     phonegapFb.login = function(permissions){
 	var def = Q.defer();
-	phonegapFb.plugin.login(permissions, def.resolve, def.reject);
+	phonegapFb.plugin.login(permissions||[], def.resolve, def.reject);
 	return def.promise;
     };	
 
