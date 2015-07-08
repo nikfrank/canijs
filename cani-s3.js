@@ -27,7 +27,7 @@ Cani.s3 = (function(s3){
 
     s3.upload = function(bucket, key, fileData, credentials){
 	var def = Q.defer();
-	sss.upload({Bucket: bucket, Key: key, Body: fileData}, function(err,, data){
+	sss.upload({Bucket: bucket, Key: key, Body: fileData}, function(err, data){
 	    err?
 		def.reject(err):
 		def.resolve(data);
