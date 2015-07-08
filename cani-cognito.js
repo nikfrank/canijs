@@ -27,18 +27,26 @@ Cani.cognito = (function(cognito){
 		IdentityPoolId: conf.cognito.IdentityPoolId,
 		Logins:Logins
 	    };
+	    var cp = JSON.parse(JSON.stringify(credPack));
 
 
 	    AWS.config.region = conf.cognito.AWSregion;
 	    AWS.config.credentials = new AWS.CognitoIdentityCredentials(credPack);
 
 	    cog = new AWS.CognitoIdentity();
-
-	    cog.getId(credPack, function(err, data){
-		err?
-		    console.log('cog err', err):
-		    def.resolve(data);
+	    cog.getCredentialsForIdentity({
+		IdentityId:credPack.IdentityId,
+		Logins:Logins
+	    }, function(err, creds){
+		console.log(err, creds);
+		cog.getId(cp, function(err, data){
+		    err?
+			console.log('cog err', err):
+			def.resolve(data);
+		});
 	    });
+
+
 
 	    return def.promise;
 	};

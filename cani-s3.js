@@ -8,12 +8,10 @@ Cani.s3 = (function(s3){
     // expect schemas in conf.file to map saves/loads, confirm permissions properly
 
     var sss; // aws s3 singleton
+    var s3conf;
 
     var S3CONF = function(conf, provider){
-
-	sss = new AWS.S3({params: {Bucket: conf.s3.Bucket } });
-	sss.Bucket = conf.s3.Bucket;
-
+	s3conf = conf;
 	// is there a list available buckets function? idk
 	Cani.core.affirm('s3', s3);
     };
@@ -23,11 +21,17 @@ Cani.s3 = (function(s3){
     // expose save and load functions
 
     
+    s3.init = function(credentials){
+	// only do this AFTER the credentials come in.
+	sss = new AWS.S3({params: {Bucket: s3conf.s3.Bucket } });
+	sss.Bucket = s3conf.s3.Bucket;	
+    };
 
 
-    s3.upload = function(bucket, key, fileData, credentials){
+    s3.upload = function(bucket, key, fileData){
 	var def = Q.defer();
-	sss.upload({Bucket: bucket, Key: key, Body: fileData}, function(err, data){
+console.log(AWS.config);
+	sss.upload({Bucket: bucket||s3conf.s3.Bucket, Key: key, Body: fileData}, function(err, data){
 	    err?
 		def.reject(err):
 		def.resolve(data);
