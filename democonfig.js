@@ -1,5 +1,9 @@
 Cani.core.boot({
 
+    s3:{
+	Bucket:''
+    },
+
     cognito:{
 	provider:'fb',
 	IdentityPoolId:'POOL ID FROM AWS',
