@@ -72,7 +72,6 @@ console.log(Cani.user);
 
 //------------------------------------------------------------------------------------------
     doc.save = function(schemaName, query, options){
-
 	if(typeof query === 'undefined') query = {};
 
 	var deferred = Q.defer(); // deferred.reject to do an error

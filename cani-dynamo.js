@@ -27,9 +27,8 @@ Cani.dynamo = (function(dynamo){
     // dynamo boot hook
     Cani.core.on('config: dynamo', DYCONF);
 
-
     dynamo.init = function(){
-	dy = new AWS.DynamoDB(conf.dynamo.awsConfigPack);
+	dy = new AWS.DynamoDB(dyconf.dynamo.awsConfigPack);
 
 	dy.listTables(function(err, data){
 	    if(err){
@@ -40,6 +39,7 @@ Cani.dynamo = (function(dynamo){
 	    dynamo.tables = data.TableNames;
 	    Cani.core.affirm('dynamo', dynamo);
 
+console.log('dytables', dynamo.tables);
 	    // affirm dy.table foreach table
 	    for(var i=dynamo.tables.length; i-->0;) Cani.core.affirm('dynamo.'+dynamo.tables[i], dynamo);
 
@@ -67,7 +67,7 @@ Cani.dynamo = (function(dynamo){
 	// load the query into an AWS Item pack
 	var pack = {};
 
-	var tableName = schema.table.split('/')[1]; // MIGHT FUCK UP
+	var tableName = schema.table.arn.split('/')[1]; // MIGHT FUCK UP
 
 	for(var ff in query){
 	    if(query[ff] === '') continue; //  no blank strings allowed
@@ -79,7 +79,7 @@ Cani.dynamo = (function(dynamo){
 		// if in schema write to pack with type
 		pack[ff] = {};
 
-		if(pack[ff][schema.fields[ff]] === 'N') query[ff] = ''+query[ff];
+		if(schema.fields[ff] === 'N') query[ff] = ''+query[ff];
 
 		pack[ff][schema.fields[ff]] = query[ff];
 
@@ -128,137 +128,37 @@ Cani.dynamo = (function(dynamo){
 
 //------------------------------------------------------------------------------------------
     dynamo.load = function(schemaName, query, options){
-
-	var deferred = Q.defer(); // deferred.reject to do an error
+	var def = Q.defer();
 
 	if(!options) options = {};
 	if(!query) query = {};
-// maybe put something in here to kill requests before booting is done
-// put option for "all possible tables? to load from all tables possible
-
-// loop through query, if string or number, leave. if object -> unpack conditions and values
-
-	var indexName;
-	var tableName;
 
 	var schema = schemas[schemaName];
 
-	// right away supplement the query with the schema defaults if proper
+	var table = schema.table;
+	var tableName = table.arn.split('/')[1];
+
+	var indexName;
+	if(indexName = options.index)
+	    if(table.indices.indexOf(indexName) === -1)
+		throw 'index '+indexName+' not available';
+
+	if(dynamo.tables.indexOf(tableName) === -1) throw 'table '+tableName+' not available';
+	
+	// that shit is ugly like a penguin's anus at feeding time!
 
 	var pack = {};
 
-	if(options.index) indexName = options.index;
-	if(options.table) tableName = options.table;
+	pack.TableName = tableName;
+	// pack.IndexName left empty for default?
 
-	var tablesTC = schema.tables;
-	if(tableName){
-	    tablesTC = {};
-	    tablesTC[tableName] = schema.tables[tableName];
-	}
-
-	// filter the tables to check based on the options. still run loop to check indices
-	// filter the tables based on what is available
-	for(var tt in tablesTC) if(dynamo.tables.indexOf(tt) === -1) delete tablesTC[tt];
-
-	// if options.table isn't permitted throw a nicely worded message about permissions by IAMRoles, confirmations
-
-	// fill in default fields from schema
-	for(var ff in schema.defaults){
-	    if(typeof schema.defaults[ff] === 'string'){
-		if(typeof query[ff] === 'undefined') query[ff] = schema.defaults[ff];
-	    }else if(typeof schema.defaults[ff] === 'object'){
-		for(var mod in schema.defaults[ff]){
-		    if(typeof query[ff] === 'undefined') query[ff] = Cani[mod].write(schema.defaults[ff][mod]);
-		}
-	    }
-	}
-
-	// here we may have many tables and no indication which to use.
-	// pick the first one who has an index we can use
-	// quit if we find one with range and hash
-	
-	var ctable;
-	var cindex;
-
-// if(options.allTables) keep track of all possible queries, then make all of them
-	// this finds a table-index pair we can use.
-//make sure we have hash+range for index query
-	for(var table in tablesTC){
-	    if(indexName){
-		//check that this table has that index. if it does break
-		if(indexName === 'default'){
-		    // check that we have the hash key... if we don't we can still check other tables
-		    if((typeof query[tablesTC[table].hashKey] !== 'undefined')&&(typeof query[tablesTC[table].rangeKey] !== 'undefined')){
-			ctable = table;
-			cindex = 'default';
-			break;
-		    }else if(typeof query[tablesTC[table].hashKey] !== 'undefined'){
-			ctable = table;
-			cindex = 'default';
-		    }
-		}else if(tablesTC[table].indices.indexOf(indexName) > -1){
-		    // check that we have the hash key... if we don't, throw an error right away
-		    var hashKey = indexName.split('-')[0];
-		    var rangeKey = indexName.split('-')[1];
-		    if((typeof query[hashKey] !== 'undefined')&&(typeof query[rangeKey] !== 'undefined')){
-			ctable = table;
-			cindex = indexName;
-			break;
-		    }// need both for an index
-		}
-		// the index is in another table. if this is the last one it'll throw an error after the loop
-		continue;
-	    }else{
-		// check this table's default index
-		if((typeof query[tablesTC[table].hashKey] !== 'undefined')&&(typeof query[tablesTC[table].rangeKey] !== 'undefined')){
-		    ctable = table;
-		    cindex = 'default';
-		    break;
-		}else if(typeof query[tablesTC[table].hashKey] !== 'undefined'){
-		    ctable = table;
-		    cindex = 'default';
-		}
-
-		// check the other indices
-		var pind = tablesTC[table].indices;
-
-		for(var i=0; i<pind.length; ++i){
-		    var hashKey = pind[i].split('-')[0];
-		    var rangeKey = pind[i].split('-')[1];
-
-		    if((typeof query[hashKey] !== 'undefined')&&(typeof query[rangeKey] !== 'undefined')){
-			ctable = table;
-			cindex = pind[i];
-			break;
-		    }// need both for non-default index
-		}
-	    }
-	}
-	
-	if((typeof ctable === 'undefined')||(typeof cindex === 'undefined')){
-	    // if we don't have a table or index here, throw a reasonably worded error
-	    // message (tell them to check the config file or the dynamo.load call)
-// use a scan instead
-	    console.log('couldnt determine table to load dynamos from. check the dynamo.load call and the config file');
-	}
-	// that shit is ugly like a penguin's anus at feeding time!
-
-	pack.TableName = tableName = ctable;
-	if(cindex !== 'default') pack.IndexName = indexName = cindex;
-
-	var table = schema.tables[ctable];
-
-	// here we know that there is a table and index which we can use properly.
-	// fill the KeyConditions with values from query index (which has been supplemented by the schema defaults)
+	// fill the KeyConditions with values from query index
 	pack.KeyConditions = {};
 
 	for(var ff in query){
-	    // this will let you override default with empty
-
 	    var type = (typeof query[ff])[0].toUpperCase();
 
-// querying arrays
-
+// querying arrays? later
 	    if(ff in schema.fields) type = schema.fields[ff];
 	    if(['S','N'].indexOf(type) === -1) continue;
 
@@ -266,36 +166,29 @@ Cani.dynamo = (function(dynamo){
 	    subpack[type] = query[ff];
 // write ONLY hash or range here (both req for index other than default)
 // pull operators here?
-	    if(query[ff] !== '') pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [subpack] };
+	    if(query[ff] !== '')
+		pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [subpack] };
 	}
 
 	dy.query(pack, function(err, res){
 	    //defer promise
 	    if(err){
 		console.log(err);
-		deferred.reject(err);
+		def.reject(err);
 	    }
 
 	    //unpack the response
 	    var pon = [];
 
 	    for(var i=0; i<res.Items.length; ++i){
-
 		var itm = {};
-		for(var ff in res.Items[i]){
+		for(var ff in res.Items[i])
 		    itm[ff] = res.Items[i][ff][Object.keys(res.Items[i][ff])[0]];
-		}
-		if(typeof itm.__DESTRINGS !== 'undefined'){
-		    for(var j=0; j<itm.__DESTRINGS.length; ++j){
-			itm[itm.__DESTRINGS[j]] = JSON.parse(itm[itm.__DESTRINGS[j]]);
-		    }
-		    delete itm.__DESTRINGS;
-		}
 		pon.push(itm);
 	    }
-	    deferred.resolve(pon);
+	    def.resolve(pon);
 	});
-  	return deferred.promise;
+  	return def.promise;
     };
 
 //------------------------------------------------------------------------------------------
