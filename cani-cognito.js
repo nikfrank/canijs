@@ -46,8 +46,6 @@ Cani.cognito = (function(cognito){
 		});
 	    });
 
-
-
 	    return def.promise;
 	};
 

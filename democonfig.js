@@ -21,8 +21,9 @@ Cani.core.boot({
 	noauth:{}
     },
 
+// use this to make tables from AWS CLI?
     doc:{
-	schemas:{ // use this to make tables from AWS CLI?
+	schemas:{
 	    lesson:{
 		fields:{// ie types
 		    docType:'S',
@@ -66,11 +67,37 @@ Cani.core.boot({
 	}
     },
 
+    dynamo:{
+	schemas:{
+	    appt:{
+		fields:{
+		    geohash:'S',
+		    expiry:'N',
+		    owner:'S',
+		    price:'N'
+		},
+		table:{
+		    arn:'arn:aws:dynamodb:eu-west-1:735148112467:table/dre',
+		    hashKey:'geohash',
+		    rangeKey:'expiry',
+		    indices:[]
+		},
+		auth:'cognito'
+	    }
+	},
+	awsConfigPack:{region: 'eu-west-1'},
+	IAMRoles:{
+	    noauth:'arn:aws:iam::735148112467:role/canijstest',
+	    fb:'arn:aws:iam::735148112467:role/canijstest',
+	    google:'arn:aws:iam::735148112467:role/canijstestgoogle'
+	}
+    },
+
     file:{
 	schemas:{'default':'canijs-test'},
 	IAMRoles:{
 	    noauth:'arn:aws:iam::735148112467:role/canijstest',
-	    fb:'arn:aws:iam::735148112467:role/caijs-test-s3'
+	    fb:'arn:aws:iam::735148112467:role/canijs-test-s3'
 	}
     },
 
