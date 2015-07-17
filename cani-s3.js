@@ -45,6 +45,18 @@ Cani.s3 = (function(s3){
 	return def.promise;
     };
 
+    s3.read = function(bucket, key){
+	var def = Q.defer();
+	var buck = bucket||s3conf.s3.Bucket;
+	sss[buck].getObject({Bucket: buck, Key: key}, function(err, data){
+	    err?
+		def.reject(err):
+		def.resolve(data);
+	    // handle failure
+	});
+	return def.promise;	
+    };
+
     return s3;
 
 })(Cani.s3||{});
