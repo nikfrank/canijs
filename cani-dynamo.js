@@ -152,31 +152,47 @@ console.log('dytables', dynamo.tables);
 	pack.TableName = tableName;
 	// pack.IndexName left empty for default?
 
-	// fill the KeyConditions with values from query index
-	pack.KeyConditions = {};
+	// string build a KeyConditionExpression
+	if(!(table.hashKey in query)) throw 'needs a hashkey ('+table.hashKey+') expression';
+	pack.KeyConditionExpression = table.hashKey + ' = :'+table.hashKey;
+
+	pack.ExpressionAttributeValues = {};
+	pack.ExpressionAttributeValues[':'+table.hashKey] = {};
+	pack.ExpressionAttributeValues[':'+table.hashKey][(typeof query[table.hashKey])[0].toUpperCase()] = 
+	    ''+query[table.hashKey];
 
 	for(var ff in query){
+	    if(ff === table.hashKey) continue;
 	    var type = (typeof query[ff])[0].toUpperCase();
+	    var cOp = '=';
 
 // querying arrays? later
-	    if(ff in schema.fields) type = schema.fields[ff];
-	    if(['S','N'].indexOf(type) === -1) continue;
+	    if((type === 'O') && ('is an actual comparison operator query')){
+		cOp = Object.keys(query[ff])[0];
+		type = (typeof query[ff][cOp])[0].toUpperCase();
+		query[ff] = query[ff][cOp];
 
-	    var subpack = {}
-	    subpack[type] = query[ff];
-// write ONLY hash or range here (both req for index other than default)
-// pull operators here?
+	    }else if(['S','N'].indexOf(type) === -1) continue;
+
+	    var expr;
+	    if(cOp !== 'begins_with') expr = ff+' '+cOp+' :'+ff;
+	    else expr = 'begins_with('+ff+', :'+ff+')';
+
+	    pack.ExpressionAttributeValues[':'+ff] = {};
+	    pack.ExpressionAttributeValues[':'+ff][type] = ''+query[ff];
+
 	    if(query[ff] !== '')
-		pack.KeyConditions[ff] = {"ComparisonOperator": "EQ", "AttributeValueList": [subpack] };
+		pack.KeyConditionExpression += ' and '+expr;
 	}
 
+console.log(pack.KeyConditionExpression, pack);
 	dy.query(pack, function(err, res){
 	    //defer promise
 	    if(err){
 		console.log(err);
 		def.reject(err);
 	    }
-
+console.log(res);
 	    //unpack the response
 	    var pon = [];
 
