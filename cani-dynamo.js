@@ -60,6 +60,8 @@ console.log('dytables', dynamo.tables);
 
 	if(typeof query === 'undefined') query = {};
 
+	query = JSON.parse(JSON.stringify(query));
+
 	var deferred = Q.defer(); // deferred.reject to do an error
 
 	var schema = schemas[schemaName];
@@ -87,7 +89,9 @@ console.log('dytables', dynamo.tables);
 		// do the old style type guessing
 		var type = (typeof query[ff])[0].toUpperCase();
 		if(type === 'U') continue; // shouldn't happen though
-		    
+		
+		if(type === 'B') type = 'BOOL';
+
 		pack[ff] = {};
 
 		if(type === 'N') query[ff] = ''+query[ff]; // pass numbers as strings? psh
@@ -98,12 +102,24 @@ console.log('dytables', dynamo.tables);
 			var atype = (typeof query[ff][0])[0].toUpperCase();
 
 			// this is a biscuit. LEARN FROM THIS CODE MOOCHES!
-			for(var i=1; i<query[ff].length; ++i)
-			    if((atype = (atype !== (typeof query[ff][i])[0].toUpperCase()))===true) break;
+			for(var i=1; i<query[ff].length; ++i){
+			    if((atype = (atype!==(typeof query[ff][i])[0].toUpperCase())||atype) ===true)
+				break;
+			}
 
 			if(atype === true) type = 'L'; // can only save as dynamo List
 			else type = atype + 'S'; // can save as a dynamo array.
-		    }else if(query[ff].constructor == Object) type = 'M';
+		    }else if(query[ff].constructor == Object){
+			type = 'M';
+			// make query[ff] into a map of {"S":"value"} structures?
+			for(var ii in query[ff]){
+			    var ss = {};
+			    var tt = (typeof query[ff][ii])[0].toUpperCase();
+			    if(tt === 'B') ss[tt = 'BOOL'] = query[ff][ii];
+			    else ss[tt] = ''+query[ff][ii];
+			    query[ff][ii] = ss;
+			}
+		    }
 		}
 
 		pack[ff][type] = query[ff];
@@ -112,7 +128,7 @@ console.log('dytables', dynamo.tables);
 
 // replace this with a stupid USE TABLE FROM SCHEMA system
 // maybe check that we have the keys for this index? meh
-
+console.log(pack);
 
 	dy.putItem({TableName:tableName, Item:pack}, function(err, res){
 	    if(err){
