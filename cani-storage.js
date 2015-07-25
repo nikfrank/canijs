@@ -15,32 +15,50 @@ Cani.storage = (function(storage){
     };
     LSCONF();
 
+    storage.write = function(schema, query){
+	var def = Q.defer();
+
+	// implement index size limiting?
+	var indexName = schema+' index';
+
+	var index = localStorage[indexName]||'';
+
+	var hash = getHash(schema, query);
+
+	if(!localStorage[hash]) localStorage[indexName] = hash+'׆'+index;
+
+	localStorage[hash] = JSON.stringify(query);
+
+	def.resolve('ok');
+
+	return def.promise;
+    };
+
+
     storage.read = function(schema, query){
 	var def = Q.defer();
 	
 	// match query against index, map out items from storage
+	var indexName = schema+' index';
 
-	def.resolve('ok');
-
-	return def.promise;
-    };
-
-    storage.write = function(schema, query){
-	var def = Q.defer();
+	var hashes = localStorage[indexName].split('׆');
 	
-	// if item exists, overwrite. else write & save to index
-
-	def.resolve('ok');
+	def.resolve(hashes.filter(queryP).map(function(h){
+	    return localStorage[h];
+	}));
 
 	return def.promise;
     };
 
-    storage.count = function(schema, query){
+    storage.queryHashes = function(schema, queryP){
 	var def = Q.defer();
 	
 	// count the hashes who match the predicate in the index
+	var indexName = schema+' index';
 
-	def.resolve('ok');
+	var hashes = localStorage[indexName].split('׆');
+	
+	def.resolve(hashes.filter(queryP));
 
 	return def.promise;
     };
@@ -49,6 +67,18 @@ Cani.storage = (function(storage){
 	var def = Q.defer();
 	
 	// match from the index. erase matches from index and storage
+	var indexName = schema+' index';
+
+	var index = localStorage[indexName];
+
+	if(index) return def.reject('did not exist - index');
+
+	var hash = getHash(schema, query);
+
+	if(!localStorage[hash]) return def.reject('did not exist - hash in index');
+
+	localStorage[indexName] = index.replace(hash+'׆', '');
+	localStorage.removeItem(hash);
 
 	def.resolve('ok');
 
@@ -57,6 +87,11 @@ Cani.storage = (function(storage){
 
 
     return storage;
+
+function getHash(schema, query){
+    return schema+'-item '+query[schema+'_hash'];
+}
+
 
 })(Cani.storage||{});
 

@@ -87,38 +87,26 @@ console.log('dytables', dynamo.tables);
 
 	    }else{
 		// do the old style type guessing
-		var type = (typeof query[ff])[0].toUpperCase();
-		if(type === 'U') continue; // shouldn't happen though
-		
+		var type = dynamoType(query[ff]);
+
+		if(type === 'U') continue; // shouldn't happen though		
 		if(type === 'B') type = 'BOOL';
 
 		pack[ff] = {};
 
 		if(type === 'N') query[ff] = ''+query[ff]; // pass numbers as strings? psh
+		if(type === 'L'){
+		    // mashu?
+		}
 
-		if(type === 'O'){
-		    // M for map === {}, L for list === []
-		    if(query[ff].constructor == Array){
-			var atype = (typeof query[ff][0])[0].toUpperCase();
-
-			// this is a biscuit. LEARN FROM THIS CODE MOOCHES!
-			for(var i=1; i<query[ff].length; ++i){
-			    if((atype = (atype!==(typeof query[ff][i])[0].toUpperCase())||atype) ===true)
-				break;
-			}
-
-			if(atype === true) type = 'L'; // can only save as dynamo List
-			else type = atype + 'S'; // can save as a dynamo array.
-		    }else if(query[ff].constructor == Object){
-			type = 'M';
-			// make query[ff] into a map of {"S":"value"} structures?
-			for(var ii in query[ff]){
-			    var ss = {};
-			    var tt = (typeof query[ff][ii])[0].toUpperCase();
-			    if(tt === 'B') ss[tt = 'BOOL'] = query[ff][ii];
-			    else ss[tt] = ''+query[ff][ii];
-			    query[ff][ii] = ss;
-			}
+		if(type === 'M'){
+		    // make query[ff] into a map of {"S":"value"} structures?
+		    for(var ii in query[ff]){
+			var ss = {};
+			var tt = dynamoType(query[ff][ii]);
+			if(tt === 'BOOL') ss[tt] = query[ff][ii];
+			else ss[tt] = ''+query[ff][ii];
+			query[ff][ii] = ss;
 		    }
 		}
 
@@ -185,7 +173,7 @@ console.log(pack);
 // querying arrays? later
 	    if((type === 'O') && ('is an actual comparison operator query')){
 		cOp = Object.keys(query[ff])[0];
-		type = (typeof query[ff][cOp])[0].toUpperCase();
+		type = dynamoType(query[ff][cOp]);
 		query[ff] = query[ff][cOp];
 
 	    }else if(['S','N'].indexOf(type) === -1) continue;
@@ -215,7 +203,7 @@ console.log(res);
 	    for(var i=0; i<res.Items.length; ++i){
 		var itm = {};
 		for(var ff in res.Items[i])
-		    itm[ff] = res.Items[i][ff][Object.keys(res.Items[i][ff])[0]];
+		    itm[ff] = deref(res.Items[i][ff], Object.keys(res.Items[i][ff])[0]);
 		pon.push(itm);
 	    }
 	    def.resolve(pon);
@@ -264,5 +252,38 @@ console.log(res);
     };
 
     return dynamo;
+
+
+
+function dynamoType(vv){
+    var t = (typeof vv)[0].toUpperCase();
+    if(t==='B') return 'BOOL';
+    else if(t!=='O') return t;
+
+    if(vv.constructor == Array){
+	var atype = (typeof query[ff][0])[0].toUpperCase();
+
+	// this is a biscuit. LEARN FROM THIS CODE MOOCHES!
+	for(var i=1; i<vv.length; ++i)
+	    if((atype = (atype!==(typeof vv[i])[0].toUpperCase())||atype) ===true)
+		break;
+
+	if(atype === true) return 'L'; // can only save as dynamo List
+	else return atype + 'S'; // can save as a dynamo array.
+    }else return 'M';
+}
+
+function deref(vv, type){
+    switch(type){
+	
+    case'M': case 'L':
+	for(var kk in vv) vv[kk] = deref(vv[kk], dynamoType(vv[kk]);
+	break;
+
+    default:
+	return vv[type];
+	break;
+    }
+}
 
 })(Cani.dynamo||{});
