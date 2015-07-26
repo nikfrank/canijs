@@ -15,6 +15,7 @@ Cani.cognito = (function(cognito){
 	    var def = Q.defer();
 	    
 // generalize this per provider in conf
+// work out long term token storage
 	    var accessToken;
 	    if(conf.cognito.provider === 'fb')
 		accessToken = providerResponse.authResponse.accessToken;

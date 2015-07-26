@@ -35,17 +35,22 @@ Cani.storage = (function(storage){
     };
 
 
-    storage.read = function(schema, query){
+    storage.read = function(schema, queryP){
 	var def = Q.defer();
 	
+	if(!queryP) queryP = function(){return true;};
+
 	// match query against index, map out items from storage
 	var indexName = schema+' index';
 
-	var hashes = localStorage[indexName].split('׆');
-	
-	def.resolve(hashes.filter(queryP).map(function(h){
-	    return localStorage[h];
-	}));
+	if(!localStorage[indexName]) def.resolve([]);
+	else{
+	    var hashes = localStorage[indexName].split('׆').slice(0,-1);
+
+	    def.resolve(hashes.filter(queryP).map(function(h){
+		return JSON.parse(localStorage[h]);
+	    }));
+	}
 
 	return def.promise;
     };
@@ -53,13 +58,16 @@ Cani.storage = (function(storage){
     storage.queryHashes = function(schema, queryP){
 	var def = Q.defer();
 	
+	if(!queryP) queryP = function(){return true;};
+
 	// count the hashes who match the predicate in the index
 	var indexName = schema+' index';
-
-	var hashes = localStorage[indexName].split('׆');
-	
-	def.resolve(hashes.filter(queryP));
-
+	if(!localStorage[indexName]) def.resolve([]);
+	else{
+	    var hashes = localStorage[indexName].split('׆').slice(0,-1);
+	    
+	    def.resolve(hashes.filter(queryP));
+	}
 	return def.promise;
     };
 
@@ -71,17 +79,17 @@ Cani.storage = (function(storage){
 
 	var index = localStorage[indexName];
 
-	if(index) return def.reject('did not exist - index');
+	if(index) def.reject('did not exist - index');
+	else{
+	    var hash = getHash(schema, query);
 
-	var hash = getHash(schema, query);
+	    if(!localStorage[hash]) return def.reject('did not exist - hash in index');
 
-	if(!localStorage[hash]) return def.reject('did not exist - hash in index');
+	    localStorage[indexName] = index.replace(hash+'׆', '');
+	    localStorage.removeItem(hash);
 
-	localStorage[indexName] = index.replace(hash+'׆', '');
-	localStorage.removeItem(hash);
-
-	def.resolve('ok');
-
+	    def.resolve('ok');
+	}
 	return def.promise;
     };
 

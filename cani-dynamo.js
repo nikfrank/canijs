@@ -261,7 +261,7 @@ function dynamoType(vv){
     else if(t!=='O') return t;
 
     if(vv.constructor == Array){
-	var atype = (typeof query[ff][0])[0].toUpperCase();
+	var atype = (typeof vv[0])[0].toUpperCase();
 
 	// this is a biscuit. LEARN FROM THIS CODE MOOCHES!
 	for(var i=1; i<vv.length; ++i)
@@ -276,8 +276,12 @@ function dynamoType(vv){
 function deref(vv, type){
     switch(type){
 	
-    case'M': case 'L':
-	for(var kk in vv) vv[kk] = deref(vv[kk], dynamoType(vv[kk]);
+    case 'L': return vv; break;
+    case'M':
+	for(var kk in vv.M){
+	    vv.M[kk] = deref(vv.M[kk], Object.keys(vv.M[kk])[0]);
+	}
+	return vv.M;
 	break;
 
     default:

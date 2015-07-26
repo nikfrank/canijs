@@ -13,6 +13,8 @@ Cani.phonegapFb = (function(phonegapFb){
 
     Cani.core.confirm('phonegap').then(function(conf){FBGCONF(conf);});
 
+// work out long term token logins
+
     phonegapFb.login = function(permissions){
 	var def = Q.defer();
 	phonegapFb.plugin.login(permissions||[], def.resolve, def.reject);
