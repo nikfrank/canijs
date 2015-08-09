@@ -283,6 +283,9 @@ function deref(vv, type){
 	}
 	return vv.M;
 	break;
+    case 'N':
+	return parseInt(vv[type]);
+	break;
 
     default:
 	return vv[type];
