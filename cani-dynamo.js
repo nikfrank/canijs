@@ -39,7 +39,6 @@ Cani.dynamo = (function(dynamo){
 	    dynamo.tables = data.TableNames;
 	    Cani.core.affirm('dynamo', dynamo);
 
-console.log('dytables', dynamo.tables);
 	    // affirm dy.table foreach table
 	    for(var i=dynamo.tables.length; i-->0;) Cani.core.affirm('dynamo.'+dynamo.tables[i], dynamo);
 
@@ -57,13 +56,11 @@ console.log('dytables', dynamo.tables);
 
 //------------------------------------------------------------------------------------------
     dynamo.save = function(schemaName, query, options){
-
 	if(typeof query === 'undefined') query = {};
 
 	query = JSON.parse(JSON.stringify(query));
 
 	var deferred = Q.defer(); // deferred.reject to do an error
-
 	var schema = schemas[schemaName];
 	
 	// load the query into an AWS Item pack

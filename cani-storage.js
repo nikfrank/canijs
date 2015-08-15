@@ -9,90 +9,97 @@ Cani.storage = (function(storage){
     var LSCONF = function(conf){
 	// use conf.schemas to determine if the current state is valid?
 	// check the indices and load them into memory?
-// no config at all? assume schema_hash for indexing
+	// no config at all? assume schema_hash for indexing
+
+console.log('storage conf', conf);
+	storage.write = function(schema, query){
+	    var def = Q.defer();
+
+	    // implement index size limiting?
+
+	    var indexName = schema+' index';
+	    var index = localStorage[indexName]||'';
+	    var hash = getHash(schema, query);
+
+	    // run an expiry?
+	    if(localStorage[hash].match(/׆/g).length >= conf.storage.cacheSize[schema])
+		storage.expire(schema, index);
+
+	    if(!localStorage[hash]) localStorage[indexName] = hash+'׆'+index;
+	    localStorage[hash] = JSON.stringify(query);
+	    def.resolve('ok');
+
+	    return def.promise;
+	};
+
+
+	storage.read = function(schema, queryP){
+	    var def = Q.defer();
+	    if(!queryP) queryP = function(){return true;};
+
+	    // match query against index, map out items from storage
+	    var indexName = schema+' index';
+
+	    if(!localStorage[indexName]) def.resolve([]);
+	    else{
+		var hashes = localStorage[indexName].split('׆').slice(0,-1);
+
+		def.resolve(hashes.filter(queryP).map(function(h){
+		    return JSON.parse(localStorage[h]);
+		}));
+	    }
+
+	    return def.promise;
+	};
+
+	storage.queryHashes = function(schema, queryP){
+	    var def = Q.defer();
+	    
+	    if(!queryP) queryP = function(){return true;};
+
+	    // count the hashes who match the predicate in the index
+	    var indexName = schema+' index';
+	    if(!localStorage[indexName]) def.resolve([]);
+	    else{
+		var hashes = localStorage[indexName].split('׆').slice(0,-1);
+		def.resolve(hashes.filter(queryP));
+	    }
+	    return def.promise;
+	};
+
+	storage.erase = function(schema, query){
+	    var def = Q.defer();
+	    
+	    // match from the index. erase matches from index and storage
+	    var indexName = schema+' index';
+	    var index = localStorage[indexName];
+
+	    if(index) def.reject('did not exist - index');
+	    else{
+		var hash = getHash(schema, query);
+
+		if(!localStorage[hash]) return def.reject('did not exist - hash in index');
+
+		localStorage[indexName] = index.replace(hash+'׆', '');
+		localStorage.removeItem(hash);
+
+		def.resolve('ok');
+	    }
+	    return def.promise;
+	};
+
+	storage.expire = function(schema, index){
+	    // sort the hashes
+	    // grab the first conf.storage.expiryChunk[schema] records
+	    // expire them?
+
+	    var index = (index||localStorage[indexName]).split('׆');//.sort(conf.);
+	};
+
 
 	Cani.core.affirm('storage', storage);
     };
     LSCONF();
-
-    storage.write = function(schema, query){
-	var def = Q.defer();
-
-	// implement index size limiting?
-	var indexName = schema+' index';
-
-	var index = localStorage[indexName]||'';
-
-	var hash = getHash(schema, query);
-
-	if(!localStorage[hash]) localStorage[indexName] = hash+'׆'+index;
-
-	localStorage[hash] = JSON.stringify(query);
-
-	def.resolve('ok');
-
-	return def.promise;
-    };
-
-
-    storage.read = function(schema, queryP){
-	var def = Q.defer();
-	
-	if(!queryP) queryP = function(){return true;};
-
-	// match query against index, map out items from storage
-	var indexName = schema+' index';
-
-	if(!localStorage[indexName]) def.resolve([]);
-	else{
-	    var hashes = localStorage[indexName].split('׆').slice(0,-1);
-
-	    def.resolve(hashes.filter(queryP).map(function(h){
-		return JSON.parse(localStorage[h]);
-	    }));
-	}
-
-	return def.promise;
-    };
-
-    storage.queryHashes = function(schema, queryP){
-	var def = Q.defer();
-	
-	if(!queryP) queryP = function(){return true;};
-
-	// count the hashes who match the predicate in the index
-	var indexName = schema+' index';
-	if(!localStorage[indexName]) def.resolve([]);
-	else{
-	    var hashes = localStorage[indexName].split('׆').slice(0,-1);
-	    
-	    def.resolve(hashes.filter(queryP));
-	}
-	return def.promise;
-    };
-
-    storage.erase = function(schema, query){
-	var def = Q.defer();
-	
-	// match from the index. erase matches from index and storage
-	var indexName = schema+' index';
-
-	var index = localStorage[indexName];
-
-	if(index) def.reject('did not exist - index');
-	else{
-	    var hash = getHash(schema, query);
-
-	    if(!localStorage[hash]) return def.reject('did not exist - hash in index');
-
-	    localStorage[indexName] = index.replace(hash+'׆', '');
-	    localStorage.removeItem(hash);
-
-	    def.resolve('ok');
-	}
-	return def.promise;
-    };
-
 
     return storage;
 
