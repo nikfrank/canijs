@@ -11,7 +11,6 @@ Cani.storage = (function(storage){
 	// check the indices and load them into memory?
 	// no config at all? assume schema_hash for indexing
 
-console.log('storage conf', conf);
 	storage.write = function(schema, query){
 	    var def = Q.defer();
 
@@ -22,12 +21,15 @@ console.log('storage conf', conf);
 	    var hash = getHash(schema, query);
 
 	    // run an expiry?
-	    if(localStorage[hash].match(/׆/g).length >= conf.storage.cacheSize[schema])
-		storage.expire(schema, index);
+	    if((index.match(/׆/g)||[]).length >= conf.storage.cacheSize[schema])
+		storage.expire(schema, index).then(function(r){
 
-	    if(!localStorage[hash]) localStorage[indexName] = hash+'׆'+index;
-	    localStorage[hash] = JSON.stringify(query);
-	    def.resolve('ok');
+		    if(!localStorage[hash]) localStorage[indexName] = hash+'׆'+index;
+		    localStorage[hash] = JSON.stringify(query);
+		    def.resolve('ok');
+		},function(err){
+		    console.log('erase err', err);
+		});
 
 	    return def.promise;
 	};
@@ -70,36 +72,54 @@ console.log('storage conf', conf);
 	storage.erase = function(schema, query){
 	    var def = Q.defer();
 	    
+console.log('erase', schema, query);
 	    // match from the index. erase matches from index and storage
 	    var indexName = schema+' index';
 	    var index = localStorage[indexName];
 
-	    if(index) def.reject('did not exist - index');
+	    if(!index) def.reject('did not exist - index');
 	    else{
 		var hash = getHash(schema, query);
 
-		if(!localStorage[hash]) return def.reject('did not exist - hash in index');
+console.log(Object.keys(localStorage), hash);
+		if(Object.keys(localStorage).indexOf(hash)===-1){
+console.log('did not exist - hash in index',hash);
+		    def.reject('did not exist - hash in index '+hash);
+		}else{
+		    localStorage[indexName] = index.replace(hash+'׆', '');
+		    localStorage.removeItem(hash);
+console.log('remove', hash);
 
-		localStorage[indexName] = index.replace(hash+'׆', '');
-		localStorage.removeItem(hash);
-
-		def.resolve('ok');
+		    def.resolve('ok');
+		}
 	    }
 	    return def.promise;
 	};
 
-	storage.expire = function(schema, index){
-	    // sort the hashes
-	    // grab the first conf.storage.expiryChunk[schema] records
-	    // expire them?
+	storage.expire = function(schema, ind){
+	    var def = Q.defer();
 
-	    var index = (index||localStorage[indexName]).split('׆');//.sort(conf.);
+	    var zgz = (ind||localStorage[indexName]).split('׆').slice(0,-1)
+		.map(function(r){return r.slice(r.indexOf(' ')+1)})
+		.sort(conf.storage.expirySort[schema]||conf.storage.defExpirySort)
+		.map(function(r){var t={};t[schema+'_hash']=r;return t;})
+		.slice(0, conf.storage.expiryChunk[schema]);
+
+	    Q.all(zgz.map(function(z){return storage.erase(schema, z);}))
+		.then(function(res){
+		    var indexName = schema+' index';
+		    console.log(localStorage[indexName], res);
+		    return res;
+		})
+		.then(def.resolve, def.reject);
+	    
+	    return def.promise;
 	};
 
 
 	Cani.core.affirm('storage', storage);
     };
-    LSCONF();
+    Cani.core.on('config: storage', LSCONF);
 
     return storage;
 
