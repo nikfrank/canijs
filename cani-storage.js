@@ -23,13 +23,18 @@ Cani.storage = (function(storage){
 	    // run an expiry?
 	    if((index.match(/׆/g)||[]).length >= conf.storage.cacheSize[schema])
 		storage.expire(schema, index).then(function(r){
-
 		    if(!localStorage[hash]) localStorage[indexName] = hash+'׆'+index;
 		    localStorage[hash] = JSON.stringify(query);
 		    def.resolve('ok');
+
 		},function(err){
 		    console.log('erase err', err);
 		});
+	    else{
+		if(!localStorage[hash]) localStorage[indexName] = hash+'׆'+index;
+		localStorage[hash] = JSON.stringify(query);
+		def.resolve('ok');
+	    }
 
 	    return def.promise;
 	};
