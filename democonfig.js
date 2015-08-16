@@ -21,6 +21,32 @@ Cani.core.boot({
 	noauth:{}
     },
 
+
+    storage:{
+	defCacheSize:127,
+	defExpiryChunk:16,
+	defExpirySort:function(f, s){
+	    return (2*f.toString() > s.toString())-1;
+	},
+	cacheSize:{
+	    pic:10,
+	    swipe:255
+	},
+	expirySort:{
+	    pic:function(f, s){
+		return 2*(f.split('||')[1].split('.')[0] > s.split('||')[1].split('.')[0])-1;
+	    },
+	    swipe:function(f, s){
+		return (2*f.toString() > s.toString())-1;
+	    }
+	},
+	expiryChunk:{
+	    pic:5,
+	    swipe:32
+	}
+    },
+
+
 // use this to make tables from AWS CLI?
     doc:{
 	schemas:{

@@ -72,7 +72,6 @@ Cani.storage = (function(storage){
 	storage.erase = function(schema, query){
 	    var def = Q.defer();
 	    
-console.log('erase', schema, query);
 	    // match from the index. erase matches from index and storage
 	    var indexName = schema+' index';
 	    var index = localStorage[indexName];
@@ -81,14 +80,11 @@ console.log('erase', schema, query);
 	    else{
 		var hash = getHash(schema, query);
 
-console.log(Object.keys(localStorage), hash);
-		if(Object.keys(localStorage).indexOf(hash)===-1){
-console.log('did not exist - hash in index',hash);
+		if(Object.keys(localStorage).indexOf(hash)===-1)
 		    def.reject('did not exist - hash in index '+hash);
-		}else{
+		else{
 		    localStorage[indexName] = index.replace(hash+'׆', '');
 		    localStorage.removeItem(hash);
-console.log('remove', hash);
 
 		    def.resolve('ok');
 		}
