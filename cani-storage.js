@@ -102,13 +102,14 @@ Cani.storage = (function(storage){
 	storage.expire = function(schema, ind, howmany){
 	    var def = Q.defer();
 
-console.log(schema, ind, howmany);
 	    var zgz = (ind||localStorage[schema+' index']).split('׆').slice(0,-1)
 		.map(function(r){return r.slice(r.indexOf(' ')+1)})
 		.sort(conf.storage.expirySort[schema]||conf.storage.defExpirySort)
 		.map(function(r){var t={};t[schema+'_hash']=r;return t;})
 		.slice(0, howmany||conf.storage.expiryChunk[schema]);
 
+// put another map in here takes a callback
+// lets user check or do something about the expiration
 	    Q.all(zgz.map(function(z){return storage.erase(schema, z);}))
 		.then(function(res){
 		    var indexName = schema+' index';

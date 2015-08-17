@@ -113,7 +113,6 @@ Cani.dynamo = (function(dynamo){
 
 // replace this with a stupid USE TABLE FROM SCHEMA system
 // maybe check that we have the keys for this index? meh
-console.log(pack);
 
 	dy.putItem({TableName:tableName, Item:pack}, function(err, res){
 	    if(err){
@@ -186,14 +185,12 @@ console.log(pack);
 		pack.KeyConditionExpression += ' and '+expr;
 	}
 
-console.log(pack.KeyConditionExpression, pack);
 	dy.query(pack, function(err, res){
 	    //defer promise
 	    if(err){
 		console.log(err);
 		def.reject(err);
 	    }
-console.log(res);
 	    //unpack the response
 	    var pon = [];
 

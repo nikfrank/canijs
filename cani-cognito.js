@@ -9,8 +9,6 @@ Cani.cognito = (function(cognito){
     var cog;
 
     var COGCONF = function(conf){
-	console.log('cogConf');
-
 	cognito.onLogin = function(providerResponse){
 	    var def = Q.defer();
 	    
@@ -39,7 +37,7 @@ Cani.cognito = (function(cognito){
 		IdentityId:credPack.IdentityId,
 		Logins:Logins
 	    }, function(err, creds){
-		console.log(err, creds);
+//		console.log(err, creds);
 		cog.getId(cp, function(err, data){
 		    err?
 			console.log('cog err', err):
@@ -52,7 +50,6 @@ Cani.cognito = (function(cognito){
 
 	Cani.core.affirm('cognito', cognito);
     };
-
 
     Cani.core.on('config: cognito', COGCONF);    
 
