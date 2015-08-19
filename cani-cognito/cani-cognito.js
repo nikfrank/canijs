@@ -34,6 +34,7 @@ Cani.cognito = (function(cognito){
 		    err?
 			console.log('cog err', err):
 			def.resolve(data);
+		    Cani.core.cast('cognito: fb-login', data);
 		});
 	    });
 

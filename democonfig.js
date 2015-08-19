@@ -1,7 +1,10 @@
+// the aws regions need to be made consistent
+
 Cani.core.boot({
 
     s3:{
-	Bucket:''
+	Bucket:'bucket name from AWS S3',
+	initOn:['cognito: fb-login']
     },
 
     cognito:{
@@ -85,7 +88,7 @@ Cani.core.boot({
 		authOrder:['fb','google']
 	    }
 	},
-	awsConfigPack:{region: 'us-west-2'},
+	awsConfigPack:{region:'us-west-2'},
 	IAMRoles:{
 	    noauth:'arn:aws:iam::735148112467:role/canijstest',
 	    fb:'arn:aws:iam::735148112467:role/canijstest',
@@ -107,16 +110,11 @@ Cani.core.boot({
 		    hashKey:'geohash',
 		    rangeKey:'expiry',
 		    indices:[]
-		},
-		auth:'cognito'
+		}
 	    }
 	},
 	awsConfigPack:{region: 'eu-west-1'},
-	IAMRoles:{
-	    noauth:'arn:aws:iam::735148112467:role/canijstest',
-	    fb:'arn:aws:iam::735148112467:role/canijstest',
-	    google:'arn:aws:iam::735148112467:role/canijstestgoogle'
-	}
+	initOn:['cognito: fb-login']
     },
 
     file:{

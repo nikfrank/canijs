@@ -9,13 +9,13 @@ Cani.dynamo = (function(dynamo){
     dynamo.tables = tables;
 
     var dy; // aws dynamo singleton
-
     var dyconf;
 
     // ------------------------------- config -------------------------------------
     var DYCONF = function(conf, provider){
 	dyconf = conf;
 	schemas = conf.dynamo.schemas;
+	if('initOn' in conf.dynamo)conf.dynamo.initOn.map(function(pr){Cani.core.on(pr,dynamo.init);});
     };
 
     // dynamo boot hook
@@ -25,23 +25,20 @@ Cani.dynamo = (function(dynamo){
 	dy = new AWS.DynamoDB(dyconf.dynamo.awsConfigPack);
 
 	dy.listTables(function(err, data){
-	    if(err){
-		// maybe parse the meaningless aws error messages?
-		console.log(err);
-	    }
+	    // maybe parse the meaningless aws error messages?
+	    if(err) console.log(err);
 
 	    dynamo.tables = data.TableNames;
 	    Cani.core.affirm('dynamo', dynamo);
 
 	    // affirm dy.table foreach table
-	    for(var i=dynamo.tables.length; i-->0;) Cani.core.affirm('dynamo.'+dynamo.tables[i], dynamo);
-
+	    for(var i=dynamo.tables.length;i-->0;) Cani.core.affirm('dynamo.'+dynamo.tables[i],dynamo);
 	});
-    }
-
+    };
 
     // expose save and load functions
 
+    // these names need to be fixed to the standard api
 //------------------------------------------------------------------------------------------
     dynamo.write = function(type){
 	// in cases where default options are non-EQ queries
