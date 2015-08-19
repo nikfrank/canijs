@@ -1,9 +1,3 @@
-if(typeof window['Cani'] === 'undefined'){
-    console.log('what?');
-}else{
-    console.log(Cani);
-}
-
 Cani.s3 = (function(s3){
     // expect schemas in conf.file to map saves/loads, confirm permissions properly
 

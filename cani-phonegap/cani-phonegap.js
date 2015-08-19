@@ -1,9 +1,3 @@
-if(typeof window['Cani'] === 'undefined'){
-    console.log('what?');
-}else{
-    console.log(Cani);
-}
-
 Cani.phonegap = (function(phonegap){
 
     var PHONEGAPCONF = function(conf){
@@ -13,6 +7,7 @@ Cani.phonegap = (function(phonegap){
 
     Cani.core.on('config: phonegap', function(conf){
 	// check that phonegap has loaded, or wait for deviceReady
+// I think this is deprecated.
 	window.__phonegapReady?
 	    PHONEGAPCONF(conf):
             document.addEventListener('deviceready', function(){
@@ -20,8 +15,6 @@ Cani.phonegap = (function(phonegap){
 	    }, false);
     });
     
-    // expose save and load functions
-
     return phonegap;
 
 })(Cani.phonegap||{});

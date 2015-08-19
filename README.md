@@ -12,10 +12,12 @@ quickstart
     npm i canijs
 
 import q.js
+
 import cani.js
+
 import cani-module-mashu.js
 
-    Cani.core.confirm(moduleOrModules).then((mOrMs) => ,,,);
+    Cani.core.confirm('moduleOrModules').then((mOrMs) => ,,,);
 
 is the way to make sure you have an asset
 

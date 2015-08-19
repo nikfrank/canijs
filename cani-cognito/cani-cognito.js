@@ -1,13 +1,5 @@
-if(typeof window['Cani'] === 'undefined'){
-    console.log('what?');
-}else{
-    console.log(Cani);
-}
-
 Cani.cognito = (function(cognito){
-
     var cog;
-
     var COGCONF = function(conf){
 	cognito.onLogin = function(providerResponse){
 	    var def = Q.defer();

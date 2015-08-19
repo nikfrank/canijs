@@ -1,9 +1,3 @@
-if(typeof window['Cani'] === 'undefined'){
-    console.log('what?');
-}else{
-    console.log(Cani);
-}
-
 Cani.rtc = (function(rtc){
 
     var socket = io.connect('http://localhost:8500');

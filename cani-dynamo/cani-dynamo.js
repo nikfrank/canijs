@@ -1,9 +1,3 @@
-if(typeof window['Cani'] === 'undefined'){
-    console.log('what?');
-}else{
-    console.log(Cani);
-}
-
 Cani.dynamo = (function(dynamo){
     // expect schemas in conf.dynamo to map saves/loads, set indices, confirm permissions properly
 

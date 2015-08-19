@@ -1,9 +1,3 @@
-if(typeof window['Cani'] === 'undefined'){
-    console.log('what?');
-}else{
-    console.log(Cani);
-}
-
 Cani.indexeddb = (function(indexeddb){
 
      var indexedDB = window.indexedDB || window.mozIndexedDB ||

@@ -1,9 +1,3 @@
-if(typeof window['Cani'] === 'undefined'){
-    console.log('what?');
-}else{
-    console.log(Cani);
-}
-
 Cani.sns = (function(sns){
 
 // we've assumed the aws js sdk is loaded in the index file

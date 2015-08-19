@@ -36,3 +36,6 @@ now that you've logged into facebook and registered to AWS cognito, feel free to
     .then(Cani.dynamo.init);
 
 making sure to init the other aws services AFTER the cognito login has occurred.
+
+
+(( this needs to cast a "cognito fb login" for aws services to init to ))

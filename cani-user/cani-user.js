@@ -1,11 +1,4 @@
 //var googleSigninCallback;
-
-if(typeof window['Cani'] === 'undefined'){
-    console.log('what?');
-}else{
-    console.log(Cani);
-}
-
 Cani.user = (function(user){
     // store user information
     // auth on request

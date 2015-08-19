@@ -1,5 +1,39 @@
-Overall:
+big doc:
+---
 
+read through phonegap, phonegapfb
+check that all the code there is necessary.
+
+move the webmock fb login into cani-phonegapfb
+
+doc new simpler login procedure
+
+api
+---
+
+cognito
+
+conf, onLogin
+
+
+phonegap (nothing)
+
+phonegapfb
+
+conf, login
+
+
+
+then move onto dynamo, s3, and storage
+
+then take a look through user, see if it should be split?
+or just docced
+
+
+clean up the top of all the cani-module files.
+
+
+Overall:
 -----
 
 rtc -> finish connect process, bind send/receive, fix host/client socket
