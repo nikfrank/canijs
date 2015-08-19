@@ -1,147 +1,50 @@
-Overall:
+The point of this project is to make a bunch of different APIs and modules exposed by various providers
+(AWS, Google, Facebook, Phonegap, Twitter, Reddit, etc.) work withe same grammar.
 
------
+These are mostly client side, however, the AWS sdk runs on node, so I'm working out imports for either.
 
-rtc -> finish connect process, bind send/receive, fix host/client socket
-clean up offer/answer host/client
+This project should be becoming stable in the near future, which is to say chill your balls!
 
 
-finish saving docs, clean up and use in housepartie
-=======
-more query options (alltables, other operators)
-
--> scan when no index is present
-
-- rewrite on s3, dy+s3 versioning
-- incorporate a "versioning" dynamo table for all S3 files
-
-- module for fb graph api
-
------------------------------
-Doing:
-
-- indexeddb
------------
-
-write a simple schema
-write write and read actions
-
-the consideration of keys to use is as follows:
-
-if a key is provided, it will be used
-the key may be a uid used similarly on dynamo
-you can make it out of a hash+range also
-
-if not, the auto key will be used, as it is assumed
-that you are handling keys/compatibility.
-
+quickstart
 ---
 
-promises for idb
+    npm i canijs
 
-indices from config
+import q.js
+import cani.js
+import cani-module-mashu.js
 
-various save and load methods
+    Cani.core.confirm(moduleOrModules).then((mOrMs) => ,,,);
 
---------------------------
-- loading file into DOM
+is the way to make sure you have an asset
 
-- graph api module
+import your caniconfig.js file (which has field for each module) a demo of which is available
 
------------------------------
-Need to do soon:
+caniconfig boots the core and then each module, which triggers callbacks on any confirms waiting
 
-- error messages
+this is pretty much only useful when confirming a state (ie logged in), which may then trigger 
+booting modules who were waiting for something (ie fbgraph boots on fb [login])
 
-- mime types for text file uploads to s3
+anyhow, you pretty much don't have to think about it much, as long as you 
+import things in the right order and confirm the module before calling anything from it
 
---------------------------------------------------------------
+a pattern I use in angular is to put placeholder functions on the scope
 
-coninuing work:
+    $scope.save = function(){ console.log('module not yet loaded'); };
 
+which I replace on confirm
 
-- endtoend unit testing through angular -> just use angular. no bs. comment well.
+    Cani.core.confirm('idb').then(function(){
+        $scope.save = function(query){ Cani.idb.save(...params).then((res) => ,,,); };
+    });
 
-<<<<<<< HEAD
--> mocha tests
+all calls through Cani are promise based (even synchronous stuff like localStorage)
 
--> load selected fields options
+that way, if I point window.Q to $q in a .run() module, there's no need to $scope.$apply/$digest
 
-=======
-- mocha tests (might need phantomjs
->>>>>>> 93c6661842a9366c948fb7163a1bd4e2305139ad
+only after window.Q exists (ie after app.js runs), I import caniconfig.js to boot the cani modules.
 
-=======
-write documentation on how to use it
-=======
+This should be pretty clear in the examples. If it isn't, copy my bad behaviour or pull request.
 
-
-Progress:
-
--facebook auth
--aws federated auth
--google auth
-
--test save doc w google & fb
--run angular
--save, load from angular
-
--Q load
--notifications for database availability
--stringify, make note of all objects on save
-
--document aws user-filtering policy setup
--load mine/see all
--promises on save
-
--save over/new (test req)
-- edit resave
-- put IAM policies and GSI descriptions into the git
-
-- saving a file
-- sort save.file/doc and load.file/doc
-
-- listObjects in bucket
-
-- save files to S3, set up IAM to work public/private
-
-- investigate ACL vs IAM -> leave ACL to max allow, use IAM to limit access (re: least-privilege policy)
-
-
-- split into modules: auth, doc (dynamo), file (s3)
-
-- reorg the conf pack by module
-
--> affirm all modules on completion of boot, pass the module through as a param
-+> use cast for boot and interally on confirms
-
-doc to register schemas to tables... can autofill ownership, uiding, datestamps in schema... also default overwrite option
-  default values per schema. NO DEFAULT VALUES PER TABLE. this makes sense, don't worry about it any more.
-
-write basic schema options, examples
-
-- destringify all objects noted on load
-
-- finish saving docs, clean up and use in housepartie
-
-- split modules into various files
-
---------------------------------------------------------------
-
-catchies:
-
-make sure to $scope.$apply() in a .then from a promise
-
-permission has to be set to arn::yada-yada/tableName* for indices
-make sure to prefix tables named the same (ie HP-party, HP-private-party) to avoid problems
-
-------------------------------------
-boot sequence:
-
-module files are loaded into the dom
-Cani.core is loaded
-modules are added to the Cani singleton
-modules register their config functions with the core
-config file initiates boot
-
-do this with require to batch the files together, document
+Look into the example and api folder of each module for more documentation!
