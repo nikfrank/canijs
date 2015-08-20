@@ -1,7 +1,7 @@
 Cani.phonegapFb = (function(phonegapFb){
 
     var FBGCONF = function(conf){
-	phonegapFb.plugin = window.facebookConnectPlugin || Cani.phonegap.fb;
+	phonegapFb.plugin = window.facebookConnectPlugin;
 	Cani.core.affirm('phonegap-fb', phonegapFb);
     };
 
@@ -20,7 +20,5 @@ Cani.phonegapFb = (function(phonegapFb){
 	return def.promise;
     };	
 
-
     return phonegapFb;
-
 })(Cani.phonegapFb||{});

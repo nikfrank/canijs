@@ -4,7 +4,7 @@ if(typeof window['Q'] === 'undefined'){
 	window.crashbecauseQ = true;
     }else{
 	window['Q'] = window['angular'].injector(['ng']).get('$q');
-	console.log(Q);
+//	console.log(Q);
     }
 }
 
