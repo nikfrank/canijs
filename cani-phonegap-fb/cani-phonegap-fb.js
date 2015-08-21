@@ -5,10 +5,7 @@ Cani.phonegapFb = (function(phonegapFb){
 	Cani.core.affirm('phonegap-fb', phonegapFb);
     };
 
-// the || Cani.phonegap.fb is for webmock using Cani-user. the phonegap service puts it there
-// this behaviour should be moved out of angular, and into cani-phonegapfb
-// whether to allow webmock can be in the config
-
+// does this even run on webmock? yes, by means of a hand-affirm by setPassing the phonegap service
 
     Cani.core.confirm('phonegap').then(function(conf){FBGCONF(conf);});
 

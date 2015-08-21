@@ -8,7 +8,7 @@ Cani.s3 = (function(s3){
 	s3conf = conf;
 	// is there a list available buckets function? idk
 	// document this, test this
-	if('initOn' in conf.s3) conf.s3.initOn.map(function(pr){ Cani.core.on(pr, s3.init);});
+	if('initOn' in conf.s3) conf.s3.initOn.map(function(pr){Cani.core.confirm(pr).then(s3.init);});
     };
 
     Cani.core.on('config: s3', S3CONF);

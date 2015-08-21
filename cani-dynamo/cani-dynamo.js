@@ -15,7 +15,8 @@ Cani.dynamo = (function(dynamo){
     var DYCONF = function(conf, provider){
 	dyconf = conf;
 	schemas = conf.dynamo.schemas;
-	if('initOn' in conf.dynamo)conf.dynamo.initOn.map(function(pr){Cani.core.on(pr,dynamo.init);});
+	if('initOn' in conf.dynamo)
+	    conf.dynamo.initOn.map(function(pr){Cani.core.confirm(pr).then(dynamo.init);});
     };
 
     // dynamo boot hook

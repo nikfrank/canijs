@@ -8,6 +8,6 @@ Cani.phonegap = (function(phonegap){
 	    PHONEGAPCONF(conf);
 	}, false);
     });
-    
+
     return phonegap;
 })(Cani.phonegap||{});
