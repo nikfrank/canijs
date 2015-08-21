@@ -1,16 +1,9 @@
 Cani.fb = (function(fb){
-
-// move facebook login & sdk loading here.
-// then cani-gg can be it's own thing.
-// no more cani-user.
-
     var user;
 
-    var FB;
-
-    var FBGCONF = function(conf){	
+    var FBCONF = function(conf){
 	window.fbAsyncInit = function(){
-	    FB.init({appId:conf.fb.App, status:true, cookie:true, xfbml:true});
+	    FB.init({appId:conf.fb.App, status:true, cookie:true, xfbml:true, version:'v2.4'});
 	    Cani.core.affirm('fb', fb);
 
 	    // facebook has a way to request extra permissions that should be a config option
@@ -45,8 +38,9 @@ Cani.fb = (function(fb){
 	    js.src = "//connect.facebook.net/en_US/all.js";
 	    ref.parentNode.insertBefore(js, ref);
 	}(document));
-
     };
+
+    Cani.core.on('config: fb', FBCONF);
 
     return fb;
 })(Cani.fb||{});

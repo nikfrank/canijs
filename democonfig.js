@@ -13,6 +13,10 @@ Cani.core.boot({
 	AWSregion:'eu-west-1'
     },
 
+    fb:{
+	App:'651024351606699'
+    },
+    
     user:{
 	fb:{
 	    App:'651024351606699'
