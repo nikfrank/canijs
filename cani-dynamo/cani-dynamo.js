@@ -47,7 +47,7 @@ Cani.dynamo = (function(dynamo){
     };
 
 //------------------------------------------------------------------------------------------
-    dynamo.save = function(schemaName, query, options){
+    dynamo.save = function(schemaName, query){
 	if(typeof query === 'undefined') query = {};
 
 	query = JSON.parse(JSON.stringify(query));
@@ -125,6 +125,9 @@ Cani.dynamo = (function(dynamo){
 	if(!options) options = {};
 	if(!query) query = {};
 
+// this doesn't implement options.FilterExpression IndexName Limit ProjectionExpression or ScanIndexForward
+// or options.Select (count, attribute listables)
+
 	var schema = schemas[schemaName];
 
 	var table = schema.table;
@@ -140,29 +143,44 @@ Cani.dynamo = (function(dynamo){
 	// that shit is ugly like a penguin's anus at feeding time!
 
 	var pack = {};
-
 	pack.TableName = tableName;
 	// pack.IndexName left empty for default?
 
 	// string build a KeyConditionExpression
-	if(!(table.hashKey in query)) throw 'needs a hashkey ('+table.hashKey+') expression';
-	pack.KeyConditionExpression = table.hashKey + ' = :'+table.hashKey;
 
+	// start withe hashKey (ALWAYS EXACT QUERYING)
+	if(!(table.hashKey in query)) throw 'query needs a hashkey ('+table.hashKey+') expression';
+	pack.KeyConditionExpression = table.hashKey + ' = :'+table.hashKey;
+	// this prev evals the :table.hashKey to the ExpressionAttributeValue next, to check equality
+	// this dynamoType I think is always S or N?
 	pack.ExpressionAttributeValues = {};
 	pack.ExpressionAttributeValues[':'+table.hashKey] = {};
-	pack.ExpressionAttributeValues[':'+table.hashKey][(typeof query[table.hashKey])[0].toUpperCase()] = 
+	pack.ExpressionAttributeValues[':'+table.hashKey][dynamoType(query[table.hashKey])] = 
 	    ''+query[table.hashKey];
 
+	// now build KeyConditionExpression for the rest of the query
 	for(var ff in query){
 	    if(ff === table.hashKey) continue;
-	    var type = (typeof query[ff])[0].toUpperCase();
+	    var type = (typeof query[ff])[0].toUpperCase(); // don't change this to dynamoType!
 	    var cOp = '=';
 
 // querying arrays? later
+
+// remember to implement this comparison operator validation!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 	    if((type === 'O') && ('is an actual comparison operator query')){
 		cOp = Object.keys(query[ff])[0];
 		type = dynamoType(query[ff][cOp]);
 		query[ff] = query[ff][cOp];
+		// the idea here is to operate as {eq:'value'} or whatever
+
+/*In addition to the usual Boolean comparison operators, you can also use CONTAINS, NOT_CONTAINS, and BEGINS_WITH for string matching, BETWEEN for range checking,  and IN to check for membership in a set.
+
+In addition to the QueryFilter, you can also supply a ConditionalOperator. This logical operator (either AND or OR) is used to connect each of the elements in the QueryFilter.
+
+
+https://aws.amazon.com/blogs/aws/improved-queries-and-updates-for-dynamodb/
+*/
+
 
 	    }else if(['S','N'].indexOf(type) === -1) continue;
 
@@ -178,6 +196,8 @@ Cani.dynamo = (function(dynamo){
 	}
 
 	dy.query(pack, function(err, res){
+	    // implement LastEvaluatedKey element large reads
+
 	    //defer promise
 	    if(err){
 		console.log(err);
@@ -198,14 +218,16 @@ Cani.dynamo = (function(dynamo){
     };
 
 //------------------------------------------------------------------------------------------
-    dynamo.erase = function(schemaName, query, options){
-	// make a deleteItem request to the table determined by options &| schema
+    dynamo.erase = function(schemaName, query){
+	// make a deleteItem request to the table determined by schema
 
 	// basically I'm going to require that you have the tableName, hash and range.
-	// feel free to send me a collection of hash-range (maybe batch delete later)
+	// feel free to send me a collection of hash-range (maybe batch delete later)?
 
-// autofill table for schemas with only one table
-	var tableName  = options.table;
+	var schema = schemas[schemaName];
+
+	// autofill table for schemas with only one table
+	var tableName  = schema.table.split('/')[1];
 
 	var pack = {
 	    Key: {},
@@ -213,7 +235,6 @@ Cani.dynamo = (function(dynamo){
 	    TableName: tableName
 	};
 
-	var schema = schemas[schemaName];
 	var table = schema.tables[tableName];
 
 	var hash = table.hashKey;
@@ -221,10 +242,6 @@ Cani.dynamo = (function(dynamo){
 
 	pack.Key[hash] = {};
 	pack.Key[range] = {};
-
-	//if((options.useDefault.indexOf(hash) === -1)||(typeof options.useDefault === 'string')){
-// fill marked defaults
-	//}
 
 	pack.Key[hash][schema.fields[hash]] = pack.Key[hash][schema.fields[hash]] || query[hash];
 	pack.Key[range][schema.fields[range]] = pack.Key[range][schema.fields[range]] || query[range];
@@ -243,7 +260,7 @@ Cani.dynamo = (function(dynamo){
 
 function dynamoType(vv){
     var t = (typeof vv)[0].toUpperCase();
-    if(t==='B') return 'BOOL';
+    if(t==='B') return 'BOOL'; // this isn't implementing BS (Binary Set) Or NULL typed
     else if(t!=='O') return t;
 
     if(vv.constructor == Array){

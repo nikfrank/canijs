@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title>Dynamo w Cognito read & write Example!</title>
+  </head>
+  <body>
+
+    <fb:login-button show-faces="false" width="200"></fb:login-button>
+
+    <button onclick="write()">Make new item</button>
+    <button onclick="read()">Refresh Table</button>
+
+    <ul id="item-table"></ul>
+
+    <script src="../../../lib/aws-sdk.min.js"></script>    
+    <script src="../../../lib/q.js"></script>
+
+    <script src="../../../cani.js"></script>
+    <script src="../../cani-dynamo.js"></script>
+    <script src="../../../cani-fb/cani-fb.js"></script>
+    <script src="../../../cani-cognito/cani-cognito.js"></script>
+
+    <script src="demo-config.js"></script>
+
+    <script src="main.js"></script>
+  </body>
+</html>

@@ -2,9 +2,15 @@ Cani.cognito = (function(cognito){
     var cog;
     var COGCONF = function(conf){
 	cognito.onLogin = function(providerResponse){
+console.log('on login', providerResponse);
 	    var def = Q.defer();
 	    
 // generalize this per provider in conf
+
+// also this will have to be able to handle multiple concurrent identities
+// eg: I want to lambda with google ID, then dyanmo withe facebook login.
+// and the cognito data syncing feature.
+
 // work out long term token storage
 	    var accessToken;
 	    if(conf.cognito.provider === 'fb')
@@ -29,7 +35,6 @@ Cani.cognito = (function(cognito){
 		IdentityId:credPack.IdentityId,
 		Logins:Logins
 	    }, function(err, creds){
-//		console.log(err, creds);
 		cog.getId(cp, function(err, data){
 		    err?
 			console.log('cog err', err):

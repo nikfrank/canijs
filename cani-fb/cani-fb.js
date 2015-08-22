@@ -13,7 +13,7 @@ Cani.fb = (function(fb){
 		    user = response.authResponse;
 		    
 		    // grab the facebook profile
-		    FB.api('/me', function(pon) {
+		    FB.api('/me', function(pon){
 			user.profile = pon;
 			Cani.core.affirm('fb: login', user);
 		    });

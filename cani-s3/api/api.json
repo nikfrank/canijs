@@ -1,0 +1,19 @@
+{
+    configExample:{
+	Bucket:'dre-images',
+	initOn:['cognito: fb-login']
+    },
+    configDescription:{
+	Bucket:'the name of the default s3 bucket you\'ll be dealing with',
+	initOn:'The events to run init as a response to.'
+    },
+    exposures:{
+	init:'() => this is used internally with initOn, but you can init whenever you want\n\n'+
+	    'keep in mind though, the auth state of the window.AWS singleton at the time of init\n\n'+
+	    'stays withis table for its lifecycle. So only init once you\'ve authed!',
+	initBucket:'(bucket) => initialize some bucket. For now you\'ll need to call this \n\n'+
+	    'for buckets other than the default bucket.',
+	upload:'(bucket, key, fileData) => upload the fileData as key to the bucket. WOW',
+	read:'(bucket, key) => read key out of bucket. WOWOW!'
+    }
+}

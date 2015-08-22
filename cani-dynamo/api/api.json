@@ -1,0 +1,56 @@
+{
+    configExample:{
+	schemas:{
+	    appt:{
+		fields:{somehash:'S', id:'N', owner:'S', price:'N'},
+		table:{
+		    arn:'arn:aws:dynamodb:eu-west-1:000000000000:table/tableName',
+		    hashKey:'id', rangeKey:'somehash',
+		    indices:(([])) // still needs to be implemented
+		}
+	    }
+	},
+	awsConfigPack:{region: 'eu-west-1'},
+	initOn:['cognito: fb-login']
+    },
+    configDescription:{
+	dynamo:{
+	    schemas:{
+		'0':'"types" for the functional minded. Each schema has a table and a format',
+		schemaName:{
+		    '0':'the keys here are the schema names',
+		    fields:'object of:\n\nkeys - fields on every item; \n\n values - dynamo type. see: http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DataModel.html',
+		    table:{
+			'0':'Table description from AWS. Read the DataModel link re: indices',
+			arn:'grab this off the table properties',
+			hashKey:'exact query main hash key',
+			rangeKey:'operator query range key',
+			indices:'additional indices on table. Yet unimplemented here.'
+		    }
+		}
+	    },
+	    awsConfigPack:'object to configure region. This is inconsistent withe cognito conf :(',
+	    initOn:'array of events to trigger Cani.dynamo.init on. Use this with login events!'
+	}
+    },
+    exposures:{
+	init:'() => this is used internally with initOn, but you can init whenever you want\n\n'+
+	    'keep in mind though, the auth state of the window.AWS singleton at the time of init\n\n'+
+	    'stays withis table for its lifecycle. So only init once you\'ve authed!',
+
+	write:'((unimplemented)) => will be used once the grammar is standardized.',
+
+	save:'(\'schemaName\', {query}) => query is the entire object you\'re saving\n\n'+
+	    'Cani.dyanmo will guess the type to save as unless explicitly stated in schema conf.',
+
+	load:'(\'schemaName\', {query}, (({options})) ) => options ((unimplemented)) to set index\n\n'+
+	    'query is {hashKey:\'val\', otherKey:{operator:\'val\'}, odKey:\'val\'}\n\n'+
+	    'operator is from [EQ | LE | LT | GE | GT | BEGINS_WITH | BETWEEN] for key &\n\n'+
+	    'from [EQ | NE | LE | LT | GE | GT | NOT_NULL | NULL | CONTAINS | NOT_CONTAINS | BEGINS_WITH | IN | BETWEEN] for other?\n\n'+
+	    'see http://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Condition.html',
+
+	erase:'(schemaName, query) => pass in a schema, hashKey and rangeKey to delete the item'
+    },
+    notes:'Scan operations are not supported because I think they\'re stupid. I\'m sure that\'ll \n\n'+
+	'change eventually'
+}

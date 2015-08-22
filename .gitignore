@@ -4,5 +4,5 @@ dist
 .sass-cache
 *~
 aws*
-q.js
+lib/
 test/mocha/

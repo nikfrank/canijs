@@ -5,6 +5,8 @@ use credentials passed from facebook (later google or whatever)
 
 pass them to AWS cognito identity pool set up for this application.
 
+config.cognito.provider MUST EQUAL 'fb' until other providers are added. Sorry.
+
 Step 1:
 
 set up an app on developers.facebook.com
@@ -27,15 +29,8 @@ Step 4:
 
 Step 5:
 
-now that you've logged into facebook and registered to AWS cognito, feel free to
+now that you've logged into facebook and registered to AWS cognito,
 
-    .then(Cani.core.confirm('s3'))
-    .then(Cani.s3.init)
-    
-    .then(Cani.core.confirm('dynamo'))
-    .then(Cani.dynamo.init);
+if you have initOn set for other AWS services (s3, dynamo for now)
 
-making sure to init the other aws services AFTER the cognito login has occurred.
-
-
-(( this needs to cast a "cognito fb login" for aws services to init to ))
+then they will run their init withe new credentials!
