@@ -32,11 +32,11 @@ http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ExpressionPlaceh
 all you have to do to use it is attach an array of verboten names to the schema's table as 
 
     {
-        table:{
-            arn:'...', hashKey:'...', rangeKey:'...', indices:[],
-            reservedAttributes:
-	         ['rollback','atomic','capacity','and','revoke','authorization','then','invalidate','current','exec']
-        }
+      table:{
+        arn:'...', hashKey:'...', rangeKey:'...', indices:[],
+        reservedAttributes:
+          ['rollback','atomic','capacity','and','revoke','authorization','then','invalidate','current','exec']
+      }
     }
 
 in the cani-config. Your's probably won't be that particular list of words though.
