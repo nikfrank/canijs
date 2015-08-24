@@ -3,17 +3,20 @@ Cani-dynamo
 
 read and write to/from dynamo tables!
 
-set up schemas for each of your tables
+the schemas in the democonfig and example should show you which info to copy paste from AWS to get it working.
 
-the schemas in the democonfig and example should show you which info to copy paste from AWS.
+Listing fields is optional, but if you don't cani-dynamo might guess wrong.
 
 (( using GSI and LSI is currently unsupported. not for long though ))
 
 
-if your table requires authentication,
+if your table requires authentication, use
 
-initOn:['cognito: fb-login']
+    initOn:['cognito: fb-login']
 
+in the config
+
+for more on seeing how to set up cognito with dynamo, see the example README
 
 
 dynamoDB reserved words
