@@ -35,7 +35,7 @@ all you have to do to use it is attach an array of verboten names to the schema'
      table:{
       arn:'...', hashKey:'...', rangeKey:'...', indices:[],
       reservedAttributes:
-       ['rollback','atomic','capacity','and','revoke','authorization','then','invalidate','current','exec']
+      ['rollback','atomic','capacity','and','revoke','authorization','then','invalidate','current','exec']
      }
     }
 
