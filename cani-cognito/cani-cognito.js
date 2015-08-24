@@ -2,7 +2,6 @@ Cani.cognito = (function(cognito){
     var cog;
     var COGCONF = function(conf){
 	cognito.onLogin = function(providerResponse){
-console.log('on login', providerResponse);
 	    var def = Q.defer();
 	    
 // generalize this per provider in conf

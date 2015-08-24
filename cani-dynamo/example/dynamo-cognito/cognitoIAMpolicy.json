@@ -1,0 +1,33 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+	{
+	    "Effect": "Allow",
+	    "Action": [
+		"mobileanalytics:PutEvents",
+		"cognito-sync:*"
+	    ],
+	    "Resource": [
+		"*"
+	    ]
+	},
+        {
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:ListTables",
+                "dynamodb:GetItem",
+                "dynamodb:BatchGetItem",
+                "dynamodb:Query"
+            ],
+            "Resource": "arn:aws:dynamodb:eu-west-1:735148112467:table/canijs"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:ListTables"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

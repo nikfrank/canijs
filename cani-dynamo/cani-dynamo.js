@@ -140,17 +140,23 @@ Cani.dynamo = (function(dynamo){
 
 	if(dynamo.tables.indexOf(tableName) === -1) throw 'table '+tableName+' not available';
 	
-	// that shit is ugly like a penguin's anus at feeding time!
-
 	var pack = {};
 	pack.TableName = tableName;
 	// pack.IndexName left empty for default?
 
 	// string build a KeyConditionExpression
 
+	var hashAtt = table.hashKey;
+
+	if((table.reservedAttributes||[]).indexOf(table.hashKey)>-1){
+	    pack.ExpressionAttributeNames = {};
+	    pack.ExpressionAttributeNames['#bsd'+table.hashKey] = table.hashKey;
+	    hashAtt = '#bsd'+table.hashKey;
+	}
+
 	// start withe hashKey (ALWAYS EXACT QUERYING)
 	if(!(table.hashKey in query)) throw 'query needs a hashkey ('+table.hashKey+') expression';
-	pack.KeyConditionExpression = table.hashKey + ' = :'+table.hashKey;
+	pack.KeyConditionExpression = hashAtt + ' = :' + table.hashKey;
 	// this prev evals the :table.hashKey to the ExpressionAttributeValue next, to check equality
 	// this dynamoType I think is always S or N?
 	pack.ExpressionAttributeValues = {};
@@ -184,9 +190,17 @@ https://aws.amazon.com/blogs/aws/improved-queries-and-updates-for-dynamodb/
 
 	    }else if(['S','N'].indexOf(type) === -1) continue;
 
+	    var att = ff;
+
+	    if((table.reservedAttributes||[]).indexOf(ff)>-1){
+		pack.ExpressionAttributeNames = pack.ExpressionAttributeNames||{};
+		pack.ExpressionAttributeNames['#bsd'+ff] = ff;
+		att = '#bsd'+ff;
+	    }
+
 	    var expr;
-	    if(cOp !== 'begins_with') expr = ff+' '+cOp+' :'+ff;
-	    else expr = 'begins_with('+ff+', :'+ff+')';
+	    if(cOp !== 'begins_with') expr = att+' '+cOp+' :'+ff;
+	    else expr = 'begins_with('+att+', :'+ff+')';
 
 	    pack.ExpressionAttributeValues[':'+ff] = {};
 	    pack.ExpressionAttributeValues[':'+ff][type] = ''+query[ff];
@@ -194,6 +208,8 @@ https://aws.amazon.com/blogs/aws/improved-queries-and-updates-for-dynamodb/
 	    if(query[ff] !== '')
 		pack.KeyConditionExpression += ' and '+expr;
 	}
+
+	// that shit is ugly like a penguin's anus at feeding time!
 
 	dy.query(pack, function(err, res){
 	    // implement LastEvaluatedKey element large reads

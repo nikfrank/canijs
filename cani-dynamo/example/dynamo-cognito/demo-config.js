@@ -1,21 +1,22 @@
 Cani.core.boot({
     cognito:{
 	provider:'fb',
-	IdentityPoolId:'POOL ID FROM AWS',
+	IdentityPoolId:'eu-west-1:c5b3e48a-d5df-4ea3-bb42-91404d7c2248',
 	AWSregion:'eu-west-1'
     },
 
     fb:{
-	App:'App id from developers.facebook.com'
+	App:'492663127567107'
     },
 
     dynamo:{
-	schemas:{ // set this to an actual table, test, then remove the ARN data.
+	schemas:{
 	    item:{
-		fields:{geohash:'S', expiry:'N', owner:'S', price:'N'},
+		fields:{owner:'S', due:'N', item:'S', refUrls:'SS'},
 		table:{
-		    arn:'arn:aws:dynamodb:eu-west-1:735148112467:table/dre',
-		    hashKey:'expiry', rangeKey:'geohash', indices:[]
+		    arn:'arn:aws:dynamodb:eu-west-1:735148112467:table/canijs',
+		    reservedAttributes:['owner'],
+		    hashKey:'owner', rangeKey:'due', indices:[]
 		}
 	    }
 	},

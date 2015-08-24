@@ -1,15 +1,34 @@
 <html>
   <head>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.9.4/angular-material.min.css">
+    
+    <style>
+      .fb-contain {position:fixed; top:5vh; right:4vw}
+      .input-contain {width:80vw; padding:2vw}
+      .input-contain * {margin:4px}
+    </style>
+
     <title>Dynamo w Cognito read & write Example!</title>
   </head>
   <body>
+    
+    <div class="fb-contain">
+      <fb:login-button show-faces="true" width="200"></fb:login-button>
+    </div>
 
-    <fb:login-button show-faces="false" width="200"></fb:login-button>
+    <div layout="column" class="input-contain">
+      <input id="nuItem" type="text" placeholder="item to do"/>
+      <input id="nuRef1" type="text" placeholder="ref url 1"/>
+      <input id="nuRef2" type="text" placeholder="ref url 2"/>
+      <input id="nuRef3" type="text" placeholder="ref url 3"/>
+      <input id="nuDate" type="datetime-local"/>
+      <!--only works in chrome-->
 
-    <button onclick="write()">Make new item</button>
-    <button onclick="read()">Refresh Table</button>
+      <button onclick="upload()">Make new item</button>
+      <button onclick="read()">Refresh Table</button>
 
-    <ul id="item-table"></ul>
+      <ul id="item-table"></ul>
+    </div>
 
     <script src="../../../lib/aws-sdk.min.js"></script>    
     <script src="../../../lib/q.js"></script>
