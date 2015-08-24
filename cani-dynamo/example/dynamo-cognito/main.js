@@ -19,9 +19,8 @@ Cani.core.confirm('dynamo').then(function(){
 
     window.read = function(){
 	Cani.dynamo.load('item', {owner:window.cogId.IdentityId}).then(function(items){
-console.log('res',items);
 	    var itemHTML = '';
-	    for(var i=0; i<items.length; ++i) itemHTML += '<li>'+items[i]+'</li>';
+	    for(var i=0; i<items.length; ++i) itemHTML += '<li>'+JSON.stringify(items[i])+'</li>';
 	    document.getElementById('item-table').innerHTML = itemHTML;
 	});
     };
