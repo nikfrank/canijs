@@ -111,6 +111,7 @@ so you aren't lying when you say "ok" to the warning
 
 if can use cognitoIAMpolicy.json from this example, make sure to change the ARN to your table's (from step 2)
 
+grab the arn & region from the sample code you see, dump it in your cani-config
 
 
 step 4) Success!
