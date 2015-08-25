@@ -4,8 +4,20 @@
     
     <style>
       .fb-contain {position:fixed; top:5vh; right:4vw}
-      .input-contain {width:80vw; padding:2vw}
-      .input-contain * {margin:4px}
+      .body-contain {width:80vw; padding:2vw}
+      .body-contain * {margin:4px}
+      .upload-bar {position:fixed; bottom:0; height:10vh; left:0; width:100vw; background-color:#bbb;}
+      .upload-box {
+          background-color:white;
+          position:fixed; top:25vh; left:25vw; min-height:30vh; width:50vw;
+          z-index:1000; border:black solid 3px; border-radius:6px;
+          box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+      }
+      .upload-box img {margin:4px; height:200px; width:auto; max-width:40vw;}
+      .upload-box textarea {resize:none; width:30vw; height:auto;}
+      .upload-box button {margin-left:auto}
+
+      #img-contain img {margin:4px; height:200px; width:auto; max-width:40vw;}
     </style>
 
     <title>S3 w Cognito read & write Example!</title>
@@ -13,11 +25,24 @@
   <body>
 
     
+    <div class="body-contain" layout="row">
+      <div layout="column">
+	<ul id="user-list"></ul>
+      </div>
+      <div layout="column">
+	<ul id="img-list"></ul>
+      </div>
+      <div id="img-contain"></div>
+    </div>
 
-    <fb:login-button show-faces="false" width="200"></fb:login-button>
+    <div class="upload-bar" layout="row">
+      <button onclick="getFile()">Upload image</button>
+      <button onclick="list()">Refresh List</button>
+    </div>
 
-    <button onclick="write()">Make new item</button>
-    <button onclick="read()">Refresh Table</button>
+    <div class="fb-contain">
+      <fb:login-button show-faces="true" width="200"></fb:login-button>
+    </div>
 
     <ul id="item-table"></ul>
 

@@ -4,15 +4,10 @@ Cani.core.confirm('cognito').then(function(){
     Cani.core.confirm('fb: login')
 	.then(function(loginData){return {authResponse:loginData};})
 	.then(Cani.cognito.onLogin)
-	.then(function(cogId){
-	    window.cogId = cogId;
-	});
+	.then(function(cogId){ window.cogId = cogId; });
 });
 
-window.upload = window.read = function(){
-    console.log('Chill your balls! Cani dynamo not yet ready');
-};
-
+window.upload = window.read = function(){console.log('Chill your balls! Cani dynamo not yet ready');};
 
 Cani.core.confirm('dynamo').then(function(){
     // by now, window.cogId = {IdentityId: "aws-region:00000000-0000-0000-0000-000000000000"}

@@ -28,13 +28,14 @@ Cani.s3 = (function(s3){
     };
 
     s3.upload = function(bucket, key, fileData){
+	if(typeof fileData !== 'string') fileData = JSON.stringify(fileData);
 	var def = Q.defer();
 	var buck = bucket||s3conf.s3.Bucket;
 	sss[buck].upload({Bucket: buck, Key: key, Body: fileData}, function(err, data){
 	    err?
 		def.reject(err):
 		def.resolve(data);
-	    // handle failure
+	    // handle failure?
 	});
 	return def.promise;
     };
@@ -42,6 +43,7 @@ Cani.s3 = (function(s3){
     var reqBuff = {};
 
     s3.read = function(bucket, key){
+	if(key.constructor == Array) return Q.all(key.map(function(k){return s3.read(bucket, k);}));
 	var def = Q.defer();
 	var buck = bucket||s3conf.s3.Bucket;
 	if(buck+' '+key in reqBuff) return reqBuff[buck+' '+key];
@@ -51,6 +53,15 @@ Cani.s3 = (function(s3){
 	});
 	reqBuff[buck+' '+key] = def.promise;
 	return def.promise;	
+    };
+
+    s3.list = function(bucket, prefix){
+	var def = Q.defer();
+	var buck = bucket||s3conf.s3.Bucket;
+	sss[buck].listObjects({Bucket:buck, Prefix:prefix}, function(err, data){
+	    err? def.reject(err):def.resolve(data.Contents);
+	});
+	return def.promise;
     };
 
     return s3;

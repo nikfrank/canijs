@@ -14,6 +14,7 @@
 	initBucket:'(bucket) => initialize some bucket. For now you\'ll need to call this \n\n'+
 	    'for buckets other than the default bucket.',
 	upload:'(bucket, key, fileData) => upload the fileData as key to the bucket. WOW',
-	read:'(bucket, key) => read key out of bucket. WOWOW!'
+	read:'(bucket, key) => read key out of bucket. also works for [keys]',
+	list:'(bucket, prefix) => lists contents of bucket with [optionally] prefix'
     }
 }

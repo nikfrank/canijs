@@ -11,20 +11,36 @@
 		"*"
             ]
 	},
-	{
-	    "Action": ["s3:ListBucket"],
-	    "Effect": "Allow",
-	    "Resource": ["arn:aws:s3:::canijs"],
-	    "Condition": {"StringLike": {"s3:prefix": ["${cognito-identity.amazonaws.com:sub}/*"]}}
-	},
-	{
-	    "Action": [
-		"s3:GetObject",
-		"s3:PutObject"
-	    ],
-	    "Effect": "Allow",
-	    "Resource": ["arn:aws:s3:::canijs/${cognito-identity.amazonaws.com:sub}/*"]
-	}
-
+	
+        {
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::canijs"
+            ]
+        },
+        
+        {
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::canijs/*"
+            ]
+        },
+        
+        {
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::canijs/${cognito-identity.amazonaws.com:sub}/*"
+            ]
+        }
     ]
 }
