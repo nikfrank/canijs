@@ -43,6 +43,8 @@ Cani.s3 = (function(s3){
     var reqBuff = {};
 
     s3.read = function(bucket, key){
+	    // items come back as buffers.
+	    // perhaps return type (string, json, file) could be an option
 	if(key.constructor == Array) return Q.all(key.map(function(k){return s3.read(bucket, k);}));
 	var def = Q.defer();
 	var buck = bucket||s3conf.s3.Bucket;

@@ -4,46 +4,70 @@ Cani.core.confirm('cognito').then(function(){
     Cani.core.confirm('fb: login')
 	.then(function(loginData){return {authResponse:loginData};})
 	.then(Cani.cognito.onLogin)
-	.then(function(cogId){window.cogId = cogId;
-			      window.cHash = cogId.IdentityId.replace(/[^A-Fa-f0-9]/g,'')});
+	.then(function(cogId){
+	    window.cogId = cogId;
+	    window.cHash = cogId.IdentityId.replace(/[^A-Fa-f0-9]/g,'');
+	});
 });
 
 window.upload = window.read = window.list = function(){console.log('Cani S3 not yet ready');};
 
 Cani.core.confirm('s3').then(function(){
+
     window.list = function(){
-	Cani.s3.list('canijs').then(function(im){
-	    var us = {};
-	    for(var a,j=im.length;j-->0;) us[(a=im[j].Key.split('/')[0])] = (us[a]||[]).concat(im[j]);
-	    window.users = us;
-	    document.getElementById('user-list').innerHTML = Object.keys(us).reduce(function(p,c){
-		return p+'<li onclick="pickUser(\''+c+'\')"><img src="//gravatar.com/avatar/'+
-		    window.cHash+'?d=wavatar"> - '+us[c].length+'</li>';},'');
+	Cani.s3.list('canijs').then(function(items){
+	    // bin the items (objs describing file) by their user cognito hash (=s3 item prefix)
+	    var users = {};
+	    for(var a,j=items.length;j-->0;) // str8 ballin
+		users[(a=items[j].Key.split('/')[0])] = (users[a]||[]).concat(items[j]);
+	    return users;
+
+	}).then(function(users){
+	    window.users = users;
+	    document.getElementById('user-list').innerHTML = Object.keys(users).reduce(function(p,c){
+		return p+
+		    '<li onclick="pickUser(\''+c+'\')">'+
+		       '<img src="//gravatar.com/avatar/'+c.replace(/[^A-Fa-f0-9]/g,'')+'?d=wavatar">'+
+		       ' -- '+users[c].length+
+		    '</li>';
+	    },'');
 	});
     };
 
-    window.read = function(keys){
-	Cani.s3.read('canijs', keys).then(function(im){
-	    var imgs = im.map(function(t){return JSON.parse(String.fromCharCode.apply(null, t.Body))});
-
-	    var itemHTML = imgs.reduce(function(p,c){
-		return p+'<li><img src="'+c.data+'">'+c.comment+'</li>';},'');
-	    document.getElementById('img-contain').innerHTML = itemHTML;
+    window.readImgs = function(keys){
+	return Cani.s3.read('canijs', keys).then(function(items){
+	    return items.map(function(t){
+		return JSON.parse(String.fromCharCode.apply(null, t.Body));
+		// this is because aws-s3 always returns typed int arrays.
+		// "returnType" will be an option
+	    });
 	});
     };
 
     window.pickUser = function(hash){
 	if(window.user === hash) return;
-	window.read(window.users[window.user = hash].map(function(o){return o.Key}));
+
+	// cani s3 buffers the requests, so we don't have to worry about re-requesting
+
+	return window.readImgs(window.users[hash].map(function(o){return o.Key}))
+	    .then(function(imgs){
+		window.user = hash;
+		document.getElementById('img-contain').innerHTML = imgs.reduce(function(p,c){
+		    return p+'<li><img src="'+c.data+'">'+c.comment+'</li>';
+		},'');
+	    });
     };
 
     window.upload = function(pic, comment){
 	var nuItem = {data:pic, comment:comment};
 	var nuKey = window.cogId.IdentityId+'/'+(new Date).getTime()+'.json';
 
+	// return the promise so when it's done getfile (who called this) can close the dialog
 	return Cani.s3.upload('canijs', nuKey, nuItem).then(function(success){
-	    console.log('success!',JSON.stringify(success),'\nnow refresh the table to see the item!');
-	}, function(err){console.log('there was an error',err);});
+	    console.log('success!', JSON.stringify(success), '\nhit refresh to see the item!');
+	}, function(err){
+	    console.log('there was an error', err);
+	});
     };
 });
 
