@@ -1,3 +1,5 @@
+MAKE CANIJS WEBPACK AMD COMPATIBLE, while keeping the promise .confirm stuff
+
 big doc:
 ---
 
