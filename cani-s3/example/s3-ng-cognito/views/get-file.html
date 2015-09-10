@@ -1,0 +1,13 @@
+<div class="upload-box" layout="row">
+  <input type="file" id="file-input" ng-show="!gtf.hasFile"/>
+
+  <div ng-show="gtf.hasFile && !gtf.uploading">
+    <img ng-src="{{gtf.currentPic}}"/>
+    <textarea placeholder="Caption your picture!" ng-model="gtf.currentComment"></textarea>
+    <button ng-click="gtf.done()">Done</button>
+  </div>
+  <div ng-show="gtf.uploading">
+    <img src="https://media.giphy.com/media/12kGB0hjXATilW/giphy.gif" class="feynman-gif"/>
+  </div>
+
+</div>

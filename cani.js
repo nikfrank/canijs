@@ -1,13 +1,3 @@
-if(typeof window['Q'] === 'undefined'){
-    if(typeof window['angular'] === 'undefined'){
-	alert('Im crashing because I dont have q');
-	window.crashbecauseQ = true;
-    }else{
-	window['Q'] = window['angular'].injector(['ng']).get('$q');
-//	console.log(Q);
-    }
-}
-
 var Cani = Cani || {};
 
 Cani.core = (function(core){
@@ -46,7 +36,6 @@ Cani.core = (function(core){
     core.confirm = function(asset, prefix){
 
 	if(!prefix) prefix = 'confirm';
-
 	var deferred = Q.defer();
 
 	if(typeof asset === 'string'){

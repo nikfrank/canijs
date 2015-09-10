@@ -1,0 +1,46 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+	{
+            "Effect": "Allow",
+            "Action": [
+		"mobileanalytics:PutEvents",
+		"cognito-sync:*"
+            ],
+            "Resource": [
+		"*"
+            ]
+	},
+	
+        {
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::canijs"
+            ]
+        },
+        
+        {
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::canijs/*"
+            ]
+        },
+        
+        {
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::canijs/${cognito-identity.amazonaws.com:sub}/*"
+            ]
+        }
+    ]
+}

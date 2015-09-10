@@ -1,0 +1,24 @@
+<div class="body-contain" layout="row">
+  <div layout="column">
+    <ul id="user-list">
+      <li ng-repeat="hash in ctrl.userHashes track by hash" ng-click="ctrl.pickUser(hash)">
+	<img ng-src="{{::ctrl.gravatarUrl(hash)}}">
+	 -- {{ctrl.users[hash].length}}
+      </li>
+    </ul>
+  </div>
+  <div layout="column">
+    <ul id="img-contain">
+      <li ng-repeat="img in ctrl.imgs">
+	<img ng-src="{{::img.data}}"/>{{::img.comment}}
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="upload-bar" layout="row">
+  <button ng-click="ctrl.gettingFile = true">Upload image</button>
+  <button ng-click="ctrl.list()">Refresh List</button>
+</div>
+
+<div ng-if="ctrl.gettingFile" get-file="ctrl.gettingFile = false"></div>
