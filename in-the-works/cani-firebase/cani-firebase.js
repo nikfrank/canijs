@@ -1,16 +1,32 @@
-Cani.fire = (function(fire){
-
-	
-    var rootRef = new Firebase('https://glowing-fire-921.firebaseio.com/housepartie');
-    fire.rootRef = rootRef;
+Cani.firebase = (function(firebase){
+    var ref;
 
     // put schemas and containers into frebase online
     // futz with the fb profile package and max it out
 
-    Cani.core.on('config: fire', function(conf){ } );
+    Cani.core.on('config: firebase', function(conf){
+	ref = new Firebase(conf.firebase.url);
+	firebase.ref = ref;
+
+
+	if(conf.firebase.initOn.indexOf('fb: login')>-1){
+	    Cani.core.confirm('fb: login').then(function(fb){
+		console.log(fb);
+		// login firebase
+
+		ref.authWithOAuthPopup("facebook", function(error, authData) {
+		    if (error) {
+			console.log("Login Failed!", error);
+		    } else {
+			console.log("Authenticated successfully with payload:", authData);
+		    }
+		});
+
+	    });
+	}
+    });
     
-    // expose save and load functions
 
-    return fire;
+    return firebase;
 
-})(Cani.fire||{});
+})(Cani.firebase||{});
