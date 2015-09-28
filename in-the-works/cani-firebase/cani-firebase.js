@@ -23,6 +23,9 @@ Cani.firebase = (function(firebase){
 		});
 	    });
 	}
+
+console.log('affirm firebase', firebase);
+	Cani.core.affirm('firebase', firebase);
     });
 
     firebase.write = function(path, data){
@@ -104,45 +107,52 @@ Cani.firebase = (function(firebase){
 
 // auth stuff, should be split into sep modules?
 
+// wire these to promise
     firebase.auth = {
 	email:{
 //https://www.firebase.com/docs/web/guide/login/password.html
 //        ".read": "auth !== null && auth.provider === 'password'"
 	    createUser:function(email, password){
 //		var ref = new Firebase("https://<YOUR-FIREBASE-APP>.firebaseio.com");
+		var def = Q.defer();
 		ref.createUser({
-		    email    : "bobtony@firebase.com",
-		    password : "correcthorsebatterystaple"
+		    email: email,
+		    password: password
 		}, function(error, userData) {
 		    if (error) {
-			console.log("Error creating user:", error);
+			def.reject(error);
 		    } else {
-			console.log("Successfully created user account with uid:", userData.uid);
+			Cani.core.cast('firebase-auth: email-create-user');
+			def.resolve(userData);
 		    }
 		});
+		return def.promise;
 	    },
-	    login:function(email, password){
+	    login:function(email, password, remember){
 //		var ref = new Firebase("https://<YOUR-FIREBASE-APP>.firebaseio.com");
+		var def = Q.defer();
 		ref.authWithPassword({
-		    email    : "bobtony@firebase.com",
-		    password : "correcthorsebatterystaple"
+		    email: email,
+		    password: password
 		}, function(error, authData) {
 		    if (error) {
-			console.log("Login Failed!", error);
+			def.reject(error);
 		    } else {
-			console.log("Authenticated successfully with payload:", authData);
+			Cani.core.affirm('firebase-auth: email-login', authData);
+			def.resolve(authData);
 		    }
 		}, { // do this in an option?
-		    remember: "sessionOnly"
+		    remember: remember||"sessionOnly"
 		});
+		return def.promise;
 	    },
 
 	    changeEmail:function(oldEmail, nuEmail, password){
 //		var ref = new Firebase("https://<YOUR-FIREBASE-APP>.firebaseio.com");
 		ref.changeEmail({
-		    oldEmail : "bobtony@firebase.com",
-		    newEmail : "bobtony@google.com",
-		    password : "correcthorsebatterystaple"
+		    oldEmail : oldEmail,
+		    newEmail : nuEmail,
+		    password: password
 		}, function(error) {
 		    if (error === null) {
 			console.log("Email changed successfully");
@@ -154,9 +164,9 @@ Cani.firebase = (function(firebase){
 	    changePassword:function(email, oldPassword, nuPassword){
 //		var ref = new Firebase("https://<YOUR-FIREBASE-APP>.firebaseio.com");
 		ref.changePassword({
-		    email       : "bobtony@firebase.com",
-		    oldPassword : "correcthorsebatterystaple",
-		    newPassword : "neatsupersecurenewpassword"
+		    email: email,
+		    oldPassword: oldPassword,
+		    newPassword: nuPassword
 		}, function(error) {
 		    if (error === null) {
 			console.log("Password changed successfully");
@@ -168,7 +178,7 @@ Cani.firebase = (function(firebase){
 	    sendPasswordReset:function(email){
 //		var ref = new Firebase("https://<YOUR-FIREBASE-APP>.firebaseio.com");
 		ref.resetPassword({
-		    email : "bobtony@firebase.com"
+		    email: email
 		}, function(error) {
 		    if (error === null) {
 			console.log("Password reset email sent successfully");
@@ -180,8 +190,8 @@ Cani.firebase = (function(firebase){
 	    deleteAccount:function(email, password){
 //		var ref = new Firebase("https://<YOUR-FIREBASE-APP>.firebaseio.com");
 		ref.removeUser({
-		    email    : "bobtony@firebase.com",
-		    password : "correcthorsebatterystaple"
+		    email: email,
+		    password: password
 		}, function(error) {
 		    if (error === null) {
 			console.log("User removed successfully");

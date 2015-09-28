@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.9.4/angular-material.min.css">
+    
+    <style>
+      .fb-contain {position:fixed; top:5vh; right:4vw}
+      .body-contain {width:80vw; padding:2vw}
+      .body-contain * {margin:4px}
+      .upload-bar {position:fixed; bottom:0; height:10vh; left:0; width:100vw; background-color:#bbb;}
+      .upload-box {
+          background-color:white;
+          position:fixed; top:25vh; left:25vw; min-height:30vh; width:50vw;
+          z-index:1000; border:black solid 3px; border-radius:6px;
+          box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+      }
+      .upload-box img {margin:4px; height:200px; width:auto; max-width:40vw;}
+      .upload-box textarea {resize:none; width:30vw; height:auto;}
+      .upload-box button {margin-left:auto}
+
+      #img-contain img {margin:4px; height:200px; width:auto; max-width:40vw;}
+
+      .feynman-gif { margin:auto; }
+    </style>
+
+    <title>Firebase with email login Example!</title>
+  </head>
+  <body ng-app="firebase-email">
+
+    <div ui-view></div>
+    
+    <script src="../../../../lib/q.js"></script>
+
+    <script src="bower_components/firebase/firebase.js"></script>
+
+    <script src="../../../../cani.js"></script>
+    <script src="../../cani-firebase.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.17.1/ramda.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.4/angular.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.js"></script>
+
+    <script src="main.js"></script>
+    <script src="demo-config.js"></script>
+  </boyd>
+</html>
