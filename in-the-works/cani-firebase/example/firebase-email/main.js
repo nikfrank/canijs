@@ -31,6 +31,9 @@ angular.module('firebase-email', ['ui.router']).run(function($q){ window.Q = $q;
 	resolve:{
 	    CaniAuth:function(auth){ // this DI is what triggers login on refresh from #/main
 		return Cani.core.confirm('firebase-auth: email-login');
+	    },
+	    firebase:function(){
+		return Cani.core.confirm('firebase');
 	    }
 	}
     });
@@ -68,28 +71,41 @@ angular.module('firebase-email', ['ui.router']).run(function($q){ window.Q = $q;
     };
 })
 
-.controller('MainCtrl', function($scope, CaniAuth){
+.controller('MainCtrl', function($scope, CaniAuth, firebase){
     var that = this;
     this.user = CaniAuth.password.email;
-    Cani.core.confirm('firebase').then(function(firebase){
 
-	$scope.login = firebase.auth.login;
-	$scope.signup = firebase.auth.createUser;
-	$scope.sendNuPassword = firebase.auth.sendPasswordReset;
+    this.login = firebase.auth.login;
+    this.signup = firebase.auth.createUser;
+    this.sendNuPassword = firebase.auth.sendPasswordReset;
 
-	$scope.changePassword = function(){
-	    // show form to ask for old credentials and new credentials
-	    firebase.auth.changePassword();
-	};
+    this.changePassword = function(){
+	// show form to ask for old credentials and new credentials
+	firebase.auth.changePassword();
+    };
 
-	$scope.changeEmail = function(){
-	    // show form to ask for old credentials and new credentials
-	    firebase.auth.changeEmail();
-	};
+    this.changeEmail = function(){
+	// show form to ask for old credentials and new credentials
+	firebase.auth.changeEmail();
+    };
 
-	$scope.logout = function(){
-	    firebase.auth.logout().then(location.reload.bind(location));   
-	};
+    this.logout = function(){
+	firebase.auth.logout().then(location.reload.bind(location));   
+    };
+
+    
+    this.writeNote = function(note){
+	console.log(CaniAuth.uid, {note:note, profileImageURL:CaniAuth.password.profileImageURL});
+	Cani.firebase.write('notes/'+CaniAuth.uid, {
+	    note:note, profileImageURL:CaniAuth.password.profileImageURL
+	}).then(function(res){
+	    console.log(res);
+	});
+    };
+
+    firebase.readOnce('notes').then(function(notesSnap){
+	that.notes = notesSnap.val();
+	console.log(that.notes);
     });
 });
 

@@ -1,5 +1,15 @@
 logged in as {{main.user}}
-<button ng-click="logout()">Logout</button>
-<button ng-click="sendNuPassword()">Send Password Reset Email</button>
-<button ng-click="changePassword()">Change Password...</button>
-<button ng-click="changeEmail()">Change Email...</button>
+<button ng-click="main.logout()">Logout</button>
+<button ng-click="main.sendNuPassword()">Send Password Reset Email</button>
+<button ng-click="main.changePassword()">Change Password...</button>
+<button ng-click="main.changeEmail()">Change Email...</button>
+
+<br>
+
+<div ng-repeat="(user,note) in main.notes">
+  <img ng-src="{{note.profileImageURL}}"/> {{note.note}}
+</div>
+
+<label for="nu-note">My Status</label>
+<input ng-model="main.nuNote" type="text" id="nu-note"/>
+<button ng-click="main.writeNote(main.nuNote)">Save...</button>

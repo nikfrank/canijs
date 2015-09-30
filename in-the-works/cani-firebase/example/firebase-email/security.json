@@ -1,6 +1,6 @@
 {
     "rules": {
-	"questions":{
+	"notes":{
 	    "$user_id": {
 		".write": "$user_id === auth.uid",
 		".read": "auth != null"
