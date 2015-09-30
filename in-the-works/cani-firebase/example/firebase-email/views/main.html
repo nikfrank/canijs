@@ -1,15 +1,37 @@
-logged in as {{main.user}}
-<button ng-click="main.logout()">Logout</button>
-<button ng-click="main.sendNuPassword()">Send Password Reset Email</button>
-<button ng-click="main.changePassword()">Change Password...</button>
-<button ng-click="main.changeEmail()">Change Email...</button>
+<div class="upload-bar">
+  <button ng-click="main.popup = 'changep'">Change Password</button>
+  <button ng-click="main.popup = 'changee'">Change Email</button>
+  <p>logged in as {{main.email}} <button ng-click="main.logout()">Logout</button></p>
+</div>
 
-<br>
+
+<label for="nu-note">My Status</label>
+<input ng-model="main.nuNote" type="text" id="nu-note"/>
+<button ng-click="main.writeNote(main.nuNote)">Save...</button>
 
 <div ng-repeat="(user,note) in main.notes">
   <img ng-src="{{note.profileImageURL}}"/> {{note.note}}
 </div>
 
-<label for="nu-note">My Status</label>
-<input ng-model="main.nuNote" type="text" id="nu-note"/>
-<button ng-click="main.writeNote(main.nuNote)">Save...</button>
+App is {{main.live?'':'not'}} live
+<button ng-click="main.changeLiveState()">Switch</button>
+
+<div class="upload-box" ng-show="main.popup">
+  <div ng-switch="main.popup">
+    <div ng-switch-when="changep">
+      <label for="old-p">Old Password</label>
+      <input ng-model="main.oldP" type="password" id="old-p">
+      <label for="nu-p">New Password</label>
+      <input ng-model="main.nuP" type="password" id="nu-p">
+      <button ng-click="main.changePassword(main.oldP, main.nuP)">Done</button>
+    </div>
+    <div ng-switch-when="changee">
+      <label for="p-for-e">Old Password</label>
+      <input ng-model="main.pForE" type="password" id="p-for-e">
+      <label for="nu-e">New Email</label>
+      <input ng-model="main.nuE" type="email" id="nu-e">
+      <button ng-click="main.changePassword(main.pForE, main.nuE)">Done</button>
+    </div>
+  </div>
+  <button ng-click="main.popup=false">Close</button>
+</div>

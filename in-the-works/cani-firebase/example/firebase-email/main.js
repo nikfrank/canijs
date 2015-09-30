@@ -50,6 +50,7 @@ angular.module('firebase-email', ['ui.router']).run(function($q){ window.Q = $q;
 })
 
 .controller('LoginCtrl', function(auth, $state){ // this DI is what triggers login from new page load
+    var that = this;
     this.login = function(email, password){
 	// login to firebase
 	Cani.firebase.auth.email.login(email, password, 'default')
@@ -61,38 +62,69 @@ angular.module('firebase-email', ['ui.router']).run(function($q){ window.Q = $q;
     };
 
     this.signup = function(email, password){
-	// login to firebase
+	// signin to firebase
 	Cani.firebase.auth.email.createUser(email, password)
-	    .then(function(res){
-		console.log('logged in', res);
-	    }, function(err){
-		console.log('login failed', err);
-	    });
+	    .then(function(res){ console.log('signed up', res);},
+		  function(err){ console.log('signup failed', err);})
+	// trigger login (automatic, but this is easier)
+	    .then(function(){ that.login(email, password);});
+    };
+
+    this.sendNuPassword = function(email){
+	firebase.auth.sendPasswordReset(email);
     };
 })
 
-.controller('MainCtrl', function($scope, CaniAuth, firebase){
+.controller('MainCtrl', function($scope, CaniAuth, firebase, $timeout){
     var that = this;
-    this.user = CaniAuth.password.email;
+    this.popup = false;
+    this.live = false;
+
+    this.email = CaniAuth.password.email;
 
     this.login = firebase.auth.login;
     this.signup = firebase.auth.createUser;
-    this.sendNuPassword = firebase.auth.sendPasswordReset;
 
-    this.changePassword = function(){
-	// show form to ask for old credentials and new credentials
-	firebase.auth.changePassword();
+    this.changePassword = function(oldP, nuP){
+	firebase.auth.email.changePassword(that.email, oldP, nuP)
+	    .then(function(res){
+		console.log('changed p', res);
+	    }, function(err){
+		console.log('failed to change p', err);
+	    }).then(function(){ that.logout();});
     };
 
-    this.changeEmail = function(){
-	// show form to ask for old credentials and new credentials
-	firebase.auth.changeEmail();
+    this.changeEmail = function(password, nuE){
+	firebase.auth.email.changeEmail(that.email, nuE, password)
+	    .then(function(res){
+		console.log('changed e', res);
+	    }, function(err){
+		console.log('failed to change e', err);
+	    }).then(function(){ that.logout();});
     };
 
     this.logout = function(){
 	firebase.auth.logout().then(location.reload.bind(location));   
     };
 
+
+    this.changeLiveState = function(){
+	that.live = !that.live;
+	if(that.live){
+	    // set up three-way binding
+	    firebase.read('notes', 'value', function(notes){
+		that.notes = notes.val();
+
+		// note this here! no $q happiness
+		// also, on write this is already in an apply. ugh
+		setTimeout(function(){ $scope.$digest();},0);
+	    });
+	}else{
+	    // kill three-way binding
+	    firebase.killRead('notes', 'value');
+	    that.readOnce();
+	}
+    };
     
     this.writeNote = function(note){
 	console.log(CaniAuth.uid, {note:note, profileImageURL:CaniAuth.password.profileImageURL});
@@ -103,9 +135,11 @@ angular.module('firebase-email', ['ui.router']).run(function($q){ window.Q = $q;
 	});
     };
 
-    firebase.readOnce('notes').then(function(notesSnap){
-	that.notes = notesSnap.val();
-	console.log(that.notes);
-    });
+    this.readOnce = function(){
+	firebase.readOnce('notes').then(function(notesSnap){
+	    that.notes = notesSnap.val();
+	});
+    };
+    this.readOnce();
 });
 

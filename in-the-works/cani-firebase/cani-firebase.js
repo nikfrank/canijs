@@ -59,7 +59,6 @@ Cani.firebase = (function(firebase){
 
 	ref.child(path).set(data, function(err){
 	    // keep in mind this will do overwriting
-	    console.log(err);
 	    err? def.reject(err):def.resolve(data);
 	});
 	return def.promise;
@@ -86,7 +85,13 @@ Cani.firebase = (function(firebase){
 	return def.promise;
     };
 
-    firebase.read = function(path, eventType){
+
+    firebase.read = function(path, eventType, callback, errcallback){
+// this needs to be an observable stream with RXJS
+// awesome.
+
+// for now, implement callbacks - later do both concurrently
+
 	// use eventType = value for reads
 	// child_added for array pushes
 	// child changed/removed for collection ops
@@ -94,19 +99,15 @@ Cani.firebase = (function(firebase){
 
 	// value triggered last (does this matter?)
 
-
-	var def = Q.defer();
-	ref.on(eventType||'value', function(snapshot){
-	    def.resolve(snapshot.val())
-	}, function(err){
-	    def.reject(err);
-	});
-
-	return def.promise;
-
-	// to kill this callback, save a ref to the ref and .off the eventType
-	// aka fix this code for to no memory leak
+	ref.child(path).on(eventType||'value', function(snapshot){
+	    callback(snapshot);
+	}, errcallback);
     };
+
+    firebase.killRead = function(path, eventType, callback){
+	return ref.child(path).off(eventType||'value', callback);
+    };
+
 
     firebase.query = function(path, orderBy){
 	// can only order each path-query once at a time
