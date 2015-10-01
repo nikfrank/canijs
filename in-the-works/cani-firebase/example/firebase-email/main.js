@@ -71,7 +71,12 @@ angular.module('firebase-email', ['ui.router']).run(function($q){ window.Q = $q;
     };
 
     this.sendNuPassword = function(email){
-	firebase.auth.sendPasswordReset(email);
+	Cani.firebase.auth.email.sendPasswordReset(email)
+	    .then(function(res){
+		console.log('sent to '+email);
+	    },function(err){
+		console.log('err',err);
+	    });
     };
 })
 
