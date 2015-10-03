@@ -22,9 +22,9 @@
       .feynman-gif { margin:auto; }
     </style>
 
-    <title>Firebase with angular Example!</title>
+    <title>Firebase with angular, fb login & rxjs Example!</title>
   </head>
-  <body not-ng-app="s3demo">
+  <body ng-app="firebase-fb">
 
     <div class="fb-contain">
       <fb:login-button show-faces="true" width="200"></fb:login-button>
@@ -33,13 +33,14 @@
 
     <div ui-view></div>
     
-    <script src="../../../../lib/q.js"></script>
+    <script src="../../../lib/q.js"></script>
+    <script src="../../../lib/bower_components/rxjs/dist/rx.lite.js"></script>
 
     <script src="bower_components/firebase/firebase.js"></script>
 
-    <script src="../../../../cani.js"></script>
+    <script src="../../../cani.js"></script>
     <script src="../../cani-firebase.js"></script>
-    <script src="../../../../cani-fb/cani-fb.js"></script>
+    <script src="../../../cani-fb/cani-fb.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.17.1/ramda.js"></script>
 

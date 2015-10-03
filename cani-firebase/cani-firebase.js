@@ -15,13 +15,21 @@ Cani.firebase = (function(firebase){
 	if(initAuthState === null) Cani.core.affirm('firebase-auth: no-persisted-login', firebase);
 	else{
 	    // send the correct auth login event if expiry is in future
-	    Cani.core.affirm('firebase-auth: email-login', initAuthState);
+	    switch(initAuthState.provider){
+	    case 'password':
+		Cani.core.affirm('firebase-auth: email-login', initAuthState);
+		break;
+	    case 'facebook':
+		Cani.core.affirm('firebase-auth: fb-login', initAuthState);
+		break;
+	    }
+	    
 	}
 
 // point this to firebase.auth.fb.onLogin(fn)
 // https://www.firebase.com/docs/web/guide/login/facebook.html
 	if(conf.firebase.initOn.indexOf('fb: login')>-1){
-	    Cani.core.confirm('fb: login').then(function(fb){
+	    Cani.core.confirm(['firebase-auth: no-persisted-login','fb: login']).then(function(aa){
 		// login firebase
 		ref.authWithOAuthPopup("facebook", function(error, authData) {
 		    if(error) console.log("Login Failed!", error);
@@ -107,6 +115,22 @@ Cani.firebase = (function(firebase){
     firebase.killRead = function(path, eventType, callback){
 	return ref.child(path).off(eventType||'value', callback);
     };
+
+    firebase.readObs = function(path, eventType){
+	eventType = eventType||'value';
+	var query = ref.child(path);
+	return Rx.Observable.create(function(observer){
+	    var listener = query.on(eventType,
+		           (eventType==='value')?
+				function(snap){ observer.onNext(snap)}:
+				function(snap, prev){observer.onNext({snapshot: snap, prevName:prev})},
+				    function(error){ observer.onError(error);});
+
+	    return function(){ query.off(eventType, listener);};
+
+	}).publish().refCount(); // this avoids duping somehow?
+    };
+
 
 
     firebase.query = function(path, orderBy){
