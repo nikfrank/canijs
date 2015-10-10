@@ -6,8 +6,9 @@ Cani.phonegapFb = (function(phonegapFb){
     };
 
 // does this even run on webmock? yes, by means of a hand-affirm by setPassing the phonegap service
-
-    Cani.core.confirm('phonegap').then(function(conf){FBGCONF(conf);});
+    Cani.core.on('config: phonegap-fb', function(conf){
+	Cani.core.confirm('phonegap').then(function(){FBGCONF(conf);});
+    });
 
 // work out long term token logins
 

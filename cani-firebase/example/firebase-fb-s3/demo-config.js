@@ -11,7 +11,6 @@ Cani.core.boot({
 
     firebase:{
 	url:'https://dazzling-fire-4932.firebaseIO.com',
-	initOn:['fb: login'],
-	ignoreProviders:['password']
+	initOn:['fb: login']
     }
 });

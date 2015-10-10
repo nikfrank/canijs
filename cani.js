@@ -34,7 +34,6 @@ Cani.core = (function(core){
     core.assets = assets;
 
     core.confirm = function(asset, prefix){
-
 	if(!prefix) prefix = 'confirm';
 	var deferred = Q.defer();
 
