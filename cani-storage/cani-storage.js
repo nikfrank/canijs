@@ -19,7 +19,7 @@ Cani.storage = (function(storage){
 		storage.expire(schema, index).then(function(r){
 		    if(!localStorage[hash]) localStorage[indexName] = hash+'׆'+index;
 		    localStorage[hash] = JSON.stringify(query);
-		    def.resolve('ok');
+		    def.resolve(query);
 
 		},function(err){
 		    console.log('erase err', err);
@@ -27,7 +27,7 @@ Cani.storage = (function(storage){
 	    else{
 		if(!localStorage[hash]) localStorage[indexName] = hash+'׆'+index;
 		localStorage[hash] = JSON.stringify(query);
-		def.resolve('ok');
+		def.resolve(query);
 	    }
 
 	    return def.promise;
