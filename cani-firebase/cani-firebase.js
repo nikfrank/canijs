@@ -62,6 +62,7 @@ Cani.firebase = (function(firebase){
 	return def.promise;
     };
 
+// this is unfinished!!!!
     firebase.update = function(path, data){
 	var hopperRef = usersRef.child("gracehop");
 	hopperRef.update({
