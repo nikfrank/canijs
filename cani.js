@@ -110,3 +110,7 @@ Cani.core = (function(core){
     return core;
 
 })(Cani.core||{});
+
+if(typeof require === 'function'){
+    module.exports = Cani;
+}

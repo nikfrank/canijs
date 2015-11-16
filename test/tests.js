@@ -1,15 +1,13 @@
 var assert = require('assert');
 
+var aws = require('aws-sdk');
+
 var env = 'test';
 var config = require('./config')[env];
 
-var conop = config.conop;
+var cani = require('../cani');
 
-var schemas = require('./schemas');
-
-var pg = require('pg');
-var pgx = require('./pgx')(pg, config.conop, schemas);
-
+console.log(cani);
 
 var teststatus = '';
 

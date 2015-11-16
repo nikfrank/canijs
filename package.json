@@ -8,9 +8,9 @@
     "type": "git",
     "url": "https://github.com/nikfrank/canijs.git"
   },
-  "keywords": [
-  ],
+  "keywords": [],
   "devDependencies": {
+    "aws-sdk": "^2.2.17",
     "mocha": "1.18.2"
   },
   "main": "nodemain",
