@@ -1,6 +1,6 @@
 // the aws regions need to be made consistent
 
-Cani.core.boot({
+module.exports = {
 
     s3:{
 	Bucket:'bucket name from AWS S3',
@@ -174,4 +174,4 @@ Cani.core.boot({
 
 	}
     }
-});
+};
