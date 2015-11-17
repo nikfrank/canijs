@@ -35,25 +35,27 @@ confirm
 
 */
     describe('cast', function(){
+
 	describe('on, no flush', function(){
 	    it('should call the callback properly when the notification is cast', function(done){
 		
 		var blah = Math.random();
 		var times = 0;
 
+		var fail = setTimeout(function(){
+		    return done('notification callback flushed incorrectly');
+		}, 2100);
+
 		Cani.core.on('blah', function(asset){
 		    if(blah !== asset) return done('asset not passed properly');
-		    if(++times === 2) done(null);
+		    else if(++times === 2){
+			clearTimeout(fail);
+			return done(null);
+		    }
 		});
 
-
 		Cani.core.cast('blah', false, blah);
-		Cani.core.cast('blah', false, blah);
-
-		setTimeout(function(){
-		    return done('notification callback flushed incorrectly');
-		}, 2900);
-
+		Cani.core.cast('blah', true, blah);
 	    });
 	});
 
@@ -63,17 +65,41 @@ confirm
 		var hmm = Math.random();
 		var times = 0;
 
+		var pass = setTimeout(function(){
+		    return done(null);
+		}, 1000);
+
 		Cani.core.on('hmm', function(asset){
-		    if(hmm !== asset) return done('asset not passed properly');
-		    if(++times === 2) return done('notification callback not flushed correctly');
+		    if(hmm !== asset){
+			clearTimeout(pass);
+			return done('asset not passed properly');
+		    }
+		    if(++times === 2){
+			clearTimeout(pass);			
+			return done('notification callback not flushed correctly');
+		    }
 		});
 
 		Cani.core.cast('hmm', true, hmm);
 		Cani.core.cast('hmm', true, hmm);
 
-		setTimeout(function(){
-		    return done(null);
-		}, 1000);
+	    });
+	});
+    });
+
+    describe('confirm', function(){
+	describe('on, no flush', function(){
+	    it('should stash the asset on affirm and resolve it on confirm', function(done){
+		// do this test once for preregister, once for postregister
+
+		var blah = Math.random();
+
+		Cani.core.affirm('blah', blah);
+
+		Cani.core.confirm('blah').then(function(asset){
+		    if(blah !== asset) return done('asset not passed properly');
+		    else return done(null);
+		});
 
 	    });
 	});

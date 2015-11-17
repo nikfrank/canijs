@@ -1,3 +1,6 @@
+if(typeof require === 'function'){
+    Q = require('q');
+}
 var Cani = Cani || {};
 
 Cani.core = (function(core){

@@ -11,7 +11,8 @@
   "keywords": [],
   "devDependencies": {
     "aws-sdk": "^2.2.17",
-    "mocha": "1.18.2"
+    "mocha": "1.18.2",
+    "q": "^1.4.1"
   },
   "main": "nodemain",
   "engines": {
@@ -27,6 +28,9 @@
   "bugs": {
     "url": "https://github.com/nikfrank/lisjp/issues"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "mocha test/tests.js",
+    "cover": "istanbul cover node_modules/.bin/_mocha -- test/tests.js"
+  },
   "readmeFilename": "README.md"
 }
