@@ -1,3 +1,5 @@
+[![Dependency Status](https://www.versioneye.com/user/projects/564f636bff016c003a000205/badge.svg?style=flat)](https://www.versioneye.com/user/projects/564f636bff016c003a000205)
+
 The point of this project is to make a bunch of different APIs and modules exposed by various providers
 (AWS, Google, Facebook, Phonegap, Twitter, Reddit, etc.) work withe same grammar.
 
