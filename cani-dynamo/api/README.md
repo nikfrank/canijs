@@ -77,7 +77,8 @@ Cani.dynamo.load('item', {price:{LT:3000}}).then(function(items){
 ```
 
 Read the AWS [docs](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html)
-to learn about indices (GSI) that will let you query your data how you please## Examples
+to learn about indices (GSI) that will let you query your data how you please
+## Examples
 ---
 
 Available [`here`](https://github.com/nikfrank/canijs/tree/master/cani-dynamo/example)
