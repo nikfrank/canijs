@@ -1,20 +1,46 @@
 {
+    title:'Cani-s3',
+    missionStatement:'Cani-s3 mediates dealing w aws s3 for you.',
+    firstExample:"Cani.s3.list('canijs').then(...);\n"+
+	"Cani.s3.upload('canijs', nuKey, nuItem).then(...);\n"
+	"Cani.s3.read('canijs', keys).then(...);",
+    scripts:['aws-sdk.js','canijs/cani.js','canijs/cani-s3/cani-s3.js'],
+
+    basicUse:["Cani.s3.list('bucketName').then(function(items){\n"+
+	      "console.log('there are '+items.length+' items');\n"+
+	      "});",
+	      "Cani.s3.upload('bucketName', 'keyForFileInBucket', "+
+	      "{object:'written as a stringify'}).then(function(res){\n"+
+	      "   // I can't remember what res is here. Should probably check that!\n"+
+	      "});",
+	      "Cani.s3.read('bucketName', ['key1', 'key2']).then(function(items){\n"+
+	      "   console.log('got '+Object.keys(items).join(' ')+' from bucket ');\n"+
+	      "});"],
+    basicUsePostText:'Read the AWS [docs](http://docs.aws.amazon.com/AWSJavaScriptSDK/'+
+	'latest/AWS/S3.html)\n'+
+	'to learn about prefices and CORS on buckets!',
+
+    exampleLink:'',
+
     configExample:{
-	Bucket:'dre-images',
+	Bucket:'canijs-images',
 	initOn:['cognito: fb-login']
     },
     configDescription:{
 	Bucket:'the name of the default s3 bucket you\'ll be dealing with',
-	initOn:'The events to run init as a response to.'
+	initOn:'The events to run init as a response to.'+
+	    'The example boots once fb logs in through cognito'
     },
     exposures:{
 	init:'() => this is used internally with initOn, but you can init whenever you want\n\n'+
-	    'keep in mind though, the auth state of the window.AWS singleton at the time of init\n\n'+
-	    'stays withis table for its lifecycle. So only init once you\'ve authed!',
+	    'keep in mind though, the auth state of the window.AWS singleton at the time of init'+
+	    '\n\nstays withis table for its lifecycle. So only init once you\'ve authed!',
 	initBucket:'(bucket) => initialize some bucket. For now you\'ll need to call this \n\n'+
 	    'for buckets other than the default bucket.',
 	upload:'(bucket, key, fileData) => upload the fileData as key to the bucket. WOW',
 	read:'(bucket, key) => read key out of bucket. also works for [keys]',
 	list:'(bucket, prefix) => lists contents of bucket with [optionally] prefix'
-    }
+    },
+    exposureOrder:['init', 'initBucket', 'upload', 'read', 'list'],
+    notes:'Look into s3 ia if you\'re precocious!'
 }
