@@ -32,8 +32,10 @@
     "url": "https://github.com/nikfrank/lisjp/issues"
   },
   "scripts": {
-    "test": "mocha test/tests.js",
-    "cover": "istanbul cover node_modules/.bin/_mocha -- test/tests.js"
+      "mocha": "mocha test/tests.js",
+      "test":"gulp test",
+      "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
+    "test-istanbul": "istanbul cover node_modules/.bin/_mocha -- test/tests.js"
   },
   "readmeFilename": "README.md"
 }

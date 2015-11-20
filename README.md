@@ -1,4 +1,6 @@
 [![Dependency Status](https://www.versioneye.com/user/projects/564f636bff016c003a000205/badge.svg?style=flat)](https://www.versioneye.com/user/projects/564f636bff016c003a000205)
+[![Coverage Status](https://coveralls.io/repos/nikfrank/canijs/badge.svg?branch=master)](https://coveralls.io/r/<account>/<repository>?branch=master)
+[![Build Status](https://travis-ci.org/nikfrank/canijs.svg?branch=master)](https://travis-ci.org/nikfrank/canijs)
 
 The point of this project is to make a bunch of different APIs and modules exposed by various providers
 (AWS, Google, Facebook, Phonegap, Twitter, Reddit, etc.) work withe same grammar.
