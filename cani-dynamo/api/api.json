@@ -1,25 +1,47 @@
 {
+    title:'Cani-dynamo',
+    missionStatement:'Cani-dynamo makes using AWS dynamoDB more like actual noSQL',
+    firstExample:"Cani.dynamo.save('item', nuItem).then(...);\n"+
+	"Cani.dynamo.load('item', {owner:this.userId}).then(...);",
+    scripts:['aws-sdk.js','canijs/cani.js','canijs/cani-dynamo/cani-dynamo.js'],
+
+    basicUse:["Cani.dynamo.save('item', {\n"+
+	      "   owner:this.userId, id:1440, somehash:'blahblahblah', price:2000\n"+
+	      "}).then(function(res){\n"+
+	      "   // I can't remember what res is here. Should probably check that!\n"+
+	      "});",
+	      "Cani.dynamo.load('item', {price:{LT:3000}}).then(function(items){\n"+
+	      "   console.log('there are '+items.length+' items under 3000 shmekels');\n"+
+	      "});"],
+    basicUsePostText:'Read the AWS [docs](http://docs.aws.amazon.com/AWSJavaScriptSDK/'+
+	'latest/AWS/DynamoDB.html)\n'+
+	'to learn about indices (GSI) that will let you query your data how you please',
+
+    exampleLink:'',
+
     configExample:{
-	schemas:{
-	    appt:{
-		fields:{somehash:'S', id:'N', owner:'S', price:'N'},
-		table:{
-		    arn:'arn:aws:dynamodb:eu-west-1:000000000000:table/tableName',
-		    hashKey:'id', rangeKey:'somehash',
-		    indices:(([])) // still needs to be implemented
+	dynamo:{
+	    schemas:{
+		item:{
+		    fields:{somehash:'S', id:'N', owner:'S', price:'N'},
+		    table:{
+			arn:'arn:aws:dynamodb:eu-west-1:000000000000:table/tableName',
+			hashKey:'id', rangeKey:'somehash',
+			indices:(([])) // still needs to be implemented
+		    }
 		}
-	    }
-	},
-	awsConfigPack:{region: 'eu-west-1'},
-	initOn:['cognito: fb-login']
+	    },
+	    awsConfigPack:{region: 'eu-west-1'},
+	    initOn:['cognito: fb-login']
+	}
     },
     configDescription:{
 	dynamo:{
 	    schemas:{
 		'0':'"types" for the functional minded. Each schema has a table and a format',
-		schemaName:{
+		"<<schemaName>>":{
 		    '0':'the keys here are the schema names',
-		    fields:'object of:\n\nkeys - fields on every item; \n\n values - dynamo type. see: http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DataModel.html',
+		    fields:'object of:\n\nkeys - fields on every item; \n\n values - dynamo type. see: http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DataModel.html\n((check impl.))',
 		    table:{
 			'0':'Table description from AWS. Read the DataModel link re: indices',
 			arn:'grab this off the table properties',
@@ -51,6 +73,7 @@
 
 	erase:'(schemaName, query) => pass in a schema, hashKey and rangeKey to delete the item'
     },
-    notes:'Scan operations are not supported because I think they\'re stupid. I\'m sure that\'ll \n\n'+
+    exposureOrder:['init', 'write', 'save', 'load', 'erase'],
+    notes:'Scan operations are not supported because I think they\'re stupid. I\'m sure that\'ll '+
 	'change eventually'
 }
