@@ -60,11 +60,8 @@ Cani.s3.read('bucketName', ['key1', 'key2']).then(function(items){
 });
 ```
 
-Read the AWS [docs](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html)
-to learn about indices (GSI) that will let you query your data how you please
-
-
-## Examples
+Read the AWS [docs](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html)
+to learn about prefices and CORS on buckets!## Examples
 ---
 
 Available [`here`](https://github.com/nikfrank/canijs/tree/master/cani-s3/example)
