@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for canijs/cani-dynamo/cani-dynamo.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">canijs/cani-dynamo/</a> cani-dynamo.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">13.89% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>25/180</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">2.22% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>2/90</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">26.67% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>4/15</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">14.74% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>23/156</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">Canidynamo = function(Cani){ return (function(dynamo){
+    // expect schemas in conf.dynamo to map saves/loads, set indices, confirm permissions properly
+&nbsp;
+    var schemas = [];
+    dynamo.schemas = schemas;
+&nbsp;
+    // grab these off the conf object
+    var tables = [];
+    dynamo.tables = tables;
+&nbsp;
+    var dy; // aws dynamo singleton
+    var dyconf;
+&nbsp;
+    // ------------------------------- config -------------------------------------
+    var DYCONF = function(conf, provider){
+	dyconf = conf;
+	schemas = conf.dynamo.schemas;
+	<span class="missing-if-branch" title="else path not taken" >E</span>if('initOn' in conf.dynamo)
+	    conf.dynamo.initOn.map(function(pr){Cani.core.confirm(pr).then(dynamo.init);});
+    };
+&nbsp;
+    // dynamo boot hook
+    Cani.core.on('config: dynamo', DYCONF);
+&nbsp;
+    dynamo.init = <span class="fstat-no" title="function not covered" >function(){</span>
+<span class="cstat-no" title="statement not covered" >	dy = new AWS.DynamoDB(dyconf.dynamo.awsConfigPack);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	dy.listTables(<span class="fstat-no" title="function not covered" >function(err, data){</span></span>
+	    // maybe parse the meaningless aws error messages?
+<span class="cstat-no" title="statement not covered" >	    if(err) <span class="cstat-no" title="statement not covered" >console.log(err);</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	    dynamo.tables = data.TableNames;</span>
+<span class="cstat-no" title="statement not covered" >	    Cani.core.affirm('dynamo', dynamo);</span>
+&nbsp;
+	    // affirm dy.table foreach table
+<span class="cstat-no" title="statement not covered" >	    for(var i=dynamo.tables.length;i--&gt;0;) <span class="cstat-no" title="statement not covered" >Cani.core.affirm('dynamo.'+dynamo.tables[i],dynamo);</span></span>
+	});
+    };
+&nbsp;
+    // expose save and load functions
+&nbsp;
+    // these names need to be fixed to the standard api
+//------------------------------------------------------------------------------------------
+    dynamo.write = <span class="fstat-no" title="function not covered" >function(type){</span>
+	// in cases where default options are non-EQ queries
+<span class="cstat-no" title="statement not covered" >	return '';</span>
+    };
+&nbsp;
+//------------------------------------------------------------------------------------------
+    dynamo.save = <span class="fstat-no" title="function not covered" >function(schemaName, query){</span>
+<span class="cstat-no" title="statement not covered" >	if(typeof query === 'undefined') <span class="cstat-no" title="statement not covered" >query = {};</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	query = JSON.parse(JSON.stringify(query));</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var deferred = Q.defer(); </span>// deferred.reject to do an error
+<span class="cstat-no" title="statement not covered" >	var schema = schemas[schemaName];</span>
+	
+	// load the query into an AWS Item pack
+<span class="cstat-no" title="statement not covered" >	var pack = {};</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var tableName = schema.table.arn.split('/')[1]; </span>// MIGHT FUCK UP
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	for(var ff in query){</span>
+<span class="cstat-no" title="statement not covered" >	    if(query[ff] === '') <span class="cstat-no" title="statement not covered" >continue; </span></span>//  no blank strings allowed
+<span class="cstat-no" title="statement not covered" >	    if(query[ff] === null) <span class="cstat-no" title="statement not covered" >continue; </span></span>// typeof null == 'object'
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	    if(ff[0] === '$') <span class="cstat-no" title="statement not covered" >continue; </span></span>// don't write angular fields. also fuck php?
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	    if(ff in schema.fields){</span>
+		// if in schema write to pack with type
+<span class="cstat-no" title="statement not covered" >		pack[ff] = {};</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		if(schema.fields[ff] === 'N') <span class="cstat-no" title="statement not covered" >query[ff] = ''+query[ff];</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		pack[ff][schema.fields[ff]] = query[ff];</span>
+&nbsp;
+	    }else{
+		// do the old style type guessing
+<span class="cstat-no" title="statement not covered" >		var type = dynamoType(query[ff]);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		if(type === 'U') <span class="cstat-no" title="statement not covered" >continue; </span></span>// shouldn't happen though		
+<span class="cstat-no" title="statement not covered" >		if(type === 'B') <span class="cstat-no" title="statement not covered" >type = 'BOOL';</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		pack[ff] = {};</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		if(type === 'N') <span class="cstat-no" title="statement not covered" >query[ff] = ''+query[ff]; </span></span>// pass numbers as strings? psh
+<span class="cstat-no" title="statement not covered" >		if(type === 'L'){</span>
+		    // mashu?
+		}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		if(type === 'M'){</span>
+		    // make query[ff] into a map of {"S":"value"} structures?
+<span class="cstat-no" title="statement not covered" >		    for(var ii in query[ff]){</span>
+<span class="cstat-no" title="statement not covered" >			var ss = {};</span>
+<span class="cstat-no" title="statement not covered" >			var tt = dynamoType(query[ff][ii]);</span>
+<span class="cstat-no" title="statement not covered" >			if(tt === 'BOOL') <span class="cstat-no" title="statement not covered" >ss[tt] = query[ff][ii];</span></span>
+			else <span class="cstat-no" title="statement not covered" >ss[tt] = ''+query[ff][ii];</span>
+<span class="cstat-no" title="statement not covered" >			query[ff][ii] = ss;</span>
+		    }
+		}
+&nbsp;
+<span class="cstat-no" title="statement not covered" >		pack[ff][type] = query[ff];</span>
+	    }
+	}
+&nbsp;
+// replace this with a stupid USE TABLE FROM SCHEMA system
+// maybe check that we have the keys for this index? meh
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	dy.putItem({TableName:tableName, Item:pack}, <span class="fstat-no" title="function not covered" >function(err, res){</span></span>
+<span class="cstat-no" title="statement not covered" >	    if(err){</span>
+<span class="cstat-no" title="statement not covered" >		console.log(err);</span>
+		// parse aws error msg
+<span class="cstat-no" title="statement not covered" >		deferred.reject(err);</span>
+	    }
+<span class="cstat-no" title="statement not covered" >	    deferred.resolve(query);</span>
+	});
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	return deferred.promise;</span>
+    };
+&nbsp;
+//------------------------------------------------------------------------------------------
+    dynamo.load = <span class="fstat-no" title="function not covered" >function(schemaName, query, options){</span>
+<span class="cstat-no" title="statement not covered" >	var def = Q.defer();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	if(!options) <span class="cstat-no" title="statement not covered" >options = {};</span></span>
+<span class="cstat-no" title="statement not covered" >	if(!query) <span class="cstat-no" title="statement not covered" >query = {};</span></span>
+&nbsp;
+// this doesn't implement options.FilterExpression IndexName Limit ProjectionExpression or ScanIndexForward
+// or options.Select (count, attribute listables)
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var schema = schemas[schemaName];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var table = schema.table;</span>
+<span class="cstat-no" title="statement not covered" >	var tableName = table.arn.split('/')[1];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var indexName;</span>
+<span class="cstat-no" title="statement not covered" >	if(indexName = options.index)</span>
+<span class="cstat-no" title="statement not covered" >	    if(table.indices.indexOf(indexName) === -1)</span>
+<span class="cstat-no" title="statement not covered" >		throw 'index '+indexName+' not available';</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	if(dynamo.tables.indexOf(tableName) === -1) <span class="cstat-no" title="statement not covered" >throw 'table '+tableName+' not available';</span></span>
+	
+<span class="cstat-no" title="statement not covered" >	var pack = {};</span>
+<span class="cstat-no" title="statement not covered" >	pack.TableName = tableName;</span>
+	// pack.IndexName left empty for default?
+&nbsp;
+	// string build a KeyConditionExpression
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var hashAtt = table.hashKey;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	if((table.reservedAttributes||[]).indexOf(table.hashKey)&gt;-1){</span>
+<span class="cstat-no" title="statement not covered" >	    pack.ExpressionAttributeNames = {};</span>
+<span class="cstat-no" title="statement not covered" >	    pack.ExpressionAttributeNames['#bsd'+table.hashKey] = table.hashKey;</span>
+<span class="cstat-no" title="statement not covered" >	    hashAtt = '#bsd'+table.hashKey;</span>
+	}
+&nbsp;
+	// start withe hashKey (ALWAYS EXACT QUERYING)
+<span class="cstat-no" title="statement not covered" >	if(!(table.hashKey in query)) <span class="cstat-no" title="statement not covered" >throw 'query needs a hashkey ('+table.hashKey+') expression';</span></span>
+<span class="cstat-no" title="statement not covered" >	pack.KeyConditionExpression = hashAtt + ' = :' + table.hashKey;</span>
+	// this prev evals the :table.hashKey to the ExpressionAttributeValue next, to check equality
+	// this dynamoType I think is always S or N?
+<span class="cstat-no" title="statement not covered" >	pack.ExpressionAttributeValues = {};</span>
+<span class="cstat-no" title="statement not covered" >	pack.ExpressionAttributeValues[':'+table.hashKey] = {};</span>
+<span class="cstat-no" title="statement not covered" >	pack.ExpressionAttributeValues[':'+table.hashKey][dynamoType(query[table.hashKey])] = </span>
+	    ''+query[table.hashKey];
+&nbsp;
+	// now build KeyConditionExpression for the rest of the query
+<span class="cstat-no" title="statement not covered" >	for(var ff in query){</span>
+<span class="cstat-no" title="statement not covered" >	    if(ff === table.hashKey) <span class="cstat-no" title="statement not covered" >continue;</span></span>
+<span class="cstat-no" title="statement not covered" >	    var type = (typeof query[ff])[0].toUpperCase(); </span>// don't change this to dynamoType!
+<span class="cstat-no" title="statement not covered" >	    var cOp = '=';</span>
+&nbsp;
+// querying arrays? later
+&nbsp;
+// remember to implement this comparison operator validation!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+<span class="cstat-no" title="statement not covered" >	    if((type === 'O') &amp;&amp; ('is an actual comparison operator query')){</span>
+<span class="cstat-no" title="statement not covered" >		cOp = Object.keys(query[ff])[0];</span>
+<span class="cstat-no" title="statement not covered" >		type = dynamoType(query[ff][cOp]);</span>
+<span class="cstat-no" title="statement not covered" >		query[ff] = query[ff][cOp];</span>
+		// the idea here is to operate as {eq:'value'} or whatever
+&nbsp;
+/*In addition to the usual Boolean comparison operators, you can also use CONTAINS, NOT_CONTAINS, and BEGINS_WITH for string matching, BETWEEN for range checking,  and IN to check for membership in a set.
+&nbsp;
+In addition to the QueryFilter, you can also supply a ConditionalOperator. This logical operator (either AND or OR) is used to connect each of the elements in the QueryFilter.
+&nbsp;
+&nbsp;
+https://aws.amazon.com/blogs/aws/improved-queries-and-updates-for-dynamodb/
+*/
+&nbsp;
+&nbsp;
+	    }else <span class="cstat-no" title="statement not covered" >if(['S','N'].indexOf(type) === -1) <span class="cstat-no" title="statement not covered" >continue;</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	    var att = ff;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	    if((table.reservedAttributes||[]).indexOf(ff)&gt;-1){</span>
+<span class="cstat-no" title="statement not covered" >		pack.ExpressionAttributeNames = pack.ExpressionAttributeNames||{};</span>
+<span class="cstat-no" title="statement not covered" >		pack.ExpressionAttributeNames['#bsd'+ff] = ff;</span>
+<span class="cstat-no" title="statement not covered" >		att = '#bsd'+ff;</span>
+	    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	    var expr;</span>
+<span class="cstat-no" title="statement not covered" >	    if(cOp !== 'begins_with') <span class="cstat-no" title="statement not covered" >expr = att+' '+cOp+' :'+ff;</span></span>
+	    else <span class="cstat-no" title="statement not covered" >expr = 'begins_with('+att+', :'+ff+')';</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	    pack.ExpressionAttributeValues[':'+ff] = {};</span>
+<span class="cstat-no" title="statement not covered" >	    pack.ExpressionAttributeValues[':'+ff][type] = ''+query[ff];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	    if(query[ff] !== '')</span>
+<span class="cstat-no" title="statement not covered" >		pack.KeyConditionExpression += ' and '+expr;</span>
+	}
+&nbsp;
+	// that shit is ugly like a penguin's anus at feeding time!
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	dy.query(pack, <span class="fstat-no" title="function not covered" >function(err, res){</span></span>
+	    // implement LastEvaluatedKey element large reads
+&nbsp;
+	    //defer promise
+<span class="cstat-no" title="statement not covered" >	    if(err){</span>
+<span class="cstat-no" title="statement not covered" >		console.log(err);</span>
+<span class="cstat-no" title="statement not covered" >		def.reject(err);</span>
+	    }
+	    //unpack the response
+<span class="cstat-no" title="statement not covered" >	    var pon = [];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	    for(var i=0; i&lt;res.Items.length; ++i){</span>
+<span class="cstat-no" title="statement not covered" >		var itm = {};</span>
+<span class="cstat-no" title="statement not covered" >		for(var ff in res.Items[i])</span>
+<span class="cstat-no" title="statement not covered" >		    itm[ff] = deref(res.Items[i][ff], Object.keys(res.Items[i][ff])[0]);</span>
+<span class="cstat-no" title="statement not covered" >		pon.push(itm);</span>
+	    }
+<span class="cstat-no" title="statement not covered" >	    def.resolve(pon);</span>
+	});
+<span class="cstat-no" title="statement not covered" >  	return def.promise;</span>
+    };
+&nbsp;
+//------------------------------------------------------------------------------------------
+    dynamo.erase = <span class="fstat-no" title="function not covered" >function(schemaName, query){</span>
+	// make a deleteItem request to the table determined by schema
+&nbsp;
+	// basically I'm going to require that you have the tableName, hash and range.
+	// feel free to send me a collection of hash-range (maybe batch delete later)?
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var schema = schemas[schemaName];</span>
+&nbsp;
+	// autofill table for schemas with only one table
+<span class="cstat-no" title="statement not covered" >	var tableName  = schema.table.split('/')[1];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var pack = {</span>
+	    Key: {},
+	    ReturnValues: "ALL_OLD",
+	    TableName: tableName
+	};
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var table = schema.tables[tableName];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var hash = table.hashKey;</span>
+<span class="cstat-no" title="statement not covered" >	var range = table.rangeKey;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	pack.Key[hash] = {};</span>
+<span class="cstat-no" title="statement not covered" >	pack.Key[range] = {};</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	pack.Key[hash][schema.fields[hash]] = pack.Key[hash][schema.fields[hash]] || query[hash];</span>
+<span class="cstat-no" title="statement not covered" >	pack.Key[range][schema.fields[range]] = pack.Key[range][schema.fields[range]] || query[range];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	var deferred = Q.defer();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	dy.deleteItem(pack, <span class="fstat-no" title="function not covered" >function(err, res){</span></span>
+<span class="cstat-no" title="statement not covered" >	    deferred.resolve(res);</span>
+	});
+<span class="cstat-no" title="statement not covered" >  	return deferred.promise;</span>
+    };
+&nbsp;
+    return dynamo;
+&nbsp;
+&nbsp;
+&nbsp;
+<span class="fstat-no" title="function not covered" >function dynamoType(vv){</span>
+<span class="cstat-no" title="statement not covered" >    var t = (typeof vv)[0].toUpperCase();</span>
+<span class="cstat-no" title="statement not covered" >    if(t==='B') <span class="cstat-no" title="statement not covered" >return 'BOOL'; </span>// this isn't implementing BS (Binary Set) Or NULL typed</span>
+    else <span class="cstat-no" title="statement not covered" >if(t!=='O') <span class="cstat-no" title="statement not covered" >return t;</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if(vv.constructor == Array){</span>
+<span class="cstat-no" title="statement not covered" >	var atype = (typeof vv[0])[0].toUpperCase();</span>
+&nbsp;
+	// this is a biscuit. LEARN FROM THIS CODE MOOCHES!
+<span class="cstat-no" title="statement not covered" >	for(var i=1; i&lt;vv.length; ++i)</span>
+<span class="cstat-no" title="statement not covered" >	    if((atype = (atype!==(typeof vv[i])[0].toUpperCase())||atype) ===true)</span>
+<span class="cstat-no" title="statement not covered" >		break;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >	if(atype === true) <span class="cstat-no" title="statement not covered" >return 'L'; </span>// can only save as dynamo List</span>
+	else <span class="cstat-no" title="statement not covered" >return atype + 'S'; </span>// can save as a dynamo array.
+    }else <span class="cstat-no" title="statement not covered" >return 'M';</span>
+}
+&nbsp;
+<span class="fstat-no" title="function not covered" >function deref(vv, type){</span>
+<span class="cstat-no" title="statement not covered" >    switch(type){</span>
+	
+    case 'L': <span class="cstat-no" title="statement not covered" >return vv; <span class="cstat-no" title="statement not covered" ></span>break;</span>
+    case'M':
+<span class="cstat-no" title="statement not covered" >	for(var kk in vv.M){</span>
+<span class="cstat-no" title="statement not covered" >	    vv.M[kk] = deref(vv.M[kk], Object.keys(vv.M[kk])[0]);</span>
+	}
+<span class="cstat-no" title="statement not covered" >	return vv.M;</span>
+<span class="cstat-no" title="statement not covered" >	break;</span>
+    case 'N':
+<span class="cstat-no" title="statement not covered" >	return parseInt(vv[type]);</span>
+<span class="cstat-no" title="statement not covered" >	break;</span>
+&nbsp;
+    default:
+<span class="cstat-no" title="statement not covered" >	return vv[type];</span>
+<span class="cstat-no" title="statement not covered" >	break;</span>
+    }
+}
+&nbsp;
+});}
+&nbsp;
+<span class="missing-if-branch" title="else path not taken" >E</span>if(typeof require === 'function'){
+    module.exports = Canidynamo;
+}else <span class="cstat-no" title="statement not covered" >Cani.dynamo = Canidynamo(Cani)(Cani.dynamo||{});</span>
+&nbsp;
+// this shit needs to be tested in a browser!
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Nov 20 2015 21:57:23 GMT+0200 (IST)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

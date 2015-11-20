@@ -13,7 +13,9 @@ This project should be becoming stable in the near future, which is to say chill
 quickstart
 ---
 
-    npm i canijs
+```
+npm i canijs
+```
 
 import q.js
 
@@ -21,7 +23,9 @@ import cani.js
 
 import cani-module-mashu.js
 
+```js
     Cani.core.confirm('moduleOrModules').then((mOrMs) => ,,,);
+```
 
 is the way to make sure you have an asset
 
@@ -54,3 +58,16 @@ only after window.Q exists (ie after app.js runs), I import caniconfig.js to boo
 This should be pretty clear in the examples. If it isn't, copy my bad behaviour or pull request.
 
 Look into the example and api folder of each module for more documentation!
+
+
+## Testing
+
+unit tests are written for mocha, with istanbul coverage
+
+there are a few modules which only run in the browser (fb, localStorage, webRTC),
+or should be tested in both anyhow (all aws modules)
+
+I'm getting through unit tests now, then I'll write e2e tests, then I'll figure out
+how to get the coverage working for e2e
+
+right now it looks like a bitch, so I'm hoping someone makes it suck less by the time I need it!
