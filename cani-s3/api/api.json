@@ -2,7 +2,7 @@
     title:'Cani-s3',
     missionStatement:'Cani-s3 mediates dealing w aws s3 for you.',
     firstExample:"Cani.s3.list('canijs').then(...);\n"+
-	"Cani.s3.upload('canijs', nuKey, nuItem).then(...);\n"
+	"Cani.s3.upload('canijs', nuKey, nuItem).then(...);\n"+
 	"Cani.s3.read('canijs', keys).then(...);",
     scripts:['aws-sdk.js','canijs/cani.js','canijs/cani-s3/cani-s3.js'],
 
