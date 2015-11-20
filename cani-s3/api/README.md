@@ -46,7 +46,7 @@ then include the aws sdk, canijs core, cani-dynamo, and your Caniconfig.js of co
 
 ```js
 Cani.s3.list('bucketName').then(function(items){
-console.log('there are '+items.length+' items');
+  console.log('there are '+items.length+' items');
 });
 ```
 ```js
@@ -93,23 +93,23 @@ Available [`here`](https://github.com/nikfrank/canijs/tree/master/cani-s3/exampl
 ### Module Exposures
 ---
 
-* **init**
-  * () => this is used internally with initOn, but you can init whenever you want
+* **init() **
+  *  this is used internally with initOn, but you can init whenever you want
     keep in mind though, the auth state of the window.AWS singleton at the time of init
     stays withis table for its lifecycle. So only init once you've authed!
 
-* **initBucket**
-  * (bucket) => initialize some bucket. For now you'll need to call this 
+* **initBucket(bucket) **
+  *  initialize some bucket. For now you'll need to call this 
     for buckets other than the default bucket.
 
-* **upload**
-  * (bucket, key, fileData) => upload the fileData as key to the bucket. WOW
+* **upload(bucket, key, fileData) **
+  *  upload the fileData as key to the bucket. WOW
 
-* **read**
-  * (bucket, key) => read key out of bucket. also works for [keys]
+* **read(bucket, key) **
+  *  read key out of bucket. also works for [keys]
 
-* **list**
-  * (bucket, prefix) => lists contents of bucket with [optionally] prefix
+* **list(bucket, prefix) **
+  *  lists contents of bucket with [optionally] prefix
 
 
 # Notes

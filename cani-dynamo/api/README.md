@@ -168,27 +168,27 @@ Available [`here`](https://github.com/nikfrank/canijs/tree/master/cani-dynamo/ex
 ### Module Exposures
 ---
 
-* **init**
-  * () => this is used internally with initOn, but you can init whenever you want
+* **init() **
+  *  this is used internally with initOn, but you can init whenever you want
     keep in mind though, the auth state of the window.AWS singleton at the time of init
     stays withis table for its lifecycle. So only init once you've authed!
 
-* **write**
-  * ((unimplemented)) => will be used once the grammar is standardized.
+* **write((unimplemented)) **
+  *  will be used once the grammar is standardized.
 
-* **save**
-  * ('schemaName', {query}) => query is the entire object you're saving
+* **save('schemaName', {query}) **
+  *  query is the entire object you're saving
     Cani.dyanmo will guess the type to save as unless explicitly stated in schema conf.
 
-* **load**
-  * ('schemaName', {query}, (({options})) ) => options ((unimplemented)) to set index
+* **load('schemaName', {query}, (({options})) ) **
+  *  options ((unimplemented)) to set index
     query is {hashKey:'val', otherKey:{operator:'val'}, odKey:'val'}
     operator is from [EQ | LE | LT | GE | GT | BEGINS_WITH | BETWEEN] for key &
     from [EQ | NE | LE | LT | GE | GT | NOT_NULL | NULL | CONTAINS | NOT_CONTAINS | BEGINS_WITH | IN | BETWEEN] for other?
     see http://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Condition.html
 
-* **erase**
-  * (schemaName, query) => pass in a schema, hashKey and rangeKey to delete the item
+* **erase(schemaName, query) **
+  *  pass in a schema, hashKey and rangeKey to delete the item
 
 
 # Notes

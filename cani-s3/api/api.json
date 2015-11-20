@@ -7,7 +7,7 @@
     scripts:['aws-sdk.js','canijs/cani.js','canijs/cani-s3/cani-s3.js'],
 
     basicUse:["Cani.s3.list('bucketName').then(function(items){\n"+
-	      "console.log('there are '+items.length+' items');\n"+
+	      "  console.log('there are '+items.length+' items');\n"+
 	      "});",
 	      "Cani.s3.upload('bucketName', 'keyForFileInBucket', "+
 	      "{object:'written as a stringify'}).then(function(res){\n"+
