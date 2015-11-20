@@ -41,11 +41,11 @@ Cani.core = (function(core){
 	var deferred = Q.defer();
 
 	if(typeof asset === 'string'){
-	    if(asset in assets){
+	    if((prefix!=='defirm')&&(asset in assets)){
 		deferred.resolve(assets[asset]);
 	    }else{
 		// register note for confirmation
-		if(typeof note['confirm: '+asset] === 'undefined'){
+		if(typeof note[prefix+': '+asset] === 'undefined'){
 		    note[prefix+': '+asset] = [];
 		}
 		core.on(prefix+': '+asset, function(){
@@ -96,9 +96,7 @@ Cani.core = (function(core){
     };
 
     core.defirm = function(asset, params){
-// call the module's defirmation handler
-	if(assets.indexOf(asset)>-1) delete assets[asset];
-// check that this doesn't delete the entire module
+	if(Object.keys(assets).indexOf(asset)>-1) delete assets[asset];
 	core.cast('defirm: '+asset, true, params);
     };
 

@@ -1,5 +1,37 @@
 var gulp = require('gulp'),
-json2md = require('gulp-json2md4api');
+json2md = require('gulp-json2md4api'),
+mocha = require('gulp-mocha'),
+istanbul = require('gulp-istanbul');
+
+gulp.task('pre-test', function () {
+  return gulp.src(['cani.js'])
+    // Covering files
+    .pipe(istanbul())
+    // Force `require` to return covered files
+    .pipe(istanbul.hookRequire());
+});
+
+gulp.task('test', ['pre-test'], function () {
+  return gulp.src(['test/*.js']) // clean up the tests dir
+    .pipe(mocha())
+    // Creating the reports after tests ran
+    .pipe(istanbul.writeReports())
+    // Enforce perfect coverage except branches, which kvetches about else statements
+    .pipe(istanbul.enforceThresholds({ thresholds: {
+          statements : 100,
+          branches : 70,
+          lines : 100,
+          functions : 100
+    } }));
+});
+
+
+
+gulp.task('mocha', function () {
+    return gulp.src('test/tests.js', {read: false})
+        // gulp-mocha needs filepaths so you can't have any plugins before it 
+        .pipe(mocha());
+});
 
 gulp.task('json2md', function (){
 
