@@ -53,8 +53,10 @@ if that shit changes, the sdk version has to be parametrized and versioning code
 
 	describe('init', function(){
 	    it('should boot?', function(done){
-console.log(dynamo);
-		done(null);
+console.log(process.env);
+
+		if(('blah' in process.env)&&('hmm' in process.env)) done(null);
+		else done('no secret nev vars');
 	    });
 	});
     });

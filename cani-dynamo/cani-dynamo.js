@@ -125,8 +125,10 @@ Canidynamo = function(Cani){ return (function(dynamo){
 	if(!options) options = {};
 	if(!query) query = {};
 
-// this doesn't implement options.FilterExpression IndexName Limit ProjectionExpression or ScanIndexForward
+// this doesn't implement options.FilterExpression IndexName Limit
+// ProjectionExpression or ScanIndexForward
 // or options.Select (count, attribute listables)
+// or streams, or RXjs
 
 	var schema = schemas[schemaName];
 

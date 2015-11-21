@@ -1,9 +1,12 @@
 language: node_js
 node_js:
-  - "4.1"
-  - "4.0"
-  - "0.12"
-  - "0.11"
-  - "0.10"
-  - "iojs"
-after_success: 'npm run coveralls'
+- '4.1'
+- '4.0'
+- '0.12'
+- '0.11'
+- '0.10'
+- iojs
+after_success: npm run coveralls
+env:
+  global:
+    secure: PLWdh+rpbdLqwVnud8piqWDqjASKEYKaaiMpQXz81S9xtlg2ICyXldAMSmmwsIzdv2UkmV1POG3X7zb6VsQEdnGHqdyTQSn8ELdC7B3uknKtgWF+FjvRBQBxDcO2HSqrUPvSKTqlrD82ONXlmyfLGxpoqF2UYa9ZFOJ/nWUJEg7syuL4Ws4RLreticQuCcAae7Avxv++rDZkmDmkQ1T+qyO5Jq4tBfYA0ed+af9lS7jVgO4eyLs2BsukhFWCMtT0ENRXFC6t3GV0ZCe/MWMEQZ3stX1xccddcrkPscSzreBwbeuC/WIV7VqQauVhROshkx1mkZrOSGvouWqhgc2Acavgcfj/uf8yII3Q3J9dszO8o7NugUCG2P9JvucMu1ZszJME1kv0sa6Gk3k2jjbhVSTCZup6Z+XFZKe+aqqieIW1RCMl4TylfSoAeoQ3LVrC3LKS8kKcnuhrJJuGM3mcKhRuzWrTfUkwgNF4KG2kEpbLiRJjTQYVuRhSZwiVywPpK2ECMmD+j53mT6hZ2mY7FjLXITzNRiNRcTbegGVN2j09ETv7sxxo/Z6R2TShZe13Ledyir7iGruzLS/8ZGg1G2L8r6P0OuiCoe0aktwlaTdf7dW9Oss7p9Nl3adngK5NOhMXxMUmN58xgf3SrgBzDpRNcskmez7heV/HsKIlDzY=

@@ -6,3 +6,4 @@ dist
 aws*
 lib/
 test/mocha/
+secret/
