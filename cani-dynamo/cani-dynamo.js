@@ -1,4 +1,4 @@
-Canidynamo = function(Cani){ return (function(dynamo){
+Canidynamo = function(Cani, AWS){ return (function(dynamo){
     // expect schemas in conf.dynamo to map saves/loads, set indices, confirm permissions properly
 
     var schemas = [];
@@ -318,6 +318,6 @@ function deref(vv, type){
 
 if(typeof require === 'function'){
     module.exports = Canidynamo;
-}else Cani.dynamo = Canidynamo(Cani)(Cani.dynamo||{});
+}else Cani.dynamo = Canidynamo(Cani, AWS)(Cani.dynamo||{});
 
 // this shit works in the browser AND node. I promise!
