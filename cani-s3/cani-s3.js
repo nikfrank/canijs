@@ -32,9 +32,8 @@ Cani.s3 = (function(s3){
 	var def = Q.defer();
 	var buck = bucket||s3conf.s3.Bucket;
 	sss[buck].upload({Bucket: buck, Key: key, Body: fileData}, function(err, data){
-	    err?
-		def.reject(err):
-		def.resolve(data);
+	    if(err) def.reject(err);
+	    else def.resolve(data);
 	    // handle failure?
 	});
 	return def.promise;
@@ -50,7 +49,8 @@ Cani.s3 = (function(s3){
 	var buck = bucket||s3conf.s3.Bucket;
 	if(buck+' '+key in reqBuff) return reqBuff[buck+' '+key];
 	sss[buck].getObject({Bucket: buck, Key: key}, function(err, data){
-	    err? def.reject(err):def.resolve(data);
+	    if(err) def.reject(err);
+	    else def.resolve(data);
 	    delete reqBuff[buck+' '+key];
 	});
 	reqBuff[buck+' '+key] = def.promise;
@@ -61,7 +61,8 @@ Cani.s3 = (function(s3){
 	var def = Q.defer();
 	var buck = bucket||s3conf.s3.Bucket;
 	sss[buck].listObjects({Bucket:buck, Prefix:prefix}, function(err, data){
-	    err? def.reject(err):def.resolve(data.Contents);
+	    if(err) def.reject(err);
+	    else def.resolve(data.Contents);
 	});
 	return def.promise;
     };

@@ -44,7 +44,7 @@ Cani.storage = (function(storage){
 	    if(!localStorage[indexName]) def.resolve([]);
 	    else{
 		var hashes = localStorage[indexName].split('׆').slice(0,-1)
-		    .map(function(r){return r.slice(r.indexOf(' ')+1)});
+		    .map(function(r){return r.slice(r.indexOf(' ')+1);});
 
 		def.resolve(hashes.filter(queryP).map(function(h){
 		    return JSON.parse(localStorage[schema+'-item '+h]);
@@ -64,7 +64,7 @@ Cani.storage = (function(storage){
 	    if(!localStorage[indexName]) def.resolve([]);
 	    else{
 		var hashes = localStorage[indexName].split('׆').slice(0,-1)
-		    .map(function(r){return r.slice(r.indexOf(' ')+1)});
+		    .map(function(r){return r.slice(r.indexOf(' ')+1);});
 		def.resolve(hashes.filter(queryP));
 	    }
 	    return def.promise;
@@ -97,7 +97,7 @@ Cani.storage = (function(storage){
 	    var def = Q.defer();
 
 	    var zgz = (ind||localStorage[schema+' index']).split('׆').slice(0,-1)
-		.map(function(r){return r.slice(r.indexOf(' ')+1)})
+		.map(function(r){return r.slice(r.indexOf(' ')+1);})
 		.sort(conf.storage.expirySort[schema]||conf.storage.defExpirySort)
 		.map(function(r){var t={};t[schema+'_hash']=r;return t;})
 		.slice(0, howmany||conf.storage.expiryChunk[schema]);

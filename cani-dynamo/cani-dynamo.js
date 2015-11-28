@@ -135,8 +135,8 @@ Canidynamo = function(Cani, AWS){ return (function(dynamo){
 	var table = schema.table;
 	var tableName = table.arn.split('/')[1];
 
-	var indexName;
-	if(indexName = options.index)
+	var indexName = options.index;
+	if(indexName)
 	    if(table.indices.indexOf(indexName) === -1)
 		throw 'index '+indexName+' not available';
 
@@ -297,24 +297,21 @@ function dynamoType(vv){
 function deref(vv, type){
     switch(type){
 	
-    case 'L': return vv; break;
+    case 'L': return vv;
     case'M':
 	for(var kk in vv.M){
 	    vv.M[kk] = deref(vv.M[kk], Object.keys(vv.M[kk])[0]);
 	}
 	return vv.M;
-	break;
     case 'N':
 	return parseInt(vv[type]);
-	break;
 
     default:
 	return vv[type];
-	break;
     }
 }
 
-});}
+});};
 
 if(typeof require === 'function'){
     module.exports = Canidynamo;

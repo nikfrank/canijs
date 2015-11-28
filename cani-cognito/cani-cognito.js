@@ -35,9 +35,9 @@ Cani.cognito = (function(cognito){
 		Logins:Logins
 	    }, function(err, creds){
 		cog.getId(cp, function(err, data){
-		    err?
-			console.log('cog err', err):
-			def.resolve(data);
+		    if(err) console.log('cog err', err);
+		    else def.resolve(data);
+		    
 		    Cani.core.affirm('cognito: fb-login', data);
 		});
 	    });

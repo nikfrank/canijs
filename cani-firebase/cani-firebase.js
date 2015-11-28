@@ -57,7 +57,8 @@ Cani.firebase = (function(firebase){
 
 	ref.child(path).set(data, function(err){
 	    // keep in mind this will do overwriting
-	    err? def.reject(err):def.resolve(data);
+	    if(err) def.reject(err);
+	    else def.resolve(data);
 	});
 	return def.promise;
     };
@@ -77,9 +78,8 @@ Cani.firebase = (function(firebase){
     firebase.readOnce = function(path, eventType){
 	var def = Q.defer();
 	ref.child(path).once(eventType||'value', function(snap){
-	    (snap.val() === null)?
-		def.reject(snap):
-		def.resolve(snap);
+	    if(snap.val() === null) def.reject(snap);
+	    else def.resolve(snap);
 	});
 	return def.promise;
     };
@@ -113,8 +113,8 @@ Cani.firebase = (function(firebase){
 	return Rx.Observable.create(function(observer){
 	    var listener = query.on(eventType,
 		           (eventType==='value')?
-				function(snap){ observer.onNext(snap)}:
-				function(snap, prev){observer.onNext({snapshot: snap, prevName:prev})},
+			       function(snap){ observer.onNext(snap);}:
+			       function(snap, prev){observer.onNext({snapshot: snap, prevName:prev});},
 				    function(error){ observer.onError(error);});
 
 	    return function(){ query.off(eventType, listener);};
@@ -197,28 +197,32 @@ Cani.firebase = (function(firebase){
 	    changeEmail:function(oldE, nuE, password){
 		var def = Q.defer();
 		ref.changeEmail({oldEmail:oldE, newEmail:nuE, password:password}, function(err){
-		    (err === null)? def.resolve():def.reject(err);
+		    if(err === null) def.resolve();
+		    else def.reject(err);
 		});
 		return def.promise;
 	    },
 	    changePassword:function(email, oldP, nuP){
 		var def = Q.defer();
 		ref.changePassword({email:email, oldPassword:oldP, newPassword:nuP}, function(err){
-		    (err === null)? def.resolve():def.reject(err);
+		    if(err === null) def.resolve();
+		    else def.reject(err);
 		});
 		return def.promise;
 	    },
 	    sendPasswordReset:function(email){
 		var def = Q.defer();
 		ref.resetPassword({email:email}, function(err){
-		    (err === null)? def.resolve():def.reject(err);
+		    if(err === null) def.resolve();
+		    else def.reject(err);
 		});
 		return def.promise;
 	    },
 	    deleteAccount:function(email, password){
 		var def = Q.defer();
 		ref.removeUser({email:email, password:password}, function(err){
-		    (err === null)? def.resolve():def.reject(err);
+		    if(err === null) def.resolve();
+		    else def.reject(err);
 		});
 		return def.promise;
 	    }
