@@ -2,13 +2,12 @@ var gulp = require('gulp'),
 json2md = require('gulp-json2md4api'),
 mocha = require('gulp-mocha'),
 istanbul = require('gulp-istanbul');
-
-var jshint = require('gulp-jshint');
  
 gulp.task('lint', function() {
-  return gulp.src('./cani-*/*.js')
-    .pipe(jshint())
-    .pipe(jshint.reporter('default'));
+    var jshint = require('gulp-jshint');
+    return gulp.src('./cani-*/*.js')
+        .pipe(jshint())
+        .pipe(jshint.reporter('default'));
 });
 
 gulp.task('pre-test', function () {
