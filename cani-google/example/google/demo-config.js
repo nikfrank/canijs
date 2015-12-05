@@ -1,5 +1,5 @@
 Cani.core.boot({
-    fb:{
-	App:'App id from developers.facebook.com'
+    google:{
+	App:'234767639427-pfs0j8gj55lf28hl0193p69eg4dkhcva.apps.googleusercontent.com'
     }
 });

@@ -46,7 +46,7 @@ put this in your Caniconfig
 }
 ```
 
-see [`demo-caniconfig.js`](https://github.com/nikfrank/canijs/blob/master/src/docs/democonfig.js)
+see [`demo-caniconfig.js`](https://github.com/nikfrank/canijs/blob/master/democonfig.js)
 for examples of all the config options for all the modules
 
 

@@ -22,8 +22,8 @@ Canidynamo = function(Cani, AWS){ return (function(dynamo){
     // dynamo boot hook
     Cani.core.on('config: dynamo', DYCONF);
 
-    dynamo.init = function(){
-	dy = new AWS.DynamoDB(dyconf.dynamo.awsConfigPack);
+    dynamo.init = function(configPack){
+	dy = new AWS.DynamoDB(configPack||dyconf.dynamo.awsConfigPack);
 
 	dy.listTables(function(err, data){
 	    // maybe parse the meaningless aws error messages?

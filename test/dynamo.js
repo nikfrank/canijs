@@ -7,7 +7,7 @@ var config = require('./unit-assets/config')[env];
 var caniconfig = require('./unit-assets/Caniconfig');
 
 var Cani = require('../cani');
-var dynamo = require('../cani-dynamo/cani-dynamo')(Cani, AWS)({});
+Cani.dynamo = require('../cani-dynamo/cani-dynamo')(Cani, AWS)({});
 
 
 // duplicate this for each module, pack the tests into the modules
@@ -37,10 +37,10 @@ describe('cani', function(){
 /*
 need to test:
 
-auth from .gitignored file AND send that shit to travis CI properly
 write some crap to a table
 read that crap
 read that crap with some operators
+read crap with a limit
 read that crap from some JSON fields or whatever
 read that crap from a GSI or two
 update it
@@ -60,55 +60,133 @@ if that shit changes, the sdk version has to be parametrized and versioning code
 */
     describe('dynamo', function(){
 
-	describe('init', function(){
-	    it('should boot?', function(done){
-		this.timeout(5000);
-		
-		AWS.config.update(secrets);
-		AWS.config.update({region: 'eu-west-1'});
-		var cognitoidentity = new AWS.CognitoIdentity(); // options?
+	before('should boot?', function(done){
+	    this.timeout(5000);
+	    
+	    AWS.config.update(secrets);
+	    AWS.config.update({region: 'eu-west-1'});
+	    var cognitoidentity = new AWS.CognitoIdentity(); // options?
 
-		var params = {
-		    IdentityPoolId:'eu-west-1:c5b3e48a-d5df-4ea3-bb42-91404d7c2248',
-		    Logins:{canijs:'travis-ci-test-account'},
-		    IdentityId:null,// null because id is handled by logins map
-		    TokenDuration:864 // a hundredth of a day
-		};
+	    var params = {
+		IdentityPoolId:'eu-west-1:c5b3e48a-d5df-4ea3-bb42-91404d7c2248',
+		Logins:{canijs:'travis-ci-test-account'},
+		IdentityId:null,// null because id is handled by logins map
+		TokenDuration:864 // a hundredth of a day
+	    };
 
-		cognitoidentity.getOpenIdTokenForDeveloperIdentity(params, function(err, data) {
+	    cognitoidentity.getOpenIdTokenForDeveloperIdentity(params, function(err, data) {
 
-		    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-			IdentityPoolId: 'eu-west-1:c5b3e48a-d5df-4ea3-bb42-91404d7c2248',
-			IdentityId: data.IdentityId,
-			Logins: {
-			    'cognito-identity.amazonaws.com': data.Token
-			}
-		    });
+		AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+		    IdentityPoolId: 'eu-west-1:c5b3e48a-d5df-4ea3-bb42-91404d7c2248',
+		    IdentityId: data.IdentityId,
+		    Logins: {'cognito-identity.amazonaws.com': data.Token}
+		});
 
-		    Cani.core.cast('config: dynamo', {
-			dynamo:{
-			    awsConfigPack:{region: 'eu-west-1'}
-			}
-		    });
 
-		    var dy = new AWS.DynamoDB();
+		Cani.dynamo.init(caniconfig);
+//{dynamo:{awsConfigPack:{region: 'eu-west-1'}}});
 
-		    dy.listTables(function(err, tables){
+		Cani.core.confirm('dynamo.canijs-test').then(function(){
+		    if(err){
+			console.log(err, err.stack); // an error occurred
+			return done(err);
+		    }
+		    else if(Cani.dynamo.tables.indexOf('canijs-test')===-1){
+			return done('no access to test table'); // cant fire
 
-			if(err){
-			    console.log(err, err.stack); // an error occurred
-			    return done(err);
-			}
-			else if(tables.TableNames.indexOf('canijs')===-1){
-			    return done('no access to test table');
-			}else{
-			    return done(null, console.log(tables));
-			}
-		    });
+		    }else return done(null, console.log(Cani.dynamo.tables));
 		});
 
 	    });
 	});
+
+	describe('write', function(){
+	    it('writes without problems', function(done){
+
+		Cani.dynamo.save('items', {uid:'blah', type:'shoe', price:100}).then(function(res){
+		    console.log(res); // check that this === item
+		    done(null);		    
+		}, function(err){
+		    done(err);
+		});
+
+	    });
+
+	    it('reads without problems', function(done){
+
+		Cani.dynamo.load('items', {uid:'blah'}).then(function(res){
+		    console.log(res); // check that this === item
+		    done(null);		    
+		}, function(err){
+		    done(err);
+		});
+
+	    });
+
+/*
+
+The sort key condition must use one of the following comparison operators:
+
+a = b — true if the attribute a is equal to the value b
+a < b — true if a is less than b
+a <= b — true if a is less than or equal to b
+a > b — true if a is greater than b
+a >= b — true if a is greater than or equal to b
+a BETWEEN b AND c — true if a is greater than or equal to b, and less than or equal to c.
+The following function is also supported:
+
+begins_with (a, substr)— true if the value of attribute a begins with a particular substring.
+
+*/
+
+
+	    it('reads using operators', function(done){
+
+		Cani.dynamo.load('items', {uid:'blah'}).then(function(res){
+		    console.log(res); // check that this === item
+		    done(null);		    
+		}, function(err){
+		    done(err);
+		});
+
+	    });
+
+
+
+// need to implement and test:
+// filters, streams, pagination of results
+
+/* take the LastEvaluatedKey value from the previous request, and use that value as the ExclusiveStartKey in the next request.*/
+
+// strongly consistent reads
+
+// conditional writes
+
+/*
+To request a conditional PutItem, DeleteItem, or UpdateItem, you specify the condition(s) in the ConditionExpression parameter. ConditionExpression is a string containing attribute names, conditional operators and built-in functions. The entire expression must evaluate to true; otherwise the operation will fail.
+
+To write an item only if it doesn't already exist, use PutItem with a conditional expression that uses the attribute_not_exists function and the name of the table's partition key
+*/
+
+
+//atomic counters in updates
+
+
+// updates
+/*
+http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.Modifying.html#Expressions.Modifying.UpdateExpressions.SET.IncrementAndDecrement
+*/
+
+
+// return values
+/*
+http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.Modifying.html#Expressions.Modifying.ReturnValues
+*/
+
+
+	});
+
+
     });
 });
 

@@ -6,6 +6,7 @@ Cani.google = (function(google){
     var GOOGLECONF = function(conf){
 	//-------------------------------GOOGLE AUTH--------------------------------
 	// this requires some meta tags in the markup, also a #gSigninWrapper for the button
+// grab them out of ./test/e2e-assets/ --> then populate the thing dynamically?
 	if(typeof conf.user.google !== 'undefined') if(typeof conf.user.google.App !== 'undefined'){
 
 	    window.confirmGapi = function(){

@@ -1,0 +1,51 @@
+<html>
+<head>
+</head>
+<body ng-app="canijstest">
+
+  <div class="row-fluid" style="overflow-x:hidden;">
+
+    <div class="span1"></div>
+    <div class="span9">
+      <div data-ng-view></div>
+    </div>
+
+    <div class="span2">
+      <div id="gSigninWrapper" style="display:none;">
+	<div id="signinButton" class="gSigninButton">
+	  Sign in with Google
+	</div>
+      </div>
+
+
+      <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+    </div>
+
+  </div>
+
+  <!--cani dep-->
+
+  <script src="../../../lib/aws-sdk.min.js"></script>
+  <script src="../../../lib/q.js"></script>
+
+  <script src="../../../lib/socket.io.js"></script>
+
+
+  <script src="../../../cani.js"></script>
+
+  <script src="../cani-webrtc.js"></script>
+
+  <script src="../democonfig.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.4/angular.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.js"></script>
+
+  <!--test page-->
+  <script src="scripts/app.js"></script>
+  <script src="scripts/controllers/test.js"></script>
+  <script src="scripts/controllers/ggdrive.js"></script>
+  <script src="scripts/controllers/rtc.js"></script>
+
+
+</body>
+</html>

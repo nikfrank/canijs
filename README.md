@@ -9,6 +9,11 @@ These are mostly client side, however, the AWS sdk runs on node, so I'm working 
 
 This project should be becoming stable in the near future, which is to say chill your balls!
 
+(( I need tables of contents ))
+
+(( and directory structure listings ))
+(( see https://github.com/AngularClass/angular2-webpack-starter ))
+
 
 quickstart
 ---

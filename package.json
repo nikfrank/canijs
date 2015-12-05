@@ -21,8 +21,8 @@
   },
   "main": "nodemain",
   "engines": {
-    "node": ">= 0.10.0",
-    "npm": ">= 1.3.0"
+    "node": "latest",
+    "npm": "latest"
   },
   "author": {
     "name": "Nik Frank",

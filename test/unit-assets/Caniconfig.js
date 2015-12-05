@@ -102,23 +102,22 @@ module.exports = {
 
     dynamo:{
 	schemas:{
-	    appt:{
+	    items:{
 		fields:{
-		    geohash:'S',
-		    expiry:'N',
-		    owner:'S',
+		    uid:'S',
+		    type:'S',
 		    price:'N'
 		},
 		table:{
-		    arn:'arn:aws:dynamodb:eu-west-1:735148112467:table/dre',
-		    hashKey:'geohash',
-		    rangeKey:'expiry',
-		    indices:[]
+		    arn:'arn:aws:dynamodb:eu-west-1:735148112467:table/canijs-test',
+		    hashKey:'uid',
+		    rangeKey:'type',
+		    indices:['type-price-index']
 		}
 	    }
 	},
 	awsConfigPack:{region: 'eu-west-1'},
-	initOn:['cognito: fb-login']
+	initOn:[]
     },
 
     file:{
