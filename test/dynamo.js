@@ -38,6 +38,8 @@ describe('cani', function(){
 need to test:
 
 write some crap to a table
+write some crap with an array that has duplicates
+ --> pare it down? or throw an error?
 read that crap
 read that crap with some operators
 read crap with a limit

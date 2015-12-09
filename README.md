@@ -2,68 +2,144 @@
 [![Coverage Status](https://coveralls.io/repos/nikfrank/canijs/badge.svg?branch=master)](https://coveralls.io/r/nikfrank/canijs?branch=master)
 [![Build Status](https://travis-ci.org/nikfrank/canijs.svg?branch=master)](https://travis-ci.org/nikfrank/canijs)
 
-The point of this project is to make a bunch of different APIs and modules exposed by various providers
-(AWS, Google, Facebook, Phonegap, Twitter, Reddit, etc.) work withe same grammar.
+# Canijs
 
-These are mostly client side, however, the AWS sdk runs on node, so I'm working out imports for either.
+Promise based grammar and convenience layer for various web APIs/SDKs
+(AWS, Google, Facebook, Phonegap, ((Twitter)), ((Reddit)), ((webRTC)), etc.)
 
-This project should be becoming stable in the near future, which is to say chill your balls!
+imagine
+```js
+Cani.login.to('facebook').then(updateUserData);
+```
+then
+```js
+Cani.post({type:'link', from:'fb_id1', to:'fb_id2', src:'http://...'})
+    .to('facebook');
+```
 
-(( I need tables of contents ))
+Code this beautiful doesn't run quite yet - canijs is still in the module development phase; the goal though is to make code read that much like English for everything I ever do!
 
-(( and directory structure listings ))
-(( see https://github.com/AngularClass/angular2-webpack-starter ))
+Right now I'm working to make all the modules env independent (node, es5, es6)
 
+This project should be becoming stable in the near future.
 
-quickstart
----
+You can see ((all)) demos running at canijs.herokuapp.com
+
+## Table of Contents
+(( these shoudl be hashlinks ))
+
+* project structure
+* quickstart
+    * angular
+* confirming states
+    * angular resolve
+* modules & examples
+  * starting point
+  * quickstart
+  * important events
+  * examples & API
+
+## Project Structure
+```html
+canijs
+│   cani.js
+│
+└───cani-module (for module in canijs)
+    │   cani-module.js
+    │
+    ├───example
+    │   └───example-with-module
+    │       ...files-for-example.html/js/css
+    │
+    └───api/README.md
+│
+└───test
+└───in-the-works
+```
+
+## quickstart
 
 ```
 npm i canijs
 ```
+from index.html
+```html
+<script src="lib/q/1.4.1/q.min.js"></script>
+<script src="lib/canijs/cani.js"></script>
+<script src="lib/canijs/cani-module/cani-module.js"></script>
+<script src="cani-config.js"></script>
+```
+and in cani-config.js
+```js
+Cani.core.boot({
+    moduleName:{
+        option:'value'
+    }
+});
+```
+then in any javascript imported anywhere
+```js
+Cani.core.confirm('moduleName').then((mod) => (mod.whatever()));
+```
+this is similar to the pattern in angular of
+1. register modules
+2. bootstrap
+3. do stuff using those modules
 
-import q.js
+the Cani.core.confirm syntax though allows for lazy loading of modules, although you'd have to cast the config event to them on your own (all core.boot does is cast a general config event withe general config json)
 
-import cani.js
-
-import cani-module-mashu.js
+you can also confirm multiple modules at once, ie to confirm a login and dynamo instance and then to update it from a localStorage cache ((example coming soon!))
 
 ```js
-    Cani.core.confirm('moduleOrModules').then((mOrMs) => ,,,);
+core.confirm(['mod1', 'mod2', 'login-state'])
+    .then(({mod1, mod2}) => mod2.load({usr:usrId}).then(mod1.save));
 ```
+this acts like a Q.all (because it is), and never blocks.
 
-is the way to make sure you have an asset
+#### angular
 
-import your caniconfig.js file (which has field for each module) a demo of which is available
+if you point window.Q to $q in a .run() module, there's no need to $scope.$apply/$digest from promise callbacks
 
-caniconfig boots the core and then each module, which triggers callbacks on any confirms waiting
+however, q is still a dependency for canijs whether or not you do this - unless you can guarantee the shim before cani.js loads -> pull request me at will about this.
 
-this is pretty much only useful when confirming a state (ie logged in), which may then trigger 
-booting modules who were waiting for something (ie fbgraph boots on fb [login])
+the behaviour is evident in one of the cani-s3 examples.
 
-anyhow, you pretty much don't have to think about it much, as long as you 
-import things in the right order and confirm the module before calling anything from it
 
-a pattern I use in angular is to put placeholder functions on the scope
+## Confirming States
 
-    $scope.save = function(){ console.log('module not yet loaded'); };
+As shown above, core.confirm also allows for confirming a state (ie logged in), which may then trigger updates to a view or login state in your app (from cani-dynamo/example/dynamo-cognito)
 
-which I replace on confirm
+```js
+Cani.core.confirm('fb: login')
+    .then(function(loginData){return {authResponse:loginData};})
+    .then(Cani.cognito.onLogin)
+    .then(function(cogId){ window.cogId = cogId; });
+```
+or could be used in an angular resolve (from cani-s3/example/s3-ng-cognito)
+```js
+resolve:{
+    CaniDep:function(){
+        return Cani.core.confirm(['cognito: fb-login', 's3']);
+    }
+}
+```
+in order to guarantee login and s3 availability for a given view
+wOOOOOOOOOOooooOOOOooOOOOOooOOooOoooOoOoOoOooOoOoh!
 
-    Cani.core.confirm('idb').then(function(){
-        $scope.save = function(query){ Cani.idb.save(...params).then((res) => ,,,); };
-    });
 
-all calls through Cani are promise based (even synchronous stuff like localStorage)
+## Modules & Examples
+starting point, quickstart, important events, examples & API
+available in each of: ((links))
+* core
+* cognito
+* dynamo
+* s3
+* fb
+* ...
 
-that way, if I point window.Q to $q in a .run() module, there's no need to $scope.$apply/$digest
-
-only after window.Q exists (ie after app.js runs), I import caniconfig.js to boot the cani modules.
-
-This should be pretty clear in the examples. If it isn't, copy my bad behaviour or pull request.
-
-Look into the example and api folder of each module for more documentation!
-
+also, for anything not covered in the examples, read through the tests! ((link))
+ 
+ this here is an example of the EAT philosophy - Examples Above Tests
 
 ## Testing
 

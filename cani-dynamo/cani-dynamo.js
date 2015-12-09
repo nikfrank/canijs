@@ -290,7 +290,11 @@ function dynamoType(vv){
 		break;
 
 	if(atype === true) return 'L'; // can only save as dynamo List
-	else return atype + 'S'; // can save as a dynamo array.
+	else{
+            // also here need to check the array for duplicates
+            // do lists need that check?
+            return atype + 'S'; // can save as a dynamo array.
+        }
     }else return 'M';
 }
 
