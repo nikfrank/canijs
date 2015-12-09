@@ -37,3 +37,10 @@ remember to whitelist the public domain!
 https://github.com/firebase/firebase-token-generator-node
 
 for lambdauthing
+
+===
+===
+
+this needs to run in node as well
+
+var Firebase = require("firebase");
