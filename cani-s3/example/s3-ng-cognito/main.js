@@ -36,7 +36,7 @@ angular.module('s3demo', ['ui.router']).run(function($q){ window.Q = $q; })
 })
 
 .controller('LoginCtrl', function(auth, $state){ // this DI is what triggers login from new page load
-    auth.confirmLogin().then(function(cogId){
+    auth.confirmLogin.then(function(cogId){
 	$state.go('main');
     });
 
