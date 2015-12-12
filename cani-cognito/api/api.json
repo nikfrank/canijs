@@ -1,0 +1,53 @@
+{
+    title:'Cani-cognito',
+    missionStatement:'Cani-cognito does the dirty work of oauth token management',
+
+    firstExample:"Cani.core.confirm('fb: login')\n"+
+        ".then(function(loginData){return {authResponse:loginData};})\n"+
+        ".then(Cani.cognito.login);",
+
+    scripts:['aws-sdk.js','canijs/cani.js','canijs/cani-cognito/cani-cognito.js',
+            'canijs/cani-id-provider/cani-id-provider.js'],
+
+    basicUse:["Cani.core.confirm('cognito').then(function(){\n"+
+              "Cani.core.confirm('fb: login')\n"+
+	      ".then(function(loginData){return {authResponse:loginData};})\n"+
+	      ".then(Cani.cognito.onLogin)\n"+
+              ".then(function(userData){\n"+
+              "console.log(userData);\n"+
+              "});"],
+    basicUsePostText:'Read the AWS [docs](http://docs.aws.amazon.com/AWSJavaScriptSDK/'+
+	'latest/AWS/CognitoIdentity.html)\n',
+
+    exampleLink:'',
+
+    configExample:{
+        cognito:{
+	    provider:'fb',
+	    IdentityPoolId:'eu-west-1:c5b3e48a-d5df-4ea3-bb42-91404d7c2248',
+	    AWSregion:'eu-west-1'
+        },
+
+        fb:{
+	    App:'492663127567107'
+        }
+    },
+    configDescription:{
+	cognito:{
+	    provider:'only \'fb\' works for now. ((will add google+ soon))',
+	    IdentityPoolId:'arn from AWS of the cognito ID pool',
+	    AWSregion:'region from AWS of the cognito ID pool'
+	},
+        fb:'cognito works with providers, although AWS allows developer identities \n'+
+        'http://docs.aws.amazon.com/cognito/devguide/identity/developer-authenticated-identities/ \n'+
+                'which is super useful as firebase email auth + AWS cognito lambda = AWS email login.'
+    },
+    exposures:{
+        onLogin:'({authResponse:providerResponse}) => call this when the provider has authed \n'+
+            'so Cani.cognito can signal the login event (which Cani.dynamo or s3 initOn from)\n'+
+            'for some reason, the onLogin expects the \n'+
+            'provider\'s response wrapped in a {authResponse:...} object. I can\'t remember why.'
+    },
+    exposureOrder:['onLogin'],
+    notes:'Just pass the authResponse to cognito.onLogin and cognito signals auth related boots!'
+}

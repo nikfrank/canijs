@@ -9,12 +9,17 @@ Cani.core.confirm(['cognito','phonegap-fb']).then(function(){
 	Cani.phonegapFb.plugin = {
 	    login:function(permissions, success, failure){
 		return Cani.core.confirm('fb: login')
-		    .then(function(loginData){return {authResponse:loginData};})//.then(R.createMapEntry('authResponse'))
+		    .then(function(loginData){return {authResponse:loginData};})
 		    .then(success, failure);
 	    }
 	};
     
     Cani.phonegapFb.login(fbpermissions)
 	.then(Cani.cognito.onLogin)
-	.then(console.log.bind(console));
+	.then(function(userData){
+            console.log(userData);
+            document.getElementById('user-data').innerHTML = JSON.stringify(userData);
+        });
 });
+
+if(!window.cordova) Cani.core.affirm('phonegap');

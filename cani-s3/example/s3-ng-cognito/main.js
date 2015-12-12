@@ -16,7 +16,6 @@ angular.module('s3demo', ['ui.router']).run(function($q){ window.Q = $q; })
 	controller: 'MainCtrl as ctrl',
 	resolve:{
 	    CaniDep:function(auth){ // this DI is what triggers login on refresh from #/main
-		console.log('confirming...');
 		return Cani.core.confirm(['cognito: fb-login', 's3']);
 	    }
 	}
