@@ -34,3 +34,9 @@ now that you've logged into facebook and registered to AWS cognito,
 if you have initOn set for other AWS services (s3, dynamo for now)
 
 then they will run their init withe new credentials!
+
+
+---
+
+
+http://aws.amazon.com/about-aws/whats-new/2015/04/amazon-cognito-adds-twitter-and-digits-as-login-providers/

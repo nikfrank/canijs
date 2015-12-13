@@ -3,7 +3,8 @@ Cani.fb = (function(fb){
 
     var FBCONF = function(conf){
 	window.fbAsyncInit = function(){
-	    FB.init({appId:conf.fb.App, status:true, cookie:true, xfbml:true, version:'v2.4'});
+	    FB.init({appId:conf.fb.App, status:true, cookie:true, xfbml:true,
+                     version:conf.fb.apiVersion||'v2.4'});
 	    Cani.core.affirm('fb', fb);
 
 	    // facebook has a way to request extra permissions that should be a config option
@@ -11,7 +12,8 @@ Cani.fb = (function(fb){
 		if(response.status === 'connected'){
 		    // record the facebook auth data, run dbconfig with it
 		    user = response.authResponse;
-		    
+		    Cani.core.affirm('fb: auth', response.authResponse);		    
+
 		    // grab the facebook profile
 		    FB.api('/me', function(pon){
 			user.profile = pon;
@@ -20,11 +22,13 @@ Cani.fb = (function(fb){
 
 		}else if(response.status === 'not_authorized'){
 		    //user hasnt authed the app, requests them to do so
+                    // this is where th auto-login comes from?
+                    // maybe that should be an option nu
 		    FB.login();
 		}else{
 		    //FB.login();
 		    Cani.core.defirm('fb: login');
-		    alert('logged out');
+                    console.log('logged out canijs fb');
 		    //location.reload();
 		}
 	    });

@@ -7,17 +7,21 @@ Cani.cognito = (function(cognito){
 // generalize this per provider in conf
 
 // also this will have to be able to handle multiple concurrent identities
-// eg: I want to lambda with google ID, then dyanmo withe facebook login.
+// eg: I want to lambda with google ID, then dynamo withe facebook login.
 // and the cognito data syncing feature.
 
 // work out long term token storage
 	    var accessToken;
 	    if(conf.cognito.provider === 'fb')
 		accessToken = providerResponse.authResponse.accessToken;
+            else if(conf.cognito.provider === 'google')
+                accessToken = providerResponse.id_token;
 
 	    var Logins;
 	    if(conf.cognito.provider === 'fb')
 		Logins = {'graph.facebook.com': accessToken};
+            else if(conf.cognito.provider === 'google')
+		Logins = {'accounts.google.com': accessToken};
 
 	    var credPack = {
 		IdentityPoolId: conf.cognito.IdentityPoolId,
