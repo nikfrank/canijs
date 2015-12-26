@@ -2,7 +2,9 @@ if(typeof require === 'function'){
     Q = require('q');
 }
 var Cani = Cani || {};
-if(window) window.Cani = Cani;
+try{
+    if(window) window.Cani = Cani;
+}catch(e){}
 
 Cani.core = (function(core){
     // core is just notifications and confirmations
