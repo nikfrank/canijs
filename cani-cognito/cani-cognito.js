@@ -16,6 +16,8 @@ Cani.cognito = (function(cognito){
 		accessToken = providerResponse.authResponse.accessToken;
             else if(conf.cognito.provider === 'google')
                 accessToken = providerResponse.id_token;
+            else
+                accessToken = providerResponse.Token;
 
 	    var Logins;
 	    if(conf.cognito.provider === 'fb')
@@ -27,8 +29,18 @@ Cani.cognito = (function(cognito){
 		IdentityPoolId: conf.cognito.IdentityPoolId,
 		Logins:Logins
 	    };
+
+            if((conf.cognito.provider !== 'fb') && (conf.cognito.provider !== 'google')){
+                Logins = {};
+                Logins['cognito-identity.amazonaws.com'] = accessToken;
+                credPack.Logins = Logins;
+            }
 	    var cp = JSON.parse(JSON.stringify(credPack));
 
+            if((conf.cognito.provider !== 'fb') && (conf.cognito.provider !== 'google')){
+                credPack.IdentityId = providerResponse.IdentityId;
+
+            }
 
 	    AWS.config.region = conf.cognito.AWSregion;
 	    AWS.config.credentials = new AWS.CognitoIdentityCredentials(credPack);
@@ -38,11 +50,18 @@ Cani.cognito = (function(cognito){
 		IdentityId:credPack.IdentityId,
 		Logins:Logins
 	    }, function(err, creds){
+		if(err) console.log('creds err', err);
+                if((conf.cognito.provider !== 'fb') && (conf.cognito.provider !== 'google')){
+                    return Cani.core.affirm('cognito: '+conf.cognito.provider+'-login', creds);
+                }
+
+// this might be the place to affirm the login
+// then in the getId, affirm the Identity?
 		cog.getId(cp, function(err, data){
 		    if(err) console.log('cog err', err);
 		    else def.resolve(data);
 		    
-		    Cani.core.affirm('cognito: fb-login', data);
+		    Cani.core.affirm('cognito: '+conf.cognito.provider+'-login', data);
 		});
 	    });
 
