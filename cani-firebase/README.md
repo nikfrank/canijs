@@ -44,3 +44,7 @@ for lambdauthing
 this needs to run in node as well
 
 var Firebase = require("firebase");
+
+---
+
+there should be an option to automatigically cache certain firebase/child/paths

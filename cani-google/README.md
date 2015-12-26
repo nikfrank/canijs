@@ -45,3 +45,13 @@ https://developers.google.com/api-client-library/javascript/features/authenticat
 
 
 This is necessary for generating the auth token at the beginning of the session, but it could be jarring when authorize is called later to refresh the token. To improve the user experience, gapi.auth.authorize supports an "immediate" mode, which refreshes the token without a popup. checkAuth calls authorize with immediate: true as in the example above.
+
+use this
+
+https://github.com/EddyVerbruggen/cordova-plugin-googleplus
+
+to make cani-phonegap-google & cani-phonegap-google-mock
+
+---
+
+later, this module (or through sub modules) should support google-api incremental scope authorization

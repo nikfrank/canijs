@@ -13,3 +13,6 @@ todo:
 write examples
 
 make sure to doc the api versioning behaviour!
+
+like cani-google, we need to be able to request further permissions
+and make requests into the facebook graph grammar

@@ -6,7 +6,7 @@ Cani.google = (function(google){
         if(typeof conf.google.App === 'undefined') throw 'no conf.google.App set';
 
 
-	window.confirmGapi = function(){
+	window.caniConfirmGapi = function(){
             var signOps = {
                 client_id:conf.google.App,
                 fetch_basic_profile:true
@@ -16,6 +16,10 @@ Cani.google = (function(google){
                 googleAuth = g;
                 Cani.core.affirm('google', google);
             });
+
+// use gapi.auth.authorize
+// immediate = true FOR TOKEN REFRESHES
+// this works after the token expired? sounds like it from their docs
 
             google.login = function(){
                 return googleAuth.signIn().then(function(){
@@ -31,8 +35,7 @@ Cani.google = (function(google){
 	    window.gapi = {};
 	    var po = document.createElement('script');
 	    po.type = 'text/javascript'; po.async = true;
-//	    po.src = 'https://apis.google.com/js/client:plusone.js?onload='+
-	    po.src = 'https://apis.google.com/js/auth2.js?onload=confirmGapi';
+	    po.src = 'https://apis.google.com/js/auth2.js?onload=caniConfirmGapi';
 
 	    var s = document.getElementsByTagName('script')[0];
 	    s.parentNode.insertBefore(po, s);
@@ -68,6 +71,7 @@ function neverRunThisGarbageEver(){
 
 // this is all garbage.
 
+//	    po.src = 'https://apis.google.com/js/client:plusone.js?onload='+
 
 	    var prevggcb = window.googleSigninCallback;
 	    window.googleSigninCallback = function(authResult){

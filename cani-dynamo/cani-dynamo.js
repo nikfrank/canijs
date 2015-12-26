@@ -322,3 +322,22 @@ if(typeof require === 'function'){
 }else Cani.dynamo = Canidynamo(Cani, AWS)(Cani.dynamo||{});
 
 // this shit works in the browser AND node. I promise!
+// but does it work through webpack? no.
+// the way to get around that is to make an index.js file to import in webpack
+// wherein we export default function(Cani, dep){}
+
+// this task requires going into ALL the modules to rework them for multi-env
+// core, google, storage, dynamo, s3, firebase
+// later: fb, google, cognito, phonegap+fb, in-the-works
+
+// need to set up for
+// es5 (all done) node (dynamo done) and webpack ()
+
+
+// can just import the files
+// but this uses the global scope
+// am I enough of an asshole to just tell ppl to use the global scope?
+// am I good enough to reserve space on the global browser this?
+// yes. I am that awesome. Fuck you.
+
+// should Cani simply run in a web-worker? maybe.

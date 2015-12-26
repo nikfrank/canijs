@@ -1,3 +1,4 @@
+//function(Cani, Firebase){ return
 Cani.firebase = (function(firebase){
     var ref;
     var baseurl;
@@ -250,4 +251,10 @@ Cani.firebase = (function(firebase){
 
     return firebase;
 
-})(Cani.firebase||{});
+})(Cani.firebase||{}); //;};
+
+/*
+if(typeof require === 'function'){
+    module.exports = Canifirebase;
+}else Cani.firebase = Canifirebase(Cani, Firebase)(Cani.firebase||{});
+*/
