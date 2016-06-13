@@ -45,6 +45,7 @@ var bootRTC = function(rtc, caniG, ioG){
   pc.onicecandidate = function(e) {
     // candidate exists in e.candidate
     if (e.candidate == null) { return }
+
     pc.addIceCandidate(new IceCandidate(e.candidate));
     socket.emit('icecandidate', {candidate:e.candidate, room:'party'});
   };
@@ -69,12 +70,13 @@ var bootRTC = function(rtc, caniG, ioG){
   rtc.offer = function(){
     createDataChannel(true);
     pc.createOffer(function (offer) {
-
+      console.log('offer', offer);
       pc.setLocalDescription(offer);
 
       socket.emit('offer', {offer:offer, room:roomName||'party'});
 
       socket.on('answer', function(answer){
+console.log('ans', answer);
 	if(!answer) return;
 	pc.setRemoteDescription(new RTCSessionDescription(answer));
 	remote = true;
