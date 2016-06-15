@@ -21,13 +21,8 @@ var bootRTC = function(rtc, caniG, ioG){
     ]
   };
 
-  // maybe changed
-  var options = {
-    optional: [
-      {DtlsSrtpKeyAgreement: true},
-      {RtpDataChannels: true}
-    ]
-  };
+  // maybe changed.. HAHAHAHAHAH it did. and this comment didnt help!
+  var options = {};
 
   var pc = new PeerConnection(server, options);
 
@@ -69,14 +64,15 @@ var bootRTC = function(rtc, caniG, ioG){
   var roomName;
   rtc.offer = function(){
     createDataChannel(true);
+    
     pc.createOffer(function (offer) {
-      console.log('offer', offer);
       pc.setLocalDescription(offer);
 
-      socket.emit('offer', {offer:offer, room:roomName||'party'});
-
+      setTimeout(()=>{
+	socket.emit('offer', {offer:offer, room:roomName||'party'});
+      }, 1000);
+      
       socket.on('answer', function(answer){
-console.log('ans', answer);
 	if(!answer) return;
 	pc.setRemoteDescription(new RTCSessionDescription(answer));
 	remote = true;
@@ -84,7 +80,6 @@ console.log('ans', answer);
 	  pc.addIceCandidate(new IceCandidate(cand));
 	  pc.onicecandidate = null;
 	}
-
       });
 
     }, function (err) {
@@ -99,34 +94,30 @@ console.log('ans', answer);
   };
 
   socket.on('offer', function(offer){
-    pc.setRemoteDescription(new RTCSessionDescription(offer), function(){
+    pc.setRemoteDescription(new RTCSessionDescription(offer.offer), function(){
       remote = true;
       if(pendingIce){
 	pc.addIceCandidate(new IceCandidate(pendingIce));
 	pc.onicecandidate = null;
       }
 
-      pc.createAnswer(function(answer){
-	pc.setLocalDescription(answer);
-
-	socket.emit('answer', {answer:answer, room:'party'});
-
-
-      }, function (err) {
-	console.error(err);
-
-      }, {//constraints
+      pc.createAnswer({
 	mandatory: {
 	  OfferToReceiveAudio: false,
 	  OfferToReceiveVideo: false
-	}
-      });
+	}}).then(function(answer){
+	  pc.setLocalDescription(answer);
+	  socket.emit('answer', {answer:answer, room:'party'});
+	  
+	}, function (err) {
+	  console.error(err);	  
+	});
     });
 
   });
 
   function createDataChannel(make){
-    if(make) dataChannel = pc.createDataChannel("jsonchannel", {reliable: false});
+    if(make) dataChannel = pc.createDataChannel("jsonchannel");
 
     dataChannel.onerror = function (error) {
       console.log("Data Channel Error:", error);
@@ -137,6 +128,7 @@ console.log('ans', answer);
     };
 
     dataChannel.onopen = function () {
+      console.log('data open');
       dataChannel.send("Hello World!");
 
       setTimeout(function(){
