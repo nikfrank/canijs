@@ -37,72 +37,53 @@ var bootRTC = function(rtc, caniG = Cani){
 
     var dataChannel;
 
-    // ondatachannel (datachannel) -> set handlers
+    // set handlers when remote connector creates the dataChannel
     pc.ondatachannel = function(datachannel){
+      console.log(datachannel.channel.label);
+      // use the label to index the dataChannel
+      
       dataChannel = datachannel.channel;
       createDataChannel(false);
     };
-
-    var remote = false;
-    var pendingIce = false;
     
-    pc.onicecandidate = function(e){
-      if(e.candidate == null){ return;}
-
-      pc.addIceCandidate(new IceCandidate(e.candidate));
-      //socket.emit('icecandidate', {candidate:e.candidate, room:'party'});
-      Cani.core.affirm('webrtc: IceCandidate', e.candidate);
-    };
-
-    // dep, candidates now passed via offer in signalling
-    socket.on('icecandidate', function(cand){
-      console.log('client use host ice');
-      if(!cand) return;
-      if(!remote) pendingIce = cand;
-      else{
-	pc.addIceCandidate(new IceCandidate(cand));
-	pc.onicecandidate = null;
-      }
-    });
-    // end dep
-
-    var sender;
-
     // find the demo code that runs "offer"
     // this needs a lot of hooks for sending identity
     // and confirming identity before answering
 
-    rtc.offer = function(sendSignalOffer, receiveSignalAnswer, postAnswer){
-      createDataChannel(true);
+    rtc.offer = function(sendSignalOffer, receiveSignalAnswer, postAnswer, dcLabel){
+      // make another peerConnection here,
+      // index her by name
 
+      createDataChannel(true, dcLabel||'jsonChannel');
+
+      pc.onicecandidate = function(e){
+	if(e.candidate == null){ return;}
+
+	pc.addIceCandidate(new IceCandidate(e.candidate));
+	Cani.core.affirm('webrtc: IceCandidate', e.candidate);
+      };
+      
       pc.createOffer(function (offer) {
 	pc.setLocalDescription(offer);
 
 	// this should instead wait for an ICE candidate and send it with
 	// then the host will maintain a list of PCs, each with ICE
-	//setTimeout(()=>{
 	Cani.core.confirm('webrtc: IceCandidate').then(candidate=>{
-	  if(!sendSignalOffer){
-	    socket.emit('offer', {offer:offer, room:'party'});
-	  }else{
-	    sendSignalOffer(offer, candidate);
+	  if(sendSignalOffer) sendSignalOffer(offer, candidate);
+	  else{
+	    // error! need to be able to send signal offer
 	  }
 	});
 
 	let receiveAnswer = function(answer){
-	  console.log('rec ans', answer);
 	  if(!answer) return;
 	  pc.setRemoteDescription(new RTCSessionDescription(answer));
-	  remote = true;
-	  
 	  if(postAnswer) postAnswer(answer);
 	};
 
-	console.log(receiveSignalAnswer);
-	if(receiveSignalAnswer){
-	  receiveSignalAnswer(receiveAnswer);
-	}else{
-	  socket.on('answer', receiveAnswer); // dep 
+	if(receiveSignalAnswer) receiveSignalAnswer(receiveAnswer);
+	else{
+	  // error! need to be able to receive signal answer
 	}
 
       }, function (err) {
@@ -116,10 +97,13 @@ var bootRTC = function(rtc, caniG = Cani){
       });
     };
 
-    rtc.acceptOffer = function(offer, candidate, sendSignalAnswer){
+    rtc.acceptOffer = function({offer, candidate, dcLabel}, sendSignalAnswer){
+      console.log('accept offer', offer, dcLabel);
+      // make another peerConnection here,
+      // index her by the userdata?
+
       pc.setRemoteDescription(new RTCSessionDescription(offer), function(){
 	pc.addIceCandidate(new IceCandidate(candidate));
-	remote = true;
 	
 	pc.createAnswer({
 	  mandatory: {
@@ -128,10 +112,9 @@ var bootRTC = function(rtc, caniG = Cani){
 	  }}).then(function(answer){
 	    pc.setLocalDescription(answer);
 
-	    if(!sendSignalAnswer){
-	      socket.emit('answer', {answer:answer, room:'party'});
-	    }else{
-	      sendSignalAnswer(answer);
+	    if(sendSignalAnswer) sendSignalAnswer(answer);
+	    else{
+	      // error, need to send signal error
 	    }
 	    
 	  }, function (err) {
@@ -141,8 +124,8 @@ var bootRTC = function(rtc, caniG = Cani){
     };
 
     
-    function createDataChannel(make){
-      if(make) dataChannel = pc.createDataChannel("jsonchannel");
+    function createDataChannel(make, channelId){
+      if(make) dataChannel = pc.createDataChannel(channelId);
 
       dataChannel.onerror = function (error) {
 	console.log("Data Channel Error:", error);
