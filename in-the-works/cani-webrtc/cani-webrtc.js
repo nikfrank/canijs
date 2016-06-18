@@ -45,15 +45,16 @@ var bootRTC = function(rtc, caniG = Cani){
 
     var remote = false;
     var pendingIce = false;
-
-    pc.onicecandidate = function(e) {
-      // candidate exists in e.candidate
-      if (e.candidate == null) { return }
+    
+    pc.onicecandidate = function(e){
+      if(e.candidate == null){ return;}
 
       pc.addIceCandidate(new IceCandidate(e.candidate));
-      socket.emit('icecandidate', {candidate:e.candidate, room:'party'});
+      //socket.emit('icecandidate', {candidate:e.candidate, room:'party'});
+      Cani.core.affirm('webrtc: IceCandidate', e.candidate);
     };
 
+    // dep, candidates now passed via offer in signalling
     socket.on('icecandidate', function(cand){
       console.log('client use host ice');
       if(!cand) return;
@@ -63,6 +64,7 @@ var bootRTC = function(rtc, caniG = Cani){
 	pc.onicecandidate = null;
       }
     });
+    // end dep
 
     var sender;
 
@@ -70,31 +72,38 @@ var bootRTC = function(rtc, caniG = Cani){
     // this needs a lot of hooks for sending identity
     // and confirming identity before answering
 
-    // rtc.createNode = function(roomName){};
-    var roomName;
-    rtc.offer = function(signalOffer){
+    rtc.offer = function(sendSignalOffer, receiveSignalAnswer, postAnswer){
       createDataChannel(true);
 
       pc.createOffer(function (offer) {
 	pc.setLocalDescription(offer);
 
-	setTimeout(()=>{
-	  if(!signalOffer){
-	    socket.emit('offer', {offer:offer, room:roomName||'party'});
+	// this should instead wait for an ICE candidate and send it with
+	// then the host will maintain a list of PCs, each with ICE
+	//setTimeout(()=>{
+	Cani.core.confirm('webrtc: IceCandidate').then(candidate=>{
+	  if(!sendSignalOffer){
+	    socket.emit('offer', {offer:offer, room:'party'});
 	  }else{
-	    signalOffer(offer);
+	    sendSignalOffer(offer, candidate);
 	  }
-	}, 1000);
-	
-	socket.on('answer', function(answer){
+	});
+
+	let receiveAnswer = function(answer){
+	  console.log('rec ans', answer);
 	  if(!answer) return;
 	  pc.setRemoteDescription(new RTCSessionDescription(answer));
 	  remote = true;
-	  if(pendingIce){
-	    pc.addIceCandidate(new IceCandidate(pendingIce));
-	    pc.onicecandidate = null;
-	  }
-	});
+	  
+	  if(postAnswer) postAnswer(answer);
+	};
+
+	console.log(receiveSignalAnswer);
+	if(receiveSignalAnswer){
+	  receiveSignalAnswer(receiveAnswer);
+	}else{
+	  socket.on('answer', receiveAnswer); // dep 
+	}
 
       }, function (err) {
 	console.error(err);
@@ -107,30 +116,31 @@ var bootRTC = function(rtc, caniG = Cani){
       });
     };
 
-    socket.on('offer', function(offer){
-      // here is where to decide if to accept the offer
-      pc.setRemoteDescription(new RTCSessionDescription(offer.offer), function(){
+    rtc.acceptOffer = function(offer, candidate, sendSignalAnswer){
+      pc.setRemoteDescription(new RTCSessionDescription(offer), function(){
+	pc.addIceCandidate(new IceCandidate(candidate));
 	remote = true;
-	if(pendingIce){
-	  pc.addIceCandidate(new IceCandidate(pendingIce));
-	  pc.onicecandidate = null;
-	}
-
+	
 	pc.createAnswer({
 	  mandatory: {
 	    OfferToReceiveAudio: false,
 	    OfferToReceiveVideo: false
 	  }}).then(function(answer){
 	    pc.setLocalDescription(answer);
-	    socket.emit('answer', {answer:answer, room:'party'});
+
+	    if(!sendSignalAnswer){
+	      socket.emit('answer', {answer:answer, room:'party'});
+	    }else{
+	      sendSignalAnswer(answer);
+	    }
 	    
 	  }, function (err) {
 	    console.error(err);	  
 	  });
       });
+    };
 
-    });
-
+    
     function createDataChannel(make){
       if(make) dataChannel = pc.createDataChannel("jsonchannel");
 
