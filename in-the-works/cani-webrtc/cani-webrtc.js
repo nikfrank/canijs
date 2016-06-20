@@ -34,6 +34,7 @@ var bootRTC = function(rtc, caniG = Cani){
 
     var pcs = {};
     var dataChannels = {};
+    var listeners = {};
     
     rtc.offer = function(sendSignalOffer, receiveSignalAnswer, postAnswer, dcLabel){
       var pc = new PeerConnection(server, {});
@@ -125,27 +126,41 @@ var bootRTC = function(rtc, caniG = Cani){
 
       dc.onmessage = function(event){
 	console.log("Got Data Channel Message:", event.data);
+	console.log('raw', event);
+	// send through all listeners
+	(listeners[dc.label]||[]).forEach(function(cb){
+	  cb(event.data);
+	});
       };
 
       dc.onopen = function(){
-	dc.send("Hello World!");
-
-	setTimeout(function(){
-	  var x = Math.random();
-	  console.log('x ', x);
-	  dc.send('blah ' + x);
-	}, 1000);
+	Cani.core.affirm('webrtc: datachannels['+dc.label+'].onopen', dc);
       };
 
       dc.onclose = function () {
 	console.log("The Data Channel is Closed");
 	dataChannels[dc.label] = null; // is there anything else to do?
+	Cani.core.defirm('webrtc: datachannels['+dc.label+'].onopen');
       };
     }
 
 
-    rtc.send = function(json, dcLabel){
+    rtc.send = function(jsonOrStr, dcLabel){
+      if(typeof jsonOrStr === 'object') jsonOrStr = JSON.stringify(jsonOrStr);
       
+      return Cani.core.confirm('webrtc: datachannels['+dcLabel+'].onopen')
+		 .then(function(dc){
+		   return dc.send(jsonOrStr);
+		 });
+    };
+
+    rtc.listen = function(dcLabel, cb){
+      if(typeof cb !== 'function'){
+	// error! can't call cb if it isn't a function.
+      }else{
+	if(!(dcLabel in listeners)) listeners[dcLabel] = [];
+	listeners[dcLabel].push(cb);
+      }
     };
 
     
