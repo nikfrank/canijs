@@ -31,30 +31,17 @@ var bootRTC = function(rtc, caniG = Cani){
     // maybe changed.. HAHAHAHAHAH it did. and this comment didnt help!
     // this originally had rtpDataChannel options in there, but now SCTP is standard
     // you can look at older than 0.2.10 I think for the old code!
-    var options = {};
 
-    var pc = new PeerConnection(server, options);
-
-    var dataChannel;
-
-    // set handlers when remote connector creates the dataChannel
-    pc.ondatachannel = function(datachannel){
-      console.log(datachannel.channel.label);
-      // use the label to index the dataChannel
-      
-      dataChannel = datachannel.channel;
-      createDataChannel(false);
-    };
+    var pcs = {};
+    var dataChannels = {};
     
-    // find the demo code that runs "offer"
-    // this needs a lot of hooks for sending identity
-    // and confirming identity before answering
-
     rtc.offer = function(sendSignalOffer, receiveSignalAnswer, postAnswer, dcLabel){
-      // make another peerConnection here,
-      // index her by name
+      var pc = new PeerConnection(server, {});
+      pcs[dcLabel] = pc;
 
-      createDataChannel(true, dcLabel||'jsonChannel');
+      console.log('offer on', dcLabel);
+      dataChannels[dcLabel] = pcs[dcLabel].createDataChannel(dcLabel);
+      initDataChannel(dataChannels[dcLabel]);
 
       pc.onicecandidate = function(e){
 	if(e.candidate == null){ return;}
@@ -63,7 +50,7 @@ var bootRTC = function(rtc, caniG = Cani){
 	Cani.core.affirm('webrtc: IceCandidate', e.candidate);
       };
       
-      pc.createOffer(function (offer) {
+      pc.createOffer(function(offer){
 	pc.setLocalDescription(offer);
 
 	// this should instead wait for an ICE candidate and send it with
@@ -73,6 +60,7 @@ var bootRTC = function(rtc, caniG = Cani){
 	  else{
 	    // error! need to be able to send signal offer
 	  }
+	  Cani.core.defirm('webrtc: IceCandidate');
 	});
 
 	let receiveAnswer = function(answer){
@@ -87,7 +75,7 @@ var bootRTC = function(rtc, caniG = Cani){
 	}
 
       }, function (err) {
-	console.error(err);
+	console.error('create offer error', err);
 
       }, {//constraints, check conf or connection type (audio/video?)
 	mandatory: {
@@ -98,10 +86,16 @@ var bootRTC = function(rtc, caniG = Cani){
     };
 
     rtc.acceptOffer = function({offer, candidate, dcLabel}, sendSignalAnswer){
-      console.log('accept offer', offer, dcLabel);
-      // make another peerConnection here,
-      // index her by the userdata?
+      var pc = new PeerConnection(server, {});
+      pcs[dcLabel] = pc;
 
+      // set handlers when remote connector creates the dataChannel
+      pc.ondatachannel = function(datachannel){
+	// use the label to index the dataChannel
+	dataChannels[datachannel.channel.label] = datachannel.channel;
+	initDataChannel(datachannel.channel);
+      };
+      
       pc.setRemoteDescription(new RTCSessionDescription(offer), function(){
 	pc.addIceCandidate(new IceCandidate(candidate));
 	
@@ -118,42 +112,43 @@ var bootRTC = function(rtc, caniG = Cani){
 	    }
 	    
 	  }, function (err) {
-	    console.error(err);	  
+	    console.error(err);
 	  });
       });
     };
 
     
-    function createDataChannel(make, channelId){
-      if(make) dataChannel = pc.createDataChannel(channelId);
-
-      dataChannel.onerror = function (error) {
+    function initDataChannel(dc){
+      dc.onerror = function(error){
 	console.log("Data Channel Error:", error);
       };
 
-      dataChannel.onmessage = function (event) {
+      dc.onmessage = function(event){
 	console.log("Got Data Channel Message:", event.data);
       };
 
-      dataChannel.onopen = function () {
-	console.log('data open');
-	dataChannel.send("Hello World!");
+      dc.onopen = function(){
+	dc.send("Hello World!");
 
 	setTimeout(function(){
 	  var x = Math.random();
 	  console.log('x ', x);
-	  dataChannel.send('blah ' + x);
+	  dc.send('blah ' + x);
 	}, 1000);
       };
 
-      dataChannel.onclose = function () {
+      dc.onclose = function () {
 	console.log("The Data Channel is Closed");
+	dataChannels[dc.label] = null; // is there anything else to do?
       };
-
     }
-    
-    // rtc.setSignalChannel({...})
 
+
+    rtc.send = function(json, dcLabel){
+      
+    };
+
+    
     // rtc.listHubs(){ return [...];}
     // rtc.createHub().then()
     // rtc.onOffer = function(offer){}
