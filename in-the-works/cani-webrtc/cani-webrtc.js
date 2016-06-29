@@ -40,7 +40,6 @@ var bootRTC = function(rtc, caniG = Cani){
       var pc = new PeerConnection(server, {});
       pcs[dcLabel] = pc;
 
-      console.log('offer on', dcLabel);
       dataChannels[dcLabel] = pcs[dcLabel].createDataChannel(dcLabel);
       initDataChannel(dataChannels[dcLabel]);
 
@@ -67,7 +66,7 @@ var bootRTC = function(rtc, caniG = Cani){
 	let receiveAnswer = function(answer){
 	  if(!answer) return;
 	  pc.setRemoteDescription(new RTCSessionDescription(answer));
-	  if(postAnswer) postAnswer(answer);
+	  if(postAnswer) postAnswer(dataChannels[dcLabel]);
 	};
 
 	if(receiveSignalAnswer) receiveSignalAnswer(receiveAnswer);
@@ -140,6 +139,8 @@ var bootRTC = function(rtc, caniG = Cani){
       dc.onclose = function () {
 	console.log("The Data Channel is Closed");
 	dataChannels[dc.label] = null; // is there anything else to do?
+// destroy pc, listeners
+	
 	Cani.core.defirm('webrtc: datachannels['+dc.label+'].onopen');
       };
     }
