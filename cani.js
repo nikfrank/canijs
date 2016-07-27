@@ -21,10 +21,10 @@ Cani.core = (function(core){
       if(flush) note[asset] = [];
     }else if(asset instanceof RegExp){
       for(var ff in note){
-	if(asset.test(ff)){
-	  for(var i=0; i<note[ff].length; ++i) note[ff][i](params);
-	  if(flush) note[ff] = [];
-	}
+	      if(asset.test(ff)){
+	        for(var i=0; i<note[ff].length; ++i) note[ff][i](params);
+	        if(flush) note[ff] = [];
+	      }
       }
     }
   };
@@ -45,15 +45,15 @@ Cani.core = (function(core){
 
     if(typeof asset === 'string'){
       if((prefix!=='defirm')&&(asset in assets)){
-	deferred.resolve(assets[asset]);
+	      deferred.resolve(assets[asset]);
       }else{
-	// register note for confirmation
-	if(typeof note[prefix+': '+asset] === 'undefined'){
-	  note[prefix+': '+asset] = [];
-	}
-	core.on(prefix+': '+asset, function(){
-	  deferred.resolve(assets[asset]);
-	});
+	      // register note for confirmation
+	      if(typeof note[prefix+': '+asset] === 'undefined'){
+	        note[prefix+': '+asset] = [];
+	      }
+	      core.on(prefix+': '+asset, function(){
+	        deferred.resolve(assets[asset]);
+	      });
       }
       return deferred.promise;
 
@@ -66,24 +66,24 @@ Cani.core = (function(core){
       // technically this would work for arrays of arrays of assets. WoAh.
       var everything = true;
       for(var se in asset){
-	var s = (asset.constructor == Array)? asset[se] : se;
-	if(!(s in assets)){
-	  everything = false;
-	  core.confirm(s).then(function(singleAsset){
-	    core.confirm(asset).then(function(allAssets){
-	      deferred.resolve(allAssets);
-	    });
-	  });
-	  break;
-	}
+	      var s = (asset.constructor == Array)? asset[se] : se;
+	      if(!(s in assets)){
+	        everything = false;
+	        core.confirm(s).then(function(singleAsset){
+	          core.confirm(asset).then(function(allAssets){
+	            deferred.resolve(allAssets);
+	          });
+	        });
+	        break;
+	      }
       }
       if(everything){
-	var ret = {};
-	for(var se in asset){
-	  var s = (asset.constructor == Array)? asset[se] : se;
-	  ret[s] = assets[s];
-	}
-	deferred.resolve(ret);
+	      var ret = {};
+	      for(var se in asset){
+	        var s = (asset.constructor == Array)? asset[se] : se;
+	        ret[s] = assets[s];
+	      }
+	      deferred.resolve(ret);
       }
       return deferred.promise;
     }

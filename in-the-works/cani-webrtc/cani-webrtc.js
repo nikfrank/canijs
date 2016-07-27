@@ -2,21 +2,27 @@ var bootRTC = function(rtc, caniG = Cani){
 
   var Cani = caniG || Cani;
 
+  if(!('browserRTC' in Cani.core.assets)){
+    Cani.core.affirm('browserRTC', {
+      PeerConnection: window.mozRTCPeerConnection ||
+		      window.webkitRTCPeerConnection ||
+		      window.RTCPeerConnection,
+      IceCandidate: window.mozRTCIceCandidate || window.RTCIceCandidate,
+      SessionDescription: window.mozRTCSessionDescription || window.RTCSessionDescription
+    });
+  }
+
+  // use navigator.mediaDevices.getUserMedia for audio and video (later)
+  
   // move the signalling (this) into cani-rtc-socket-signalling
   // then all that should be here is confirm rtc-signal-socket
   // and then set up the bindings onto rtc
-  Cani.core.confirm('socket').then(function(socket){
+  Cani.core.confirm(['socket', 'browserRTC']).then(function(modules){
+    var socket = modules.socket;
 
-    // check that this still works
-    var PeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-    var IceCandidate = window.mozRTCIceCandidate || window.RTCIceCandidate;
-    var SessionDescription = window.mozRTCSessionDescription ||
-			     window.RTCSessionDescription;
-    
-    navigator.getUserMedia = navigator.getUserMedia ||
-			     navigator.mozGetUserMedia ||
-			     navigator.webkitGetUserMedia;
-    // this to be in a try block
+    var PeerConnection = modules.browserRTC.PeerConnection;
+    var IceCandidate = modules.browserRTC.IceCandidate;
+    var SessionDescription = modules.browserRTC.SessionDescription;
 
     
     // are these still running?
@@ -28,21 +34,32 @@ var bootRTC = function(rtc, caniG = Cani){
       ]
     };
 
-    // maybe changed.. HAHAHAHAHAH it did. and this comment didnt help!
-    // this originally had rtpDataChannel options in there, but now SCTP is standard
-    // you can look at older than 0.2.10 I think for the old code!
-
     var pcs = {};
     var dataChannels = {};
     var listeners = {};
     
-    rtc.offer = function(sendSignalOffer, receiveSignalAnswer, postAnswer, dcLabel){
-      var pc = new PeerConnection(server, {});
-      pcs[dcLabel] = pc;
-
-      dataChannels[dcLabel] = pcs[dcLabel].createDataChannel(dcLabel);
+    rtc.offer = function(sendSignalOffer, receiveSignalAnswer, dcLabel){
+      if(!(dcLabel in pcs)) pcs[dcLabel] = new PeerConnection(server, {});
+      var pc = pcs[dcLabel];
+      
+      dataChannels[dcLabel] = pc.createDataChannel(dcLabel);
+      console.log(dataChannels);
       initDataChannel(dataChannels[dcLabel]);
 
+      pc.oniceconnectionstatechange = function() {
+	// there's something going on which I don't understand
+	// when the host refreshes, the patron tries to reconnect
+	// the patron isn't able to
+	// from any situation.
+
+	// it's as if the hanging connection caused by the host refresh
+	// zombies the patron.
+	
+	console.log('ice change', Object.keys(pcs)
+					.map(pci=>(pci+' '+pcs[pci].iceConnectionState)));
+	if(pc.iceConnectionState === 'failed') pc.close();
+      };
+      
       pc.onicecandidate = function(e){
 	if(e.candidate == null){ return;}
 
@@ -50,11 +67,17 @@ var bootRTC = function(rtc, caniG = Cani){
 	Cani.core.affirm('webrtc: IceCandidate', e.candidate);
       };
       
-      pc.createOffer(function(offer){
+      pc.createOffer({
+	//constraints, check conf or connection type (audio/video?)
+	mandatory: {
+	  OfferToReceiveAudio: false,
+	  OfferToReceiveVideo: false
+	}
+      }).then(function(offer){
 	pc.setLocalDescription(offer);
 
-	// this should instead wait for an ICE candidate and send it with
-	// then the host will maintain a list of PCs, each with ICE
+	// perhaps should uniquify the confirm key per peerConnection
+	// this would only matter in instances where many PCs being made quickly
 	Cani.core.confirm('webrtc: IceCandidate').then(candidate=>{
 	  if(sendSignalOffer) sendSignalOffer(offer, candidate);
 	  else{
@@ -66,7 +89,6 @@ var bootRTC = function(rtc, caniG = Cani){
 	let receiveAnswer = function(answer){
 	  if(!answer) return;
 	  pc.setRemoteDescription(new RTCSessionDescription(answer));
-	  if(postAnswer) postAnswer(dataChannels[dcLabel]);
 	};
 
 	if(receiveSignalAnswer) receiveSignalAnswer(receiveAnswer);
@@ -74,15 +96,7 @@ var bootRTC = function(rtc, caniG = Cani){
 	  // error! need to be able to receive signal answer
 	}
 
-      }, function (err) {
-	console.error('create offer error', err);
-
-      }, {//constraints, check conf or connection type (audio/video?)
-	mandatory: {
-	  OfferToReceiveAudio: false,
-	  OfferToReceiveVideo: false
-	}
-      });
+      }, function(err){ console.error('create offer error', err);});
     };
 
     rtc.acceptOffer = function({offer, candidate, dcLabel}, sendSignalAnswer){
@@ -92,11 +106,12 @@ var bootRTC = function(rtc, caniG = Cani){
       // set handlers when remote connector creates the dataChannel
       pc.ondatachannel = function(datachannel){
 	// use the label to index the dataChannel
+	console.log('on data channel', datachannel.channel.label);
 	dataChannels[datachannel.channel.label] = datachannel.channel;
 	initDataChannel(datachannel.channel);
       };
       
-      pc.setRemoteDescription(new RTCSessionDescription(offer), function(){
+      pc.setRemoteDescription(new RTCSessionDescription(offer)).then(function(){
 	pc.addIceCandidate(new IceCandidate(candidate));
 	
 	pc.createAnswer({
@@ -119,6 +134,7 @@ var bootRTC = function(rtc, caniG = Cani){
 
     
     function initDataChannel(dc){
+      var dcLabel = dc.label;
       dc.onerror = function(error){
 	console.log("Data Channel Error:", error);
       };
@@ -127,21 +143,29 @@ var bootRTC = function(rtc, caniG = Cani){
 	console.log("Got Data Channel Message:", event.data);
 	console.log('raw', event);
 	// send through all listeners
-	(listeners[dc.label]||[]).forEach(function(cb){
+	(listeners[dcLabel]||[]).forEach(function(cb){
 	  cb(event.data);
 	});
       };
 
       dc.onopen = function(){
-	Cani.core.affirm('webrtc: datachannels['+dc.label+'].onopen', dc);
+	console.log('on open');
+	Cani.core.affirm('webrtc: datachannels['+dcLabel+'].onopen', dc);
       };
 
       dc.onclose = function () {
 	console.log("The Data Channel is Closed");
-	dataChannels[dc.label] = null; // is there anything else to do?
-// destroy pc, listeners
+	if(dcLabel in listeners) delete listeners[dcLabel];
+	delete dataChannels[dcLabel]; // is there anything else to do?
+	//	delete pcs[dc.label];
+	console.log(pcs);
+	// destroy pc, listeners
+	// do I need to remove ice candidates?
+
+	// there's a bug now, that when a connection is closed by the host
+	// then the patron becomes unconnectable
 	
-	Cani.core.defirm('webrtc: datachannels['+dc.label+'].onopen');
+	Cani.core.defirm('webrtc: datachannels['+dcLabel+'].onopen');
       };
     }
 
@@ -164,17 +188,6 @@ var bootRTC = function(rtc, caniG = Cani){
       }
     };
 
-    
-    // rtc.listHubs(){ return [...];}
-    // rtc.createHub().then()
-    // rtc.onOffer = function(offer){}
-    // rtc.onRemoteConnection = function(peer){}
-
-
-    // rtc.connectToHub(hubId).then(successFn, rejectFn)
-    // rtc.hub[id].onmessage = function(message){}
-
-    // rtc.disconnectFromHub(hubId).then()
 
     //... those for dataChannels
     //... then for video/audio
